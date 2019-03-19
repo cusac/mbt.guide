@@ -1,0 +1,10 @@
+extends:
+  - react-app
+  - plugin:prettier/recommended
+plugins:
+  - header
+rules:
+  header/header:
+    - 2
+    - line
+    - - ' @flow'
