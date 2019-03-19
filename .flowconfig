@@ -3,6 +3,7 @@
 [include]
 
 [libs]
+flow-libs/
 
 [lints]
 

@@ -2,14 +2,9 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import nullthrows from 'nullthrows';
 
 import 'semantic-ui-css/semantic.min.css';
+import App from './App';
 
-const root = document.getElementById('root');
-
-if (!root) {
-  throw new Error('No root element');
-}
-
-ReactDOM.render(<App />, root);
+ReactDOM.render(<App />, nullthrows(document.getElementById('root')));
