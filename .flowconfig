@@ -9,5 +9,7 @@ flow-libs/
 
 [options]
 module.use_strict=true
+module.system.node.resolve_dirname=node_modules
+module.system.node.resolve_dirname=src
 
 [strict]

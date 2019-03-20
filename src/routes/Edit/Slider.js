@@ -1,12 +1,11 @@
 // @flow
-// https://developers.google.com/youtube/iframe_api_reference
-// https://developers.google.com/youtube/player_parameters
+// https://refreshless.com/nouislider/
 
 import * as React from 'react';
 import noUiSlider from 'nouislider';
 import 'nouislider/distribute/nouislider.css';
 
-import * as timeFormat from './timeFormat';
+import * as timeFormat from 'utils/timeFormat';
 
 export type Range = {| min: number, max: number |};
 
