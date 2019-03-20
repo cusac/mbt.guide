@@ -6,49 +6,70 @@ import * as React from 'react';
 import noUiSlider from 'nouislider';
 import 'nouislider/distribute/nouislider.css';
 
+import * as timeFormat from './timeFormat';
+
 export type Range = {| min: number, max: number |};
 
 const Slider = ({
   onChange,
   onHandleUpdate,
+  onHandleSet,
   range,
+  start,
+  colors,
+  margin,
 }: {
   onChange: (Array<number>) => void,
   onHandleUpdate: (number, number) => void,
+  onHandleSet: (number, number) => void,
   range: Range,
+  start: Array<number>,
+  colors: Array<string>,
+  margin: number,
 }) => {
   const [slider, setSlider] = React.useState(undefined);
   const ref = React.createRef();
   React.useEffect(() => {
-    const format = {
-      to: value => (isNaN(value) ? value : new Date(1000 * value).toISOString().substr(11, 8)),
-      from: value =>
-        isNaN(value) ? new Date(`1970-01-01T${value}Z`).getTime() / 1000 : parseInt(value, 10),
-    };
-
+    if (start.length === 0) {
+      return;
+    }
     const slider = noUiSlider.create(ref.current, {
-      start: [200, 1000],
+      start,
       step: 1,
-      connect: [true, true, true],
-      margin: 5,
+      connect: Array(start.length + 1).fill(true),
+      margin,
       range,
       pips: {
         mode: 'range',
         density: 3,
-        format,
+        format: timeFormat,
       },
       tooltips: true,
-      format,
+      format: timeFormat,
     });
 
-    slider.on('update', (values, handleIndex, rawValues) => {
-      onHandleUpdate(handleIndex, rawValues[handleIndex]);
-    });
+    slider.on('update', (values, handleIndex, rawValues) =>
+      onHandleUpdate(handleIndex, rawValues[handleIndex])
+    );
+
+    slider.on('set', (values, handleIndex, rawValues) =>
+      onHandleSet(handleIndex, rawValues[handleIndex])
+    );
 
     setSlider(slider);
+
+    return () => slider.destroy();
   }, []);
 
-  React.useEffect(() => slider && slider.updateOptions({ range }), [range.min, range.max]);
+  React.useEffect(() => slider && slider.updateOptions({ range }), [slider, range.min, range.max]);
+  React.useEffect(
+    () =>
+      slider &&
+      [...slider.target.querySelectorAll('.noUi-connect')].forEach((connect, i) => {
+        connect.style.background = colors[i];
+      }),
+    [slider, ...colors]
+  );
 
   return <div ref={ref} style={{ width: 640 }} />;
 };
@@ -56,10 +77,13 @@ const Slider = ({
 Slider.defaultProps = {
   onChange: () => {},
   onHandleUpdate: () => {},
+  onHandleSet: () => {},
   range: {
     min: 0,
     max: 4000,
   },
+  start: [],
+  margin: 0,
 };
 
 export default Slider;

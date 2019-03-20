@@ -32,7 +32,10 @@ const YouTubePlayer = ({ onReady, seconds }: { onReady: Video => void, seconds: 
               });
 
               setPlayer(player);
-              player.seekTo(seconds, true);
+
+              if (seconds !== 0) {
+                player.seekTo(seconds, true);
+              }
             },
           },
         });
