@@ -35,15 +35,16 @@ const VideoSplitter = ({
 
   invariant(segments.length > 0, 'at least one segment required');
 
-  const updateSegmentAt = (index, data) => {
-    const newSegments = segments.slice();
-    newSegments[index] = {
-      ...newSegments[index],
-      ...data,
-    };
-    setSegments(newSegments);
-  };
-
+  console.log('render', segments.map(({ end }) => end));
+  const updateSegmentAt = (index, data) =>
+    setSegments(segments => {
+      const newSegments = segments.slice();
+      newSegments[index] = {
+        ...newSegments[index],
+        ...data,
+      };
+      return newSegments;
+    });
   return (
     <div>
       <Slider
@@ -79,33 +80,38 @@ const VideoSplitter = ({
               segments[segments.length - 2].end + 2 * minSegmentDuration <= video.duration
             )
           }
-          onClick={() => {
-            const newSegments = segments.slice();
-            const prevEnd = newSegments.length === 1 ? 0 : newSegments[newSegments.length - 2].end;
-            newSegments[newSegments.length - 1] = {
-              ...newSegments[newSegments.length - 1],
-              end: Math.round((prevEnd + video.duration) / 2),
-            };
-            newSegments.push({
-              end: video.duration,
-              title: 'New segment title',
-            });
-            setSegments(newSegments);
-          }}
+          onClick={() =>
+            setSegments(segments => {
+              const newSegments = segments.slice();
+              const prevEnd =
+                newSegments.length === 1 ? 0 : newSegments[newSegments.length - 2].end;
+              newSegments[newSegments.length - 1] = {
+                ...newSegments[newSegments.length - 1],
+                end: Math.round((prevEnd + video.duration) / 2),
+              };
+              newSegments.push({
+                end: video.duration,
+                title: 'New segment title',
+              });
+              return newSegments;
+            })
+          }
         >
           <Icon name="add" /> Add new segment
         </Button>
         <Button
           color="red"
           disabled={segments.length === 1}
-          onClick={() => {
-            const newSegments = segments.slice(0, -1);
-            newSegments[newSegments.length - 1] = {
-              ...newSegments[newSegments.length - 1],
-              end: video.duration,
-            };
-            setSegments(newSegments);
-          }}
+          onClick={() =>
+            setSegments(segments => {
+              const newSegments = segments.slice(0, -1);
+              newSegments[newSegments.length - 1] = {
+                ...newSegments[newSegments.length - 1],
+                end: video.duration,
+              };
+              return newSegments;
+            })
+          }
         >
           <Icon name="trash alternate outline" /> Remove last segment
         </Button>
