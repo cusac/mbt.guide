@@ -27,7 +27,7 @@ const VideoSplitter = ({
   setSeconds: number => void,
   segmentColors: Array<string>,
   minSegmentDuration: number,
-  onSave: ($PropertyType<db.Video, 'segments'>) => Promise<void>,
+  onSave: ($Shape<db.Video>) => Promise<void>,
 }) => {
   const [segments, setSegments] = React.useState(data.segments);
   invariant(segments.length > 0, 'at least one segment required');
@@ -105,7 +105,7 @@ const VideoSplitter = ({
         >
           <Icon name="trash alternate outline" /> Remove last segment
         </Button>
-        <Button color="green" onClick={() => onSave(segments)}>
+        <Button color="green" onClick={() => onSave({ segments })}>
           <Icon name="save" /> Save changes
         </Button>
       </div>

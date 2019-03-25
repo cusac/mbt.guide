@@ -15,10 +15,18 @@ const YouTubePlayer = ({
   videoId,
   onReady,
   seconds,
+  autoplay,
+  controls,
+  start,
+  end,
 }: {
   videoId: string,
   onReady: Video => void,
   seconds: number,
+  autoplay: boolean,
+  controls: boolean,
+  start: number,
+  end: number,
 }) => {
   const [player, setPlayer] = React.useState(undefined);
 
@@ -30,10 +38,13 @@ const YouTubePlayer = ({
         width: 640,
         videoId,
         playerVars: {
-          controls: 0, // disable video player controls
+          controls, // video player controls
           disablekb: 1, // disable keyboard controls
           fs: 0, // disable full screen mode
           modestbranding: 1,
+          autoplay,
+          start,
+          end,
         },
         events: {
           onReady: () => {
@@ -62,6 +73,10 @@ const YouTubePlayer = ({
 YouTubePlayer.defaultProps = {
   onReady: () => {},
   seconds: 0,
+  autoplay: true,
+  controls: true,
+  start: 0,
+  end: 0,
 };
 
 export default YouTubePlayer;

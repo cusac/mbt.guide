@@ -17,8 +17,13 @@ const App = () => {
             render={props => <routes.Edit {...props} videoId={props.match.params.videoId} />}
           />
           <Route
-            path="/watch/:videoId"
-            render={props => <routes.Watch {...props} videoId={props.match.params.videoId} />}
+            path="/watch/:title/:videoId/:segmentIndex"
+            render={props => {
+              // TODO encode segmentIndex as last character of videoId
+              const { videoId } = props.match.params;
+              const segmentIndex = Number(props.match.params.segmentIndex);
+              return <routes.Watch {...props} {...{ videoId, segmentIndex }} />;
+            }}
           />
         </Router>
       </header>
