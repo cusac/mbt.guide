@@ -1,54 +1,34 @@
 // @flow
 
 import * as React from 'react';
+import * as luxon from 'luxon';
 import * as db from 'services/db';
 
-import { type Video } from 'components/YouTubePlayer';
+const YOUTUBE_API_KEY = 'AIzaSyBTOgZacvh2HpWGO-8Fbd7dUOvMJvf-l_o';
 
 /**
  * Returns stored data about the video and an async function to update it.
- *
- * TODO cache YT data from YouTube API, so only videoId is required as argument
  */
-export default function useVideoData(video: ?Video) {
+export default function useVideoData({
+  ytVideoId,
+  fallback = false,
+}: {
+  ytVideoId: string,
+  fallback?: boolean,
+}) {
   const [data, setData] = React.useState((null: ?db.Video));
   const [dataId, setDataId] = React.useState((null: ?string));
+  const [error, setError] = React.useState();
 
-  React.useEffect(() => {
-    (async () => {
-      if (!video) {
-        return;
-      }
-      const { id, duration } = video;
-      try {
-        const querySnapshot = await db.videos.where('id', '==', id).get();
-        if (querySnapshot.size === 1) {
-          const [doc] = querySnapshot.docs;
-          setData(doc.data());
-          setDataId(doc.id);
-          return;
-        }
-        // default new document
-        setData({
-          id,
-          segments: [
-            {
-              title: 'First segment',
-              end: duration, // last segment's end is the video duration
-            },
-          ],
-        });
-      } catch (e) {
-        console.error(`Error loading data for video ${video.id}`, e);
-      }
-    })();
-  }, [video && video.id]);
+  if (error) {
+    throw error;
+  }
 
   async function update(updates: Object) {
     try {
       const newData = { ...data, ...updates };
       if (dataId != null) {
-        await db.videos.doc(dataId).update(newData);
+        await db.videos.doc(dataId).update(updates);
       } else {
         const docRef = await db.videos.add(newData);
         setDataId(docRef.id);
@@ -58,6 +38,51 @@ export default function useVideoData(video: ?Video) {
       console.error(`Error saving video`, e);
     }
   }
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const querySnapshot = await db.videos.where('id', '==', ytVideoId).get();
+        if (querySnapshot.size === 1) {
+          const [doc] = querySnapshot.docs;
+          setData(doc.data());
+          setDataId(doc.id);
+          return;
+        }
+
+        if (!fallback) {
+          throw new Error(`No data for video ${ytVideoId}`);
+        }
+
+        const ytResponse = await fetch(
+          `https://www.googleapis.com/youtube/v3/videos?id=${ytVideoId}&part=snippet,contentDetails&key=${YOUTUBE_API_KEY}`
+        );
+
+        const ytData = await ytResponse.json();
+        const [ytVideo] = ytData.items;
+
+        if (!ytVideo) {
+          throw new Error(`Missing YouTube Video with id ${ytVideoId}`);
+        }
+
+        const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
+
+        await update({
+          id: ytVideoId,
+          duration,
+          segments: [
+            {
+              title: 'First segment',
+              end: duration,
+            },
+          ],
+          youtube: ytVideo, // cache all YouTube data for future use
+        });
+      } catch (e) {
+        setError(e);
+      }
+    })();
+  }, [ytVideoId]);
 
   return [data, update];
 }

@@ -6,11 +6,6 @@
 import * as React from 'react';
 import nullthrows from 'nullthrows';
 
-export type Video = {|
-  id: string,
-  duration: number,
-|};
-
 const YouTubePlayer = ({
   videoId,
   onReady,
@@ -21,7 +16,10 @@ const YouTubePlayer = ({
   end,
 }: {
   videoId: string,
-  onReady: Video => void,
+  onReady: ({|
+    id: string,
+    duration: number,
+  |}) => void,
   seconds: number,
   autoplay: boolean,
   controls: boolean,
