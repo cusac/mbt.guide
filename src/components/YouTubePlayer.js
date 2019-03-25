@@ -36,11 +36,11 @@ const YouTubePlayer = ({
         width: 640,
         videoId,
         playerVars: {
-          controls, // video player controls
+          controls: Number(controls), // video player controls
           disablekb: 1, // disable keyboard controls
           fs: 0, // disable full screen mode
           modestbranding: 1,
-          autoplay,
+          autoplay: Number(autoplay),
           start,
           end,
         },

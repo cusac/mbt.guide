@@ -1,3 +1,3 @@
 // @flow
 
-export { default as useVideoData } from './useVideoData';
+export { default as useVideo } from './useVideo';

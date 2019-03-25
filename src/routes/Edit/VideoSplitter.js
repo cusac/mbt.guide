@@ -3,45 +3,41 @@
 import * as React from 'react';
 import { Button, Segment, Icon } from 'semantic-ui-react';
 import invariant from 'invariant';
-import * as db from 'services/db';
+import * as data from 'data';
 
 import Slider from './Slider';
 import VideoSegment from './VideoSegment';
-
-export type SegmentData = {|
-  end: number, // seconds
-  title: string,
-|};
 
 const VideoSplitter = ({
   video,
   setSeconds,
   segmentColors,
   minSegmentDuration,
-  onSave,
 }: {
-  video: db.Video,
+  video: data.Video,
   setSeconds: number => void,
   segmentColors: Array<string>,
   minSegmentDuration: number,
-  onSave: ($Shape<db.Video>) => Promise<void>,
 }) => {
   const [segments, setSegments] = React.useState(video.segments);
   invariant(segments.length > 0, 'at least one segment required');
 
   const updateSegmentAt = (index, data) => {
     const newSegments = segments.slice();
-    newSegments[index] = {
-      ...newSegments[index],
-      ...data,
-    };
+    Object.assign(newSegments[index], data);
+    if ('end' in data && index + 1 < newSegments.length) {
+      Object.assign(newSegments[index + 1], { start: data.end });
+    }
     setSegments(newSegments);
   };
+
+  const { duration } = video.data;
+
   return (
     <div>
       <Slider
         key={segments.length} // causes slider recreation on segments count change
-        range={{ min: 0, max: video.duration }}
+        range={{ min: 0, max: duration }}
         onHandleUpdate={(index, value) => setSeconds(value)}
         onHandleSet={(index, value) => updateSegmentAt(index, { end: value })}
         start={segments.slice(0, -1).map(({ end }) => end)}
@@ -52,14 +48,12 @@ const VideoSplitter = ({
       <br />
       <br />
       <Segment.Group>
-        {segments.map((data, index) => (
+        {segments.map(data => (
           <VideoSegment
-            key={index}
-            index={index}
+            key={data.index}
             data={data}
-            color={segmentColors[index]}
-            start={index ? segments[index - 1].end : 0}
-            onChange={newData => updateSegmentAt(index, newData)}
+            color={segmentColors[data.index]}
+            onChange={newData => updateSegmentAt(data.index, newData)}
           />
         ))}
       </Segment.Group>
@@ -69,18 +63,21 @@ const VideoSplitter = ({
           disabled={
             !(
               segments.length === 1 ||
-              segments[segments.length - 2].end + 2 * minSegmentDuration <= video.duration
+              segments[segments.length - 2].end + 2 * minSegmentDuration <= duration
             )
           }
           onClick={() => {
             const newSegments = segments.slice();
             const prevEnd = newSegments.length === 1 ? 0 : newSegments[newSegments.length - 2].end;
-            newSegments[newSegments.length - 1] = {
-              ...newSegments[newSegments.length - 1],
-              end: Math.round((prevEnd + video.duration) / 2),
-            };
+            const lastEnd = Math.round((prevEnd + duration) / 2);
+            Object.assign(newSegments[newSegments.length - 1], {
+              end: lastEnd,
+            });
             newSegments.push({
-              end: video.duration,
+              videoId: video.data.id,
+              index: newSegments.length,
+              start: lastEnd,
+              end: duration,
               title: 'New segment title',
             });
             setSegments(newSegments);
@@ -93,16 +90,15 @@ const VideoSplitter = ({
           disabled={segments.length === 1}
           onClick={() => {
             const newSegments = segments.slice(0, -1);
-            newSegments[newSegments.length - 1] = {
-              ...newSegments[newSegments.length - 1],
-              end: video.duration,
-            };
+            Object.assign(newSegments[newSegments.length - 1], {
+              end: duration,
+            });
             setSegments(newSegments);
           }}
         >
           <Icon name="trash alternate outline" /> Remove last segment
         </Button>
-        <Button color="green" onClick={() => onSave({ segments })}>
+        <Button color="green" onClick={() => video.updateSegments(segments)}>
           <Icon name="save" /> Save changes
         </Button>
       </div>

@@ -9,7 +9,7 @@ const segmentColors = ['orange', 'green', 'yellow', 'blue', 'red', 'purple'];
 const minSegmentDuration = 5;
 
 const Edit = ({ videoId }: { videoId: string }) => {
-  const [video, update] = hooks.useVideoData({ ytVideoId: videoId, fallback: true });
+  const video = hooks.useVideo({ ytVideoId: videoId, fallback: true });
   const [seconds, setSeconds] = React.useState(0);
 
   if (!video) {
@@ -19,10 +19,7 @@ const Edit = ({ videoId }: { videoId: string }) => {
   return (
     <div>
       <YouTubePlayer autoplay={false} controls={false} {...{ videoId, seconds }} />
-      <VideoSplitter
-        onSave={update}
-        {...{ video, setSeconds, segmentColors, minSegmentDuration }}
-      />
+      <VideoSplitter {...{ video, setSeconds, segmentColors, minSegmentDuration }} />
     </div>
   );
 };

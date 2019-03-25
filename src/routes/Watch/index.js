@@ -5,20 +5,21 @@ import * as hooks from 'hooks';
 import YouTubePlayer from 'components/YouTubePlayer';
 
 const Watch = ({ videoId, segmentIndex }: { videoId: string, segmentIndex: number }) => {
-  const [data] = hooks.useVideoData({ ytVideoId: videoId });
-  if (!data) {
+  const video = hooks.useVideo({ ytVideoId: videoId });
+  if (!video) {
     return <div>Loading video data</div>;
   }
 
-  const segment = data.segments[segmentIndex];
+  const segment = video.segments[segmentIndex];
   if (!segment) {
     return <div>Missing segment</div>;
   }
-  const start = segmentIndex === 0 ? 0 : data.segments[segmentIndex - 1].end;
+
+  const { start, end } = segment;
   return (
     <div>
       <h1 style={{ color: 'white' }}>{segment.title}</h1>
-      <YouTubePlayer {...{ videoId, start, end: segment.end }} />
+      <YouTubePlayer {...{ videoId, start, end }} />
     </div>
   );
 };

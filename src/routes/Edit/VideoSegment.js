@@ -2,22 +2,17 @@
 
 import * as React from 'react';
 import { Segment, Grid, Input } from 'semantic-ui-react';
-
 import * as timeFormat from 'utils/timeFormat';
-import type { SegmentData } from './VideoSplitter';
+import * as db from 'services/db';
 
 const VideoSegment = ({
-  index,
+  data: { start, end, title },
   color,
-  start,
-  data: { end, title },
   onChange,
 }: {
-  index: number,
+  data: db.VideoSegment,
   color: string,
-  start: number,
-  data: SegmentData,
-  onChange: ($Shape<SegmentData>) => void,
+  onChange: ($Shape<db.VideoSegment>) => void,
 }) => {
   return (
     <Segment color={color}>
