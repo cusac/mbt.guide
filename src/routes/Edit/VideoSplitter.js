@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { Button, Segment, Icon } from 'semantic-ui-react';
 import invariant from 'invariant';
+import * as db from 'services/db';
 
 import type { Video } from 'components/YouTubePlayer';
 import Slider from './Slider';
@@ -15,24 +16,20 @@ export type SegmentData = {|
 
 const VideoSplitter = ({
   video,
+  data,
   setSeconds,
   segmentColors,
   minSegmentDuration,
+  onSave,
 }: {
   video: Video,
+  data: db.Video,
   setSeconds: number => void,
   segmentColors: Array<string>,
   minSegmentDuration: number,
+  onSave: ($PropertyType<db.Video, 'segments'>) => Promise<void>,
 }) => {
-  const [segments, setSegments] = React.useState(
-    ([
-      {
-        end: video.duration, // last segment's end is the video duration
-        title: 'First segment',
-      },
-    ]: Array<SegmentData>)
-  );
-
+  const [segments, setSegments] = React.useState(data.segments);
   invariant(segments.length > 0, 'at least one segment required');
 
   const updateSegmentAt = (index, data) => {
@@ -108,7 +105,7 @@ const VideoSplitter = ({
         >
           <Icon name="trash alternate outline" /> Remove last segment
         </Button>
-        <Button color="green">
+        <Button color="green" onClick={() => onSave(segments)}>
           <Icon name="save" /> Save changes
         </Button>
       </div>

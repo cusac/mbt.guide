@@ -29,6 +29,7 @@
     "not op_mini all"
   ],
   "dependencies": {
+    "firebase": "^5.9.1",
     "invariant": "^2.2.4",
     "nouislider": "^13.1.3",
     "nullthrows": "^1.1.1",

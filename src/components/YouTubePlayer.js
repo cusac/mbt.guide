@@ -7,6 +7,7 @@ import * as React from 'react';
 import nullthrows from 'nullthrows';
 
 export type Video = {|
+  id: string,
   duration: number,
 |};
 
@@ -38,6 +39,7 @@ const YouTubePlayer = ({
           onReady: () => {
             setPlayer(ytPlayer);
             onReady({
+              id: videoId,
               duration: ytPlayer.getDuration(),
             });
           },

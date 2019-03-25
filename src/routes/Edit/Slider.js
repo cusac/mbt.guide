@@ -52,6 +52,16 @@ const Slider = ({
     return () => slider.destroy();
   }, []);
 
+  React.useEffect(() => slider && slider.updateOptions({ range }), [slider, range.min, range.max]);
+  React.useEffect(
+    () =>
+      slider &&
+      [...slider.target.querySelectorAll('.noUi-connect')].forEach((connect, i) => {
+        connect.style.background = colors[i];
+      }),
+    [slider, ...colors]
+  );
+
   [['update', onHandleUpdate], ['set', onHandleSet]].forEach(([name, callback]) =>
     React.useEffect(() => {
       if (!slider) {
@@ -73,16 +83,6 @@ const Slider = ({
 
       return () => slider.off(eventName);
     }, [slider, callback])
-  );
-
-  React.useEffect(() => slider && slider.updateOptions({ range }), [slider, range.min, range.max]);
-  React.useEffect(
-    () =>
-      slider &&
-      [...slider.target.querySelectorAll('.noUi-connect')].forEach((connect, i) => {
-        connect.style.background = colors[i];
-      }),
-    [slider, ...colors]
   );
 
   return <div ref={ref} style={{ width: 640 }} />;
