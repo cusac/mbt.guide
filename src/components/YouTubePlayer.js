@@ -37,11 +37,6 @@ const YouTubePlayer = ({
         events: {
           onReady: () => {
             setPlayer(ytPlayer);
-
-            if (seconds !== 0) {
-              ytPlayer.seekTo(seconds, true);
-            }
-
             onReady({
               duration: ytPlayer.getDuration(),
             });
@@ -49,16 +44,15 @@ const YouTubePlayer = ({
         },
       });
     });
-
-    return () =>
-      ytReady(() => {
-        if (player) {
-          player.destroy();
-        }
-      });
+    return () => ytReady(() => player && player.destroy());
   }, [videoId]);
 
-  React.useEffect(() => void (player && player.seekTo(seconds, true), [player, seconds]));
+  React.useEffect(() => {
+    if (!player || seconds === 0) {
+      return;
+    }
+    player.seekTo(seconds, true);
+  }, [player, seconds]);
 
   return <div ref={ref} />;
 };

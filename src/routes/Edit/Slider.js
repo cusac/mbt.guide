@@ -47,18 +47,33 @@ const Slider = ({
       format: timeFormat,
     });
 
-    slider.on('update', (values, handleIndex, rawValues) =>
-      onHandleUpdate(handleIndex, rawValues[handleIndex])
-    );
-
-    slider.on('set', (values, handleIndex, rawValues) =>
-      onHandleSet(handleIndex, rawValues[handleIndex])
-    );
-
     setSlider(slider);
 
     return () => slider.destroy();
   }, []);
+
+  [['update', onHandleUpdate], ['set', onHandleSet]].forEach(([name, callback]) =>
+    React.useEffect(() => {
+      if (!slider) {
+        return;
+      }
+
+      // NOTE we need to add namespace to the event name to keep the internal callbacks
+      const eventName = `${name}.react`;
+
+      let justBound = true;
+      slider.on(eventName, (values, handleIndex, rawValues) => {
+        if (justBound) {
+          return;
+        }
+
+        callback(handleIndex, rawValues[handleIndex]);
+      });
+      justBound = false;
+
+      return () => slider.off(eventName);
+    }, [slider, callback])
+  );
 
   React.useEffect(() => slider && slider.updateOptions({ range }), [slider, range.min, range.max]);
   React.useEffect(
