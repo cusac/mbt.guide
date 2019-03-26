@@ -11,7 +11,7 @@ const App = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <components.ErrorBoundary>
+        <components.ErrorBoundary onError={() => <div>Something went wrong!</div>}>
           <Router>
             <Route path="/" exact component={routes.Home} />
             <Route

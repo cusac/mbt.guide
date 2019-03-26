@@ -74,6 +74,7 @@ const VideoSplitter = ({
               end: lastEnd,
             });
             newSegments.push({
+              id: `${video.data.id}${newSegments.length}`,
               videoId: video.data.id,
               index: newSegments.length,
               start: lastEnd,

@@ -1,27 +1,30 @@
 // @flow
 
+import { Button, Icon } from 'semantic-ui-react';
+import * as components from 'components';
+import * as data from 'data';
+import * as errors from 'errors';
 import * as React from 'react';
-import * as hooks from 'hooks';
-import YouTubePlayer from 'components/YouTubePlayer';
-import VideoSplitter from './VideoSplitter';
 
-const segmentColors = ['orange', 'green', 'yellow', 'blue', 'red', 'purple'];
-const minSegmentDuration = 5;
+import Editor from './Editor';
 
-const Edit = ({ videoId }: { videoId: string }) => {
-  const video = hooks.useVideo({ ytVideoId: videoId, fallback: true });
-  const [seconds, setSeconds] = React.useState(0);
-
-  if (!video) {
-    return <div>Loading video</div>;
-  }
-
-  return (
-    <div>
-      <YouTubePlayer autoplay={false} controls={false} {...{ videoId, seconds }} />
-      <VideoSplitter {...{ video, setSeconds, segmentColors, minSegmentDuration }} />
-    </div>
-  );
-};
+const Edit = ({ videoId }: { videoId: string }) => (
+  <components.ErrorBoundary
+    onError={(error, done) =>
+      error instanceof errors.MissingVideoError && (
+        <div>
+          You need to create a new video!
+          <br />
+          <br />
+          <Button color="green" onClick={() => data.Video.create(videoId).then(done)}>
+            <Icon name="add" /> Create a new video
+          </Button>
+        </div>
+      )
+    }
+  >
+    <Editor videoId={videoId} />
+  </components.ErrorBoundary>
+);
 
 export default Edit;

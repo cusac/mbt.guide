@@ -1,109 +1,123 @@
 // @flow
 
-import invariant from 'invariant';
 import * as db from 'services/db';
+import * as errors from 'errors';
 import * as luxon from 'luxon';
+import * as utils from 'utils';
+import invariant from 'invariant';
 
 const YOUTUBE_API_KEY = 'AIzaSyBTOgZacvh2HpWGO-8Fbd7dUOvMJvf-l_o';
 
-type QuerySnapshots = $Shape<{|
-  videos: Object,
-  videoSegments: Object,
+type DbSnapshot = $Shape<{|
+  videos: Array<db.Video>,
+  videoSegments: Array<db.VideoSegment>,
 |}>;
 
 export default class Video {
-  static subscribe(
-    { ytVideoId, fallback = false }: {| ytVideoId: string, fallback?: boolean |},
-    onChange: Video => void,
-    onError: any => void
-  ): () => void {
-    let querySnapshots = {};
-    const cb = (qs: QuerySnapshots) => {
-      const { videos, videoSegments } = Object.assign(querySnapshots, qs);
+  /**
+   * Creates data for video with given id based on YouTube content
+   */
+  static async create(id: string): Promise<void> {
+    return db.default.runTransaction(async transaction => {
+      const videoRef = db.videos.doc(id);
+      const videoDoc = await transaction.get(videoRef);
+
+      if (videoDoc.exists) {
+        transaction.update(videoRef, {}); // dummy update as required by transactions
+        return; // nothing to do here
+      }
+
+      const ytResponse = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?id=${id}&part=snippet,contentDetails&key=${YOUTUBE_API_KEY}`
+      );
+      const [ytVideo] = (await ytResponse.json()).items;
+      if (!ytVideo) {
+        throw new Error(`Missing YouTube Video with id ${id}`);
+      }
+      const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
+
+      transaction
+        .set(
+          videoRef,
+          ({
+            id,
+            duration,
+            youtube: ytVideo,
+          }: db.Video)
+        )
+        .set(
+          db.videoSegments.doc(`${id}0`),
+          ({
+            id: `${id}0`,
+            videoId: id,
+            index: 0,
+            title: 'Segment title',
+            start: 0,
+            end: duration,
+          }: db.VideoSegment)
+        );
+    });
+  }
+
+  static subscribe(id: string, onChange: Video => void, onError: any => void): () => void {
+    const dbSnapshot = {};
+    const cb = (dbs: DbSnapshot) => {
+      const { videos, videoSegments } = Object.assign(dbSnapshot, dbs);
       if (!videos || !videoSegments) {
         return; // still loading data
       }
 
-      if (!videos.empty && !videoSegments.empty) {
-        // TODO test errors
-        onChange(new Video(querySnapshots));
-        return;
+      try {
+        onChange(new Video(dbSnapshot));
+      } catch (e) {
+        onError(e);
       }
-
-      (async () => {
-        try {
-          if (!fallback) {
-            throw new Error(`No data for video ${ytVideoId}`);
-          }
-
-          const ytResponse = await fetch(
-            `https://www.googleapis.com/youtube/v3/videos?id=${ytVideoId}&part=snippet,contentDetails&key=${YOUTUBE_API_KEY}`
-          );
-          const [ytVideo] = (await ytResponse.json()).items;
-          if (!ytVideo) {
-            throw new Error(`Missing YouTube Video with id ${ytVideoId}`);
-          }
-          const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
-          console.log('duration', duration);
-
-          invariant(videos.empty && videoSegments.empty, 'expected no prior data');
-          querySnapshots = {}; // mark snapshots as still loading
-          await db.default
-            .batch()
-            .set(
-              db.videos.doc(),
-              ({
-                id: ytVideoId,
-                duration,
-                youtube: ytVideo,
-              }: db.Video)
-            )
-            .set(
-              db.videoSegments.doc(),
-              ({
-                videoId: ytVideoId,
-                index: 0,
-                title: 'Segment title',
-                start: 0,
-                end: duration,
-              }: db.VideoSegment)
-            )
-            .commit();
-        } catch (e) {
-          onError(e);
-        }
-      })();
     };
     const unsubs = [
-      db.videos.where('id', '==', ytVideoId).onSnapshot(videos => cb({ videos })),
+      db.videos.doc(id).onSnapshot(video => cb({ videos: [video.data()] }), onError),
       db.videoSegments
-        .where('videoId', '==', ytVideoId)
-        .onSnapshot(videoSegments => cb({ videoSegments })),
+        .where('videoId', '==', id)
+        .orderBy('index')
+        .onSnapshot(
+          videoSegments => cb({ videoSegments: videoSegments.docs.map(doc => doc.data()) }),
+          onError
+        ),
     ];
     return () => unsubs.forEach(fn => fn());
   }
 
-  constructor(querySnapshots: QuerySnapshots) {
-    this._querySnapshots = querySnapshots;
+  constructor(dbSnapshot: DbSnapshot) {
+    this._dbSnapshot = dbSnapshot;
 
-    const { videos, videoSegments } = querySnapshots;
+    const { videos, videoSegments } = dbSnapshot;
     invariant(videos && videoSegments, 'videos and videoSegments snapshots required');
-    invariant(videos.size === 1 && !videoSegments.empty, 'expected one video with segments');
+    if (videos.length !== 1 || videoSegments.length === 0) {
+      throw new errors.MissingVideoError('Expected one video with segments');
+    }
 
-    this.data = videos.docs[0].data();
-    this.segments = videoSegments.docs.map(doc => doc.data());
+    this.data = videos[0];
+    this.segments = videoSegments;
+
+    invariant(
+      utils.isArraySorted(this.segments, (x, y) => x.index - y.index),
+      'segments should be sorted by index'
+    );
   }
 
-  _querySnapshots: QuerySnapshots;
+  _dbSnapshot: DbSnapshot;
 
   +data: db.Video;
   +segments: Array<db.VideoSegment>;
 
-  async updateSegments(newSegments: Array<db.VideoSegment>): Promise<void> {
-    console.log('updateSegments', newSegments);
-    // TODO#1 check that this.segments is ordered by index
-    // TODO#2 check that newSegments is ordered by index
-    // TODO#3 create bulk with matching updates
-    // TODO#4 if newSegments is longer add new ones, if shorter remove objects
+  async updateSegments(segments: Array<db.VideoSegment>): Promise<void> {
+    invariant(
+      utils.isArraySorted(segments, (x, y) => x.index - y.index),
+      'segments should be sorted by index'
+    );
+
+    const batch = db.default.batch();
+    segments.forEach(s => batch.set(db.videoSegments.doc(s.id), s));
+    this.segments.slice(segments.length).forEach(s => batch.delete(db.videoSegments.doc(s.id)));
+    await batch.commit();
   }
 }

@@ -3,6 +3,7 @@
 import { db } from '..';
 
 export type VideoSegment = {|
+  id: string,
   videoId: string,
   index: number, // starts with 0
   title: string,

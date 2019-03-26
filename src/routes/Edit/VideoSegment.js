@@ -1,9 +1,9 @@
 // @flow
 
-import * as React from 'react';
 import { Segment, Grid, Input } from 'semantic-ui-react';
-import * as timeFormat from 'utils/timeFormat';
 import * as db from 'services/db';
+import * as React from 'react';
+import * as utils from 'utils';
 
 const VideoSegment = ({
   data: { start, end, title },
@@ -18,7 +18,7 @@ const VideoSegment = ({
     <Segment color={color}>
       <Grid.Row>
         <Grid.Column>
-          {timeFormat.to(start)} -> {timeFormat.to(end)}
+          {utils.timeFormat.to(start)} -> {utils.timeFormat.to(end)}
         </Grid.Column>
       </Grid.Row>
       <Grid columns={2} divided>

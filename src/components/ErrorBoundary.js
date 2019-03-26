@@ -4,28 +4,33 @@ import * as React from 'react';
 
 type Props = {
   children: React.Node,
+  onError: (error: any, done: () => void) => React.Node,
 };
+
 type State = {
-  hasError: boolean,
+  error: any,
 };
 
 export default class ErrorBoundary extends React.Component<Props, State> {
+  static getDerivedStateFromError(error: any) {
+    return { error };
+  }
+
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { error: undefined };
   }
 
   componentDidCatch(error: any, info: Object) {
-    this.setState({ hasError: true });
-
     console.error(error, info);
   }
 
+  done = () => {
+    this.setState({ error: undefined });
+  };
+
   render() {
-    if (this.state.hasError) {
-      // You can render any custom fallback UI
-      return <h1>Something went wrong.</h1>;
-    }
-    return this.props.children;
+    const { error } = this.state;
+    return (error && this.props.onError(error, this.done)) || this.props.children;
   }
 }

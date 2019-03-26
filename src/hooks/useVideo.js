@@ -6,17 +6,12 @@ import * as data from 'data';
 /**
  * Returns stored data about the video
  */
-export default function useVideoData(options: {| ytVideoId: string, fallback?: boolean |}) {
-  const [video, setVideo] = React.useState((null: ?data.Video));
+export default function useVideoData(id: string) {
   const [error, setError] = React.useState();
+  const [video, setVideo] = React.useState((null: ?data.Video));
+  React.useEffect(() => data.Video.subscribe(id, setVideo, setError), [id]);
   if (error) {
     throw error;
   }
-
-  React.useEffect(() => data.Video.subscribe(options, setVideo, setError), [
-    options.ytVideoId,
-    options.fallback,
-  ]);
-
   return video;
 }

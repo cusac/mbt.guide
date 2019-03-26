@@ -5,7 +5,7 @@ import * as hooks from 'hooks';
 import YouTubePlayer from 'components/YouTubePlayer';
 
 const Watch = ({ videoId, segmentIndex }: { videoId: string, segmentIndex: number }) => {
-  const video = hooks.useVideo({ ytVideoId: videoId });
+  const video = hooks.useVideo(videoId);
   if (!video) {
     return <div>Loading video data</div>;
   }

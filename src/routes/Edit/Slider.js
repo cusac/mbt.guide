@@ -1,11 +1,10 @@
 // @flow
 // https://refreshless.com/nouislider/
 
-import * as React from 'react';
-import noUiSlider from 'nouislider';
 import 'nouislider/distribute/nouislider.css';
-
-import * as timeFormat from 'utils/timeFormat';
+import * as React from 'react';
+import * as utils from 'utils';
+import noUiSlider from 'nouislider';
 
 export type Range = {| min: number, max: number |};
 
@@ -41,10 +40,10 @@ const Slider = ({
       pips: {
         mode: 'range',
         density: 3,
-        format: timeFormat,
+        format: utils.timeFormat,
       },
       tooltips: true,
-      format: timeFormat,
+      format: utils.timeFormat,
     });
 
     setSlider(slider);
