@@ -1,38 +1,32 @@
 // @flow
 
-import { Segment, Grid, Input } from 'semantic-ui-react';
+import { Button, Grid, Segment } from 'semantic-ui-react';
 import * as db from 'services/db';
 import * as React from 'react';
 import * as utils from 'utils';
 
 const VideoSegment = ({
+  active,
   data: { start, end, title },
   color,
-  onChange,
+  onSelect,
 }: {
+  active: boolean,
   data: db.VideoSegment,
   color: string,
-  onChange: ($Shape<db.VideoSegment>) => void,
+  onSelect: () => void,
 }) => {
   return (
     <Segment color={color}>
-      <Grid.Row>
-        <Grid.Column>
-          {utils.timeFormat.to(start)} -> {utils.timeFormat.to(end)}
-        </Grid.Column>
-      </Grid.Row>
       <Grid columns={2} divided>
         <Grid.Row>
           <Grid.Column verticalAlign="middle" width={3}>
-            Title
+            <Button active={active} circular icon="edit" onClick={() => onSelect()} />
           </Grid.Column>
           <Grid.Column width={13}>
-            <Input
-              fluid
-              placeholder="Title"
-              value={title}
-              onChange={(event, { value }) => onChange({ title: value })}
-            />
+            {utils.timeFormat.to(start)} -> {utils.timeFormat.to(end)}
+            <br />
+            {title}
           </Grid.Column>
         </Grid.Row>
       </Grid>
@@ -41,7 +35,8 @@ const VideoSegment = ({
 };
 
 VideoSegment.defaultProps = {
-  onChange: () => {},
+  active: false,
+  onSelect: () => {},
 };
 
 export default VideoSegment;

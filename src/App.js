@@ -1,10 +1,11 @@
 // @flow
 
-import * as React from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
-
-import * as routes from 'routes';
+import { Router, Route } from 'react-router-dom';
 import * as components from 'components';
+import * as React from 'react';
+import * as routes from 'routes';
+import * as utils from 'utils';
+
 import './App.css';
 
 const App = () => {
@@ -12,11 +13,15 @@ const App = () => {
     <div className="App">
       <header className="App-header">
         <components.ErrorBoundary onError={() => <div>Something went wrong!</div>}>
-          <Router>
+          <Router history={utils.history}>
             <Route path="/" exact component={routes.Home} />
             <Route
-              path="/edit/:videoId"
-              render={props => <routes.Edit {...props} videoId={props.match.params.videoId} />}
+              path="/edit/:videoId/:index?"
+              render={props => {
+                const { videoId } = props.match.params;
+                const index = Number(props.match.params.index || 0);
+                return <routes.Edit {...props} {...{ videoId, index }} />;
+              }}
             />
             <Route
               path="/watch/:title/:videoId/:segmentIndex"

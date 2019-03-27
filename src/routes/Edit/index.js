@@ -8,7 +8,7 @@ import * as React from 'react';
 
 import Editor from './Editor';
 
-const Edit = ({ videoId }: { videoId: string }) => (
+const Edit = ({ videoId, index }: { videoId: string, index: number }) => (
   <components.ErrorBoundary
     onError={(error, done) =>
       error instanceof errors.MissingVideoError && (
@@ -23,7 +23,7 @@ const Edit = ({ videoId }: { videoId: string }) => (
       )
     }
   >
-    <Editor videoId={videoId} />
+    <Editor {...{ videoId, index }} />
   </components.ErrorBoundary>
 );
 

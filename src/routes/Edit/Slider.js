@@ -84,7 +84,7 @@ const Slider = ({
     }, [slider, callback])
   );
 
-  return <div ref={ref} style={{ width: 640 }} />;
+  return <div ref={ref} style={{ width: 2000 }} />;
 };
 
 Slider.defaultProps = {

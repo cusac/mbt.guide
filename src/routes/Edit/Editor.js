@@ -1,6 +1,5 @@
 // @flow
 
-import * as components from 'components';
 import * as hooks from 'hooks';
 import * as React from 'react';
 
@@ -9,19 +8,18 @@ import VideoSplitter from './VideoSplitter';
 const segmentColors = ['orange', 'green', 'yellow', 'blue', 'red', 'purple'];
 const minSegmentDuration = 5;
 
-const Editor = ({ videoId }: { videoId: string }) => {
-  const [seconds, setSeconds] = React.useState(0);
+const Editor = ({ videoId, index }: { videoId: string, index: number }) => {
   const video = hooks.useVideo(videoId);
 
   if (!video) {
-    return <div>Loading video</div>;
+    return <div>Loading video data</div>;
   }
 
   return (
-    <div>
-      <components.YouTubePlayer autoplay={false} controls={false} {...{ videoId, seconds }} />
-      <VideoSplitter {...{ video, setSeconds, segmentColors, minSegmentDuration }} />
-    </div>
+    <VideoSplitter
+      index={Math.min(index, video.segments.length - 1)}
+      {...{ video, segmentColors, minSegmentDuration }}
+    />
   );
 };
 
