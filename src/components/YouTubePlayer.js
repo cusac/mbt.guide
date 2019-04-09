@@ -6,9 +6,13 @@
 import * as React from 'react';
 import nullthrows from 'nullthrows';
 
+export type State = 'unstarted' | 'ended' | 'playing' | 'paused' | 'buffering' | 'cued';
+
 const YouTubePlayer = ({
   videoId,
   onReady,
+  onStateChange,
+  onSecondsChange,
   seconds,
   autoplay,
   controls,
@@ -20,17 +24,21 @@ const YouTubePlayer = ({
     id: string,
     duration: number,
   |}) => void,
+  onStateChange: State => void,
+  onSecondsChange: number => void,
   seconds: number,
   autoplay: boolean,
   controls: boolean,
   start: number,
   end: number,
 }) => {
-  const [player, setPlayer] = React.useState(undefined);
+  const [player, setPlayer] = React.useState((undefined: Object | void));
+  const [prevSeconds, setPrevSeconds] = React.useState((undefined: number | void));
 
   const ref = React.createRef();
   React.useEffect(() => {
     ytReady(() => {
+      let playingInterval: IntervalID | void;
       const ytPlayer = new YT.Player(ref.current, {
         height: 360,
         width: 640,
@@ -52,6 +60,36 @@ const YouTubePlayer = ({
               duration: ytPlayer.getDuration(),
             });
           },
+          onStateChange: ({ data: state }) => {
+            switch (state) {
+              case YT.PlayerState.PLAYING:
+                if (playingInterval == null) {
+                  playingInterval = setInterval(() => {
+                    const time = ytPlayer.getCurrentTime();
+                    setPrevSeconds(time);
+                    onSecondsChange(time);
+                  }, 300);
+                }
+                break;
+
+              default:
+                if (playingInterval != null) {
+                  clearInterval(playingInterval);
+                  playingInterval = undefined;
+                }
+            }
+
+            onStateChange(
+              ({
+                [-1]: 'unstarted',
+                [YT.PlayerState.ENDED]: 'ended',
+                [YT.PlayerState.PLAYING]: 'playing',
+                [YT.PlayerState.PAUSED]: 'paused',
+                [YT.PlayerState.BUFFERING]: 'buffering',
+                [YT.PlayerState.CUED]: 'cued',
+              }: { [number]: State })[state]
+            );
+          },
         },
       });
     });
@@ -59,7 +97,7 @@ const YouTubePlayer = ({
   }, [videoId]);
 
   React.useEffect(() => {
-    if (!player || seconds === 0) {
+    if (!player || seconds === 0 || seconds === prevSeconds) {
       return;
     }
     player.seekTo(seconds, true);
@@ -70,6 +108,8 @@ const YouTubePlayer = ({
 
 YouTubePlayer.defaultProps = {
   onReady: () => {},
+  onStateChange: () => {},
+  onSecondsChange: () => {},
   seconds: 0,
   autoplay: true,
   controls: true,

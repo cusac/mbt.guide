@@ -8,7 +8,6 @@ import * as React from 'react';
 import * as utils from 'utils';
 import invariant from 'invariant';
 
-import Slider from './Slider';
 import VideoSegment from './VideoSegment';
 
 const VideoSplitter = ({
@@ -42,12 +41,15 @@ const VideoSplitter = ({
   return (
     <div style={{ width: 1012 }}>
       <Grid>
-        <Grid.Row style={{ height: 360 }}>
+        <Grid.Row style={{ height: 390 }}>
           <Grid.Column width={11} style={{ padding: 0 }}>
-            <components.YouTubePlayer
-              autoplay={false}
-              controls={false}
-              {...{ videoId: video.data.id, seconds }}
+            <components.YouTubePlayerWithControls
+              duration={video.data.duration}
+              end={segments[index].end}
+              seconds={seconds}
+              start={segments[index].start}
+              videoId={video.data.id}
+              onSecondsChange={seconds => setSeconds(seconds)}
             />
           </Grid.Column>
           <Grid.Column width={5} style={{ height: '100%', padding: 0 }}>
@@ -124,7 +126,7 @@ const VideoSplitter = ({
                 paddingTop: 50,
               }}
             >
-              <Slider
+              <components.Slider
                 key={segments.length} // causes slider recreation on segments count change
                 range={{ min: 0, max: duration }}
                 onHandleUpdate={(i, value) => setSeconds(value)}
@@ -132,6 +134,8 @@ const VideoSplitter = ({
                 start={segments.slice(0, -1).map(({ end }) => end)}
                 colors={segmentColors}
                 margin={minSegmentDuration}
+                width={2000} // TODO make dependant on video duration
+                pips
               />
             </div>
           </Grid.Column>

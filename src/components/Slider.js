@@ -16,6 +16,8 @@ const Slider = ({
   start,
   colors,
   margin,
+  width,
+  pips,
 }: {
   onChange: (Array<number>) => void,
   onHandleUpdate: (number, number) => void,
@@ -24,6 +26,8 @@ const Slider = ({
   start: Array<number>,
   colors: Array<string>,
   margin: number,
+  width: number,
+  pips: boolean,
 }) => {
   const [slider, setSlider] = React.useState(undefined);
   const ref = React.createRef();
@@ -37,7 +41,7 @@ const Slider = ({
       connect: Array(start.length + 1).fill(true),
       margin,
       range,
-      pips: {
+      pips: pips && {
         mode: 'range',
         density: 3,
         format: utils.timeFormat,
@@ -52,6 +56,7 @@ const Slider = ({
   }, []);
 
   React.useEffect(() => slider && slider.updateOptions({ range }), [slider, range.min, range.max]);
+  React.useEffect(() => slider && slider.updateOptions({ start }), [slider, ...start]);
   React.useEffect(
     () =>
       slider &&
@@ -84,7 +89,7 @@ const Slider = ({
     }, [slider, callback])
   );
 
-  return <div ref={ref} style={{ width: 2000 }} />;
+  return <div ref={ref} style={{ margin: '0px auto', width }} />;
 };
 
 Slider.defaultProps = {
@@ -97,6 +102,9 @@ Slider.defaultProps = {
   },
   start: [],
   margin: 0,
+  width: 400,
+  colors: ['red', 'rgb(255, 255, 255, 0.5)'],
+  pips: false,
 };
 
 export default Slider;
