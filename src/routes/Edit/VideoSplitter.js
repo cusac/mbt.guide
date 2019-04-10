@@ -49,7 +49,7 @@ const VideoSplitter = ({
               seconds={seconds}
               start={segments[index].start}
               videoId={video.data.id}
-              onSecondsChange={seconds => setSeconds(seconds)}
+              onSecondsChange={setSeconds}
             />
           </Grid.Column>
           <Grid.Column width={5} style={{ height: '100%', padding: 0 }}>

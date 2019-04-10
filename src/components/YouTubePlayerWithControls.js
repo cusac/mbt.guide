@@ -4,8 +4,6 @@ import { Button } from 'semantic-ui-react';
 import * as components from 'components';
 import * as React from 'react';
 
-const showPlayPauseButton = false;
-
 const YouTubePlayerWithControls = ({
   videoId,
   duration,
@@ -25,19 +23,27 @@ const YouTubePlayerWithControls = ({
   end: number,
   onSecondsChange: number => void,
 }) => {
+  // eslint-disable-next-line no-unused-vars
   const [state, setState] = React.useState(('unstarted': components.YouTubePlayerState));
+  const [playing, setPlaying] = React.useState((false: boolean));
+  if (state === 'playing' && !playing) {
+    setPlaying(true);
+  }
+  if (state === 'paused' && playing) {
+    setPlaying(false);
+  }
 
   return (
     <div>
       <components.YouTubePlayer
-        {...{ videoId, seconds, autoplay, start, end }}
+        {...{ videoId, seconds, autoplay, start, end, playing }}
         controls={false}
         onStateChange={setState}
         onSecondsChange={onSecondsChange}
       />
       {controls && (
         <div>
-          {showPlayPauseButton && <Button circular icon={state === 'paused' ? 'pause' : 'play'} />}
+          <Button circular icon={playing ? 'pause' : 'play'} onClick={() => setPlaying(!playing)} />
           <components.Slider
             start={[seconds]}
             range={{ min: start, max: end }}

@@ -18,6 +18,7 @@ const YouTubePlayer = ({
   controls,
   start,
   end,
+  playing,
 }: {
   videoId: string,
   onReady: ({|
@@ -31,14 +32,15 @@ const YouTubePlayer = ({
   controls: boolean,
   start: number,
   end: number,
+  playing: boolean,
 }) => {
   const [player, setPlayer] = React.useState((undefined: Object | void));
+  const [state, setState] = React.useState(('unstarted': State));
   const [prevSeconds, setPrevSeconds] = React.useState((undefined: number | void));
 
   const ref = React.createRef();
   React.useEffect(() => {
     ytReady(() => {
-      let playingInterval: IntervalID | void;
       const ytPlayer = new YT.Player(ref.current, {
         height: 360,
         width: 640,
@@ -49,8 +51,6 @@ const YouTubePlayer = ({
           fs: 0, // disable full screen mode
           modestbranding: 1,
           autoplay: Number(autoplay),
-          start,
-          end,
         },
         events: {
           onReady: () => {
@@ -60,35 +60,17 @@ const YouTubePlayer = ({
               duration: ytPlayer.getDuration(),
             });
           },
-          onStateChange: ({ data: state }) => {
-            switch (state) {
-              case YT.PlayerState.PLAYING:
-                if (playingInterval == null) {
-                  playingInterval = setInterval(() => {
-                    const time = ytPlayer.getCurrentTime();
-                    setPrevSeconds(time);
-                    onSecondsChange(time);
-                  }, 300);
-                }
-                break;
-
-              default:
-                if (playingInterval != null) {
-                  clearInterval(playingInterval);
-                  playingInterval = undefined;
-                }
-            }
-
-            onStateChange(
-              ({
-                [-1]: 'unstarted',
-                [YT.PlayerState.ENDED]: 'ended',
-                [YT.PlayerState.PLAYING]: 'playing',
-                [YT.PlayerState.PAUSED]: 'paused',
-                [YT.PlayerState.BUFFERING]: 'buffering',
-                [YT.PlayerState.CUED]: 'cued',
-              }: { [number]: State })[state]
-            );
+          onStateChange: ({ data }) => {
+            const state = ({
+              [-1]: 'unstarted',
+              [YT.PlayerState.ENDED]: 'ended',
+              [YT.PlayerState.PLAYING]: 'playing',
+              [YT.PlayerState.PAUSED]: 'paused',
+              [YT.PlayerState.BUFFERING]: 'buffering',
+              [YT.PlayerState.CUED]: 'cued',
+            }: { [number]: State })[data];
+            setState(state);
+            onStateChange(state);
           },
         },
       });
@@ -96,12 +78,60 @@ const YouTubePlayer = ({
     return () => ytReady(() => player && player.destroy());
   }, [videoId]);
 
+  // synchronise player time with seconds prop
   React.useEffect(() => {
-    if (!player || seconds === 0 || seconds === prevSeconds) {
+    if (!player) {
       return;
     }
-    player.seekTo(seconds, true);
+
+    if (seconds >= start && seconds <= end) {
+      if (seconds !== prevSeconds && seconds !== 0) {
+        player.seekTo(seconds, true);
+      }
+    } else {
+      player.seekTo(start, true);
+    }
   }, [player, seconds]);
+
+  // broadcast current player time as it changes
+  React.useEffect(() => {
+    if (!player) {
+      return;
+    }
+
+    const checkCurrentTime = () => {
+      const time = player.getCurrentTime();
+      setPrevSeconds(time);
+      onSecondsChange(time);
+    };
+
+    checkCurrentTime();
+
+    let interval: IntervalID | void;
+    switch (state) {
+      case 'buffering':
+      case 'playing':
+        interval = setInterval(checkCurrentTime, 300);
+        break;
+
+      default:
+    }
+
+    return () => clearInterval(interval);
+  }, [player, state]);
+
+  // allow playing/pausing video using the playing prop
+  React.useEffect(() => {
+    if (!player) {
+      return;
+    }
+
+    if (playing) {
+      player.playVideo();
+    } else {
+      player.pauseVideo();
+    }
+  }, [player, playing]);
 
   return <div ref={ref} />;
 };
@@ -109,12 +139,9 @@ const YouTubePlayer = ({
 YouTubePlayer.defaultProps = {
   onReady: () => {},
   onStateChange: () => {},
-  onSecondsChange: () => {},
-  seconds: 0,
   autoplay: true,
   controls: true,
-  start: 0,
-  end: 0,
+  playing: false,
 };
 
 export default YouTubePlayer;
