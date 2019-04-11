@@ -36,7 +36,6 @@ const YouTubePlayer = ({
 }) => {
   const [player, setPlayer] = React.useState((undefined: Object | void));
   const [state, setState] = React.useState(('unstarted': State));
-  const [prevSeconds, setPrevSeconds] = React.useState((undefined: number | void));
 
   const ref = React.createRef();
   React.useEffect(() => {
@@ -51,6 +50,8 @@ const YouTubePlayer = ({
           fs: 0, // disable full screen mode
           modestbranding: 1,
           autoplay: Number(autoplay),
+          start,
+          end,
         },
         events: {
           onReady: () => {
@@ -78,47 +79,47 @@ const YouTubePlayer = ({
     return () => ytReady(() => player && player.destroy());
   }, [videoId]);
 
+  const [prevTime, setPrevTime] = React.useState((undefined: number | void));
+
   // synchronise player time with seconds prop
   React.useEffect(() => {
     if (!player) {
       return;
     }
 
-    if (seconds >= start && seconds <= end) {
-      if (seconds !== prevSeconds && seconds !== 0) {
-        player.seekTo(seconds, true);
-      }
-    } else {
-      player.seekTo(start, true);
-    }
-  }, [player, seconds]);
-
-  // broadcast current player time as it changes
-  React.useEffect(() => {
-    if (!player) {
+    // video has just loaded
+    if (player.getCurrentTime() === 0) {
       return;
     }
 
-    const checkCurrentTime = () => {
-      const time = player.getCurrentTime();
-      setPrevSeconds(time);
-      onSecondsChange(time);
-    };
-
-    checkCurrentTime();
-
-    let interval: IntervalID | void;
-    switch (state) {
-      case 'buffering':
-      case 'playing':
-        interval = setInterval(checkCurrentTime, 300);
-        break;
-
-      default:
+    // seconds updated by the player itself
+    if (seconds === prevTime) {
+      return;
     }
 
-    return () => clearInterval(interval);
-  }, [player, state]);
+    player.seekTo(seconds, true);
+  }, [player, seconds]);
+
+  // broadcast current player time as it changes
+  const [counter, setCounter] = React.useState(0);
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      setCounter(counter + 1); // make sure effect runs again
+
+      if (!player) {
+        return;
+      }
+
+      if (state !== 'playing' && state !== 'buffering') {
+        return;
+      }
+
+      const time = player.getCurrentTime();
+      setPrevTime(time);
+      onSecondsChange(time);
+    }, 200);
+    return () => clearTimeout(timeout);
+  }, [counter]);
 
   // allow playing/pausing video using the playing prop
   React.useEffect(() => {

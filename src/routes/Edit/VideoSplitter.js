@@ -21,7 +21,6 @@ const VideoSplitter = ({
   segmentColors: Array<string>,
   minSegmentDuration: number,
 }) => {
-  const [seconds, setSeconds] = React.useState(0);
   const [segments, setSegments] = React.useState(video.segments);
   invariant(segments.length > 0, 'at least one segment required');
   invariant(index >= 0, 'negative index');
@@ -46,10 +45,8 @@ const VideoSplitter = ({
             <components.YouTubePlayerWithControls
               duration={video.data.duration}
               end={segments[index].end}
-              seconds={seconds}
               start={segments[index].start}
               videoId={video.data.id}
-              onSecondsChange={setSeconds}
             />
           </Grid.Column>
           <Grid.Column width={5} style={{ height: '100%', padding: 0 }}>
@@ -129,7 +126,6 @@ const VideoSplitter = ({
               <components.Slider
                 key={segments.length} // causes slider recreation on segments count change
                 range={{ min: 0, max: duration }}
-                onHandleUpdate={(i, value) => setSeconds(value)}
                 onHandleSet={(i, value) => updateSegmentAt(i, { end: value })}
                 start={segments.slice(0, -1).map(({ end }) => end)}
                 colors={segmentColors}
@@ -141,7 +137,7 @@ const VideoSplitter = ({
           </Grid.Column>
         </Grid.Row>
         <Grid.Row>
-          <Grid.Column verticalAlign="middle" width={3}>
+          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
             Title
           </Grid.Column>
           <Grid.Column width={7}>

@@ -7,48 +7,58 @@ import * as React from 'react';
 const YouTubePlayerWithControls = ({
   videoId,
   duration,
-  seconds,
   autoplay,
   controls,
   start,
   end,
-  onSecondsChange,
 }: {
   videoId: string,
   duration: number,
-  seconds: number,
   autoplay: boolean,
   controls: boolean,
   start: number,
   end: number,
-  onSecondsChange: number => void,
 }) => {
+  const [seconds, setSeconds] = React.useState(start);
   // eslint-disable-next-line no-unused-vars
   const [state, setState] = React.useState(('unstarted': components.YouTubePlayerState));
-  const [playing, setPlaying] = React.useState((false: boolean));
-  if (state === 'playing' && !playing) {
-    setPlaying(true);
-  }
-  if (state === 'paused' && playing) {
-    setPlaying(false);
-  }
+  const [playing, setPlaying] = React.useState(autoplay);
 
   return (
     <div>
-      <components.YouTubePlayer
-        {...{ videoId, seconds, autoplay, start, end, playing }}
-        controls={false}
-        onStateChange={setState}
-        onSecondsChange={onSecondsChange}
-      />
+      <div key={`${start}-${end}`}>
+        <components.YouTubePlayer
+          {...{ videoId, seconds, autoplay, start, end, playing }}
+          controls={false}
+          onStateChange={state => {
+            setState(state);
+            switch (state) {
+              case 'playing':
+                setPlaying(true);
+                break;
+
+              case 'paused':
+              case 'ended':
+                setPlaying(false);
+                break;
+
+              default:
+            }
+          }}
+          onSecondsChange={setSeconds}
+        />
+      </div>
       {controls && (
         <div>
-          <Button circular icon={playing ? 'pause' : 'play'} onClick={() => setPlaying(!playing)} />
+          <Button.Group>
+            <Button icon={playing ? 'pause' : 'play'} onClick={() => setPlaying(!playing)} />
+            <Button icon="undo" onClick={() => setSeconds(start)} />
+          </Button.Group>
           <components.Slider
             start={[seconds]}
             range={{ min: start, max: end }}
             width={640}
-            onHandleUpdate={(i, value) => onSecondsChange(value)}
+            onHandleUpdate={(i, value) => setSeconds(value)}
           />
         </div>
       )}
