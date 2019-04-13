@@ -40,7 +40,7 @@ const VideoSplitter = ({
   return (
     <div style={{ width: 1012 }}>
       <Grid>
-        <Grid.Row style={{ height: 390 }}>
+        <Grid.Row style={{ height: 420 }}>
           <Grid.Column width={11} style={{ padding: 0 }}>
             <components.YouTubePlayerWithControls
               duration={video.data.duration}
@@ -94,9 +94,12 @@ const VideoSplitter = ({
               </Button>
               <Button
                 color="red"
-                disabled={segments.length === 1}
+                disabled={index !== segments.length - 1 || segments.length === 1}
                 onClick={() => {
-                  // TODO only allow if last segment is being edited
+                  // only allow if last segment is being edited
+                  if (index !== segments.length - 1 || segments.length === 1) {
+                    return;
+                  }
                   const newSegments = segments.slice(0, -1);
                   Object.assign(newSegments[newSegments.length - 1], {
                     end: duration,

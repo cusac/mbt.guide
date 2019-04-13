@@ -1,8 +1,8 @@
 // @flow
 
-import * as React from 'react';
+import * as components from 'components';
 import * as hooks from 'hooks';
-import YouTubePlayer from 'components/YouTubePlayer';
+import * as React from 'react';
 
 const Watch = ({ videoId, segmentIndex }: { videoId: string, segmentIndex: number }) => {
   const video = hooks.useVideo(videoId);
@@ -19,7 +19,13 @@ const Watch = ({ videoId, segmentIndex }: { videoId: string, segmentIndex: numbe
   return (
     <div>
       <h1 style={{ color: 'white' }}>{segment.title}</h1>
-      <YouTubePlayer {...{ videoId, start, end }} />
+      <components.YouTubePlayerWithControls
+        {...{ videoId, start, end }}
+        autoplay
+        duration={video.data.duration}
+        end={segment.end}
+        start={segment.start}
+      />
     </div>
   );
 };

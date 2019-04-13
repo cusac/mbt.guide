@@ -86,6 +86,11 @@ export default class Video {
     return () => unsubs.forEach(fn => fn());
   }
 
+  static async getSegments(): Promise<Array<db.VideoSegment>> {
+    const videoSegments = await db.videoSegments.get();
+    return videoSegments.docs.map(doc => doc.data());
+  }
+
   constructor(dbSnapshot: DbSnapshot) {
     this._dbSnapshot = dbSnapshot;
 
