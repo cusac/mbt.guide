@@ -1,13 +1,12 @@
 // @flow
 
 import * as React from 'react';
-import { auth, firebase, firebaseui } from 'services';
+import { authUI, firebase } from 'services';
 
 const Auth = () => {
   const ref = React.createRef();
   React.useEffect(() => {
-    const ui = new firebaseui.auth.AuthUI(auth);
-    ui.start(ref.current, {
+    authUI.start(ref.current, {
       callbacks: {
         signInSuccessWithAuthResult: () => false,
       },

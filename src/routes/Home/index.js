@@ -1,17 +1,16 @@
 // @flow
 
-import { auth } from 'services';
-import { Link } from 'react-router-dom';
 import * as components from 'components';
 import * as data from 'data';
 import * as db from 'services/db';
 import * as React from 'react';
+import * as services from 'services';
 
 import Auth from './Auth';
 
 import logo from './logo-wide.png';
 
-const { Button } = components;
+const { Button, Link } = components;
 
 const Home = () => {
   const [error, setError] = React.useState();
@@ -27,7 +26,7 @@ const Home = () => {
     return <div>Loading segments</div>;
   }
 
-  const user = auth.currentUser;
+  const user = services.auth.currentUser;
 
   return (
     <div>
@@ -44,7 +43,7 @@ const Home = () => {
       {user ? (
         <div>
           Welcome {user.email}!<br />
-          <Button onClick={() => auth.signOut()} style={{ margin: 5 }}>
+          <Button onClick={() => services.auth.signOut()} style={{ margin: 5 }}>
             Sign out
           </Button>
           <br />

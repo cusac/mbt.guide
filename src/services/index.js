@@ -16,7 +16,8 @@ const app = firebase.initializeApp({
 
 const auth = app.auth();
 const db = app.firestore();
+const authUI = new firebaseui.auth.AuthUI(auth);
 
-export { auth, db, firebase, firebaseui };
+export { auth, authUI, db, firebase, firebaseui };
 
 export default app;
