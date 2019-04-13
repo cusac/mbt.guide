@@ -36,6 +36,8 @@ export default class Video {
       }
       const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
 
+      const segmentId = Video.getSegmentId(id, 0);
+
       transaction
         .set(
           videoRef,
@@ -46,9 +48,9 @@ export default class Video {
           }: db.Video)
         )
         .set(
-          db.videoSegments.doc(`${id}0`),
+          db.videoSegments.doc(segmentId),
           ({
-            id: `${id}0`,
+            id: segmentId,
             videoId: id,
             index: 0,
             title: 'Segment title',
@@ -89,6 +91,18 @@ export default class Video {
   static async getSegments(): Promise<Array<db.VideoSegment>> {
     const videoSegments = await db.videoSegments.get();
     return videoSegments.docs.map(doc => doc.data());
+  }
+
+  static getSegmentId(videoId: string, index: number): string {
+    invariant(index < 32, 'index must be less than 32');
+    return `${videoId}${index.toString(32)}`;
+  }
+
+  static parseSegmentId(id: string): [string, number] {
+    invariant(id.length > 1, 'id too short');
+    const [videoId, index] = [id.slice(0, -1), parseInt(id.slice(-1), 32)];
+    invariant(Video.getSegmentId(videoId, index) === id, 'invalid id');
+    return [videoId, index];
   }
 
   constructor(dbSnapshot: DbSnapshot) {

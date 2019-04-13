@@ -1,5 +1,7 @@
 // @flow
 
+export { Button, Grid, Icon, Input, Segment } from 'semantic-ui-react';
+
 export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as Slider } from './Slider';
 export { default as YouTubePlayer } from './YouTubePlayer';

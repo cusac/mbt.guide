@@ -1,12 +1,13 @@
 // @flow
 
-import { Button, Icon } from 'semantic-ui-react';
 import * as components from 'components';
 import * as data from 'data';
 import * as errors from 'errors';
 import * as React from 'react';
 
 import Editor from './Editor';
+
+const { Button, Icon } = components;
 
 const Edit = ({ videoId, index }: { videoId: string, index: number }) => (
   <components.ErrorBoundary

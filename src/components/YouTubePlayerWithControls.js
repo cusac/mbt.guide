@@ -1,8 +1,9 @@
 // @flow
 
-import { Button } from 'semantic-ui-react';
 import * as components from 'components';
 import * as React from 'react';
+
+const { Button } = components;
 
 const YouTubePlayerWithControls = ({
   videoId,

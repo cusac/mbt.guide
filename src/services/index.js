@@ -1,6 +1,8 @@
 // @flow
 
 import * as firebase from 'firebase/app';
+import firebaseui from 'firebaseui';
+import 'firebase/auth';
 import 'firebase/firestore';
 
 const app = firebase.initializeApp({
@@ -12,8 +14,9 @@ const app = firebase.initializeApp({
   messagingSenderId: '634656320956',
 });
 
+const auth = app.auth();
 const db = app.firestore();
 
-export { db };
+export { auth, db, firebase, firebaseui };
 
 export default app;

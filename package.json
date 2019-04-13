@@ -30,6 +30,7 @@
   ],
   "dependencies": {
     "firebase": "^5.9.1",
+    "firebaseui": "^3.5.2",
     "invariant": "^2.2.4",
     "luxon": "^1.12.0",
     "nouislider": "^13.1.3",

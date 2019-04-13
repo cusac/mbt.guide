@@ -1,6 +1,5 @@
 // @flow
 
-import { Button, Grid, Icon, Input, Segment } from 'semantic-ui-react';
 import * as components from 'components';
 import * as data from 'data';
 import * as db from 'services/db';
@@ -9,6 +8,8 @@ import * as utils from 'utils';
 import invariant from 'invariant';
 
 import VideoSegment from './VideoSegment';
+
+const { Button, Grid, Icon, Input, Segment } = components;
 
 const VideoSplitter = ({
   video,
@@ -80,7 +81,7 @@ const VideoSplitter = ({
                     end: lastEnd,
                   });
                   newSegments.push({
-                    id: `${video.data.id}${newSegments.length}`,
+                    id: data.Video.getSegmentId(video.data.id, newSegments.length),
                     videoId: video.data.id,
                     index: newSegments.length,
                     start: lastEnd,
@@ -109,7 +110,17 @@ const VideoSplitter = ({
               >
                 <Icon name="trash alternate outline" /> Remove
               </Button>
-              <Button color="green" onClick={() => video.updateSegments(segments)}>
+              <Button
+                color="green"
+                onClick={async () => {
+                  try {
+                    await video.updateSegments(segments);
+                    alert('OK!');
+                  } catch (e) {
+                    alert(String(e));
+                  }
+                }}
+              >
                 <Icon name="save" /> Save
               </Button>
             </Button.Group>

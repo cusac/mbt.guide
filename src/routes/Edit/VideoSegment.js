@@ -1,9 +1,11 @@
 // @flow
 
-import { Button, Grid, Segment } from 'semantic-ui-react';
+import * as components from 'components';
 import * as db from 'services/db';
 import * as React from 'react';
 import * as utils from 'utils';
+
+const { Button, Grid, Segment } = components;
 
 const VideoSegment = ({
   active,
@@ -23,7 +25,7 @@ const VideoSegment = ({
           <Grid.Column verticalAlign="middle" width={3}>
             <Button active={active} circular icon="edit" onClick={() => onSelect()} />
           </Grid.Column>
-          <Grid.Column width={13}>
+          <Grid.Column width={13} style={{ color: 'black' }}>
             {utils.timeFormat.to(start)} -> {utils.timeFormat.to(end)}
             <br />
             {title}

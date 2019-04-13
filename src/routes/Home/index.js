@@ -1,9 +1,17 @@
 // @flow
 
+import { auth } from 'services';
 import { Link } from 'react-router-dom';
+import * as components from 'components';
 import * as data from 'data';
 import * as db from 'services/db';
 import * as React from 'react';
+
+import Auth from './Auth';
+
+import logo from './logo-wide.png';
+
+const { Button } = components;
 
 const Home = () => {
   const [error, setError] = React.useState();
@@ -19,21 +27,32 @@ const Home = () => {
     return <div>Loading segments</div>;
   }
 
+  const user = auth.currentUser;
+
   return (
     <div>
-      <h3 style={{ color: 'white' }}>My Big TOE guide</h3>
-      <br />
+      <img src={logo} alt="My Big TOE guide" style={{ width: '30%' }} />
+      {/* <h3 style={{ color: 'white' }}>My Big TOE guide</h3> */}
       {segments.map(segment => (
         <div key={segment.id} style={{ marginBottom: 5 }}>
-          <Link
-            to={`/watch/${segment.title.replace(/ /g, '-')}/${segment.videoId}/${segment.index}`}
-          >
+          <Link to={`/watch/${segment.title.replace(/ /g, '-')}/${segment.id}`}>
             {segment.title}
           </Link>
         </div>
       ))}
       <hr />
-      <Link to={`/edit/k0aLELfo9ws`}>Edit sample video</Link>
+      {user ? (
+        <div>
+          Welcome {user.email}!<br />
+          <Button onClick={() => auth.signOut()} style={{ margin: 5 }}>
+            Sign out
+          </Button>
+          <br />
+          <Link to={`/edit/k0aLELfo9ws`}>Edit sample video</Link>
+        </div>
+      ) : (
+        <Auth />
+      )}
     </div>
   );
 };
