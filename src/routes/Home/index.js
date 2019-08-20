@@ -34,9 +34,7 @@ const Home = () => {
       {/* <h3 style={{ color: 'white' }}>My Big TOE guide</h3> */}
       {segments.map(segment => (
         <div key={segment.id} style={{ marginBottom: 5 }}>
-          <Link to={`/watch/${segment.title.replace(/ /g, '-')}/${segment.id}`}>
-            {segment.title}
-          </Link>
+          <Link to={`/watch/${segment.videoId}/${segment.id}`}>{segment.title}</Link>
         </div>
       ))}
       <hr />

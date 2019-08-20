@@ -9,7 +9,7 @@ import Editor from './Editor';
 
 const { Button, Icon } = components;
 
-const Edit = ({ videoId, index }: { videoId: string, index: number }) => (
+const Edit = ({ videoId, segmentId }: { videoId: string, segmentId: string }) => (
   <components.ErrorBoundary
     onError={(error, done) =>
       error instanceof errors.MissingVideoError && (
@@ -24,7 +24,7 @@ const Edit = ({ videoId, index }: { videoId: string, index: number }) => (
       )
     }
   >
-    <Editor {...{ videoId, index }} />
+    <Editor {...{ videoId, segmentId }} />
   </components.ErrorBoundary>
 );
 

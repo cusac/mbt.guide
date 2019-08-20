@@ -8,19 +8,16 @@ import VideoSplitter from './VideoSplitter';
 const segmentColors = ['orange', 'green', 'yellow', 'blue', 'red', 'purple'];
 const minSegmentDuration = 5;
 
-const Editor = ({ videoId, index }: { videoId: string, index: number }) => {
+const Editor = ({ videoId, segmentId }: { videoId: string, segmentId: string }) => {
   const video = hooks.useVideo(videoId);
+
+  console.log('EDIT SEG ID:', segmentId);
 
   if (!video) {
     return <div>Loading video data</div>;
   }
 
-  return (
-    <VideoSplitter
-      index={Math.min(index, video.segments.length - 1)}
-      {...{ video, segmentColors, minSegmentDuration }}
-    />
-  );
+  return <VideoSplitter {...{ segmentId, video, segmentColors, minSegmentDuration }} />;
 };
 
 export default Editor;
