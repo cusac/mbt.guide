@@ -12,7 +12,7 @@ import { v4 as uuid } from 'uuid';
 
 import VideoSegment from './VideoSegment';
 
-const { Button, Grid, Icon, Input, Segment } = components;
+const { Button, Grid, Icon, Input, Segment, Form, TextArea } = components;
 
 const VideoSplitter = ({
   video,
@@ -44,6 +44,7 @@ const VideoSplitter = ({
       end: duration - 300,
       title: 'New segment title',
       tags: [],
+      description: '',
     });
     setSegments(newSegments);
     utils.history.push(`/edit/${video.data.id}/${newId}`);
@@ -149,6 +150,20 @@ const VideoSplitter = ({
               value={segments[index].title}
               onChange={(event, { value }) => updateSegmentAt(index, { title: value })}
             />
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
+            Description
+          </Grid.Column>
+          <Grid.Column width={13}>
+            <Form>
+              <TextArea
+                placeholder="Enter a description"
+                value={segments[index].description}
+                onChange={(event, { value }) => updateSegmentAt(index, { description: value })}
+              />
+            </Form>
           </Grid.Column>
         </Grid.Row>
         <Grid.Row>

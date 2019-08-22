@@ -56,6 +56,8 @@ export default class Video {
             title: 'Segment title',
             start: 300,
             end: duration - 300,
+            tags: [],
+            description: '',
           }: db.VideoSegment)
         );
     });
