@@ -5,6 +5,8 @@ import * as data from 'data';
 import * as db from 'services/db';
 import * as React from 'react';
 import * as utils from 'utils';
+import TagsInput from 'react-tagsinput';
+import 'react-tagsinput/react-tagsinput.css';
 import invariant from 'invariant';
 import { v4 as uuid } from 'uuid';
 
@@ -41,6 +43,7 @@ const VideoSplitter = ({
       start: 300,
       end: duration - 300,
       title: 'New segment title',
+      tags: [],
     });
     setSegments(newSegments);
     utils.history.push(`/edit/${video.data.id}/${newId}`);
@@ -66,6 +69,7 @@ const VideoSplitter = ({
     utils.history.push(`/edit/${video.data.id}/${segments[0].id}`);
     return <div />;
   }
+
   const index = segments.indexOf(segment);
   const { duration } = video.data;
 
@@ -144,6 +148,17 @@ const VideoSplitter = ({
               placeholder="Title"
               value={segments[index].title}
               onChange={(event, { value }) => updateSegmentAt(index, { title: value })}
+            />
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
+            Tags
+          </Grid.Column>
+          <Grid.Column width={13}>
+            <TagsInput
+              value={segments[index].tags}
+              onChange={tags => updateSegmentAt(index, { tags })}
             />
           </Grid.Column>
         </Grid.Row>
