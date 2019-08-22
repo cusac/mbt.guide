@@ -19,12 +19,9 @@ export default class Video {
    * Creates data for video with given id based on YouTube content
    */
   static async create(id: string): Promise<void> {
-    console.log('CREATE:', id);
     return db.default.runTransaction(async transaction => {
       const videoRef = db.videos.doc(id);
-      console.log('GETTING VID DOC', videoRef);
       const videoDoc = await transaction.get(videoRef);
-      console.log('GOT VID DOC:', videoDoc);
 
       if (videoDoc.exists) {
         transaction.update(videoRef, {}); // dummy update as required by transactions
@@ -40,7 +37,6 @@ export default class Video {
       }
       const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
 
-      // const segmentId = Video.getSegmentId(id);
       const segmentId = uuid();
 
       transaction
@@ -66,10 +62,8 @@ export default class Video {
   }
 
   static subscribe(id: string, onChange: Video => void, onError: any => void): () => void {
-    console.log('SUBSCRIBE:', db.videos.doc(id));
     const dbSnapshot = {};
     const cb = (dbs: DbSnapshot) => {
-      console.log('DBS:', dbs);
       const { videos, videoSegments } = Object.assign(dbSnapshot, dbs);
       if (!videos || !videoSegments) {
         return; // still loading data

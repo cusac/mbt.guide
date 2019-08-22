@@ -26,24 +26,47 @@ const VideoSplitter = ({
   const [segments, setSegments] = React.useState(video.segments);
   invariant(segments.length > 0, 'at least one segment required');
 
-  const updateSegmentAt = (i, data: $Shape<db.VideoSegment>) => {
+  const updateSegmentAt = (index, data: $Shape<db.VideoSegment>) => {
     const newSegments = segments.slice();
-    console.log('NEW SEGS:', newSegments);
-    console.log('Data:', data);
-    Object.assign(newSegments[i], data);
-    if ('end' in data && i + 1 < newSegments.length) {
-      Object.assign(newSegments[i + 1], { start: data.end });
-    }
+    Object.assign(newSegments[index], data);
     setSegments(newSegments);
   };
 
-  //TODO: Create segment if segmentId doesn't exist? (REF ORIG CODE)
-  console.log('SEG ID:', segmentId);
-  console.log('SEGMENTS:', segments);
-  const segment = segments.find(s => s.id === segmentId);
-  invariant(segment, 'segment not found');
-  const index = segments.indexOf(segment);
+  const addSegment = () => {
+    const newSegments = segments.slice();
+    const newId = uuid();
+    newSegments.push({
+      id: newId,
+      videoId: video.data.id,
+      start: 300,
+      end: duration - 300,
+      title: 'New segment title',
+    });
+    setSegments(newSegments);
+    utils.history.push(`/edit/${video.data.id}/${newId}`);
+  };
 
+  const removeSegment = () => {
+    const newSegments = segments.filter(s => s !== segment);
+    setSegments(newSegments);
+    utils.history.push(`/edit/${video.data.id}/${segments[0].id}`);
+  };
+
+  const saveChanges = async () => {
+    try {
+      await video.updateSegments(segments);
+      alert('Changes saved!');
+    } catch (e) {
+      alert(String(e));
+    }
+  };
+
+  const segment = segments.find(s => s.id === segmentId);
+  if (!segment) {
+    utils.history.push(`/edit/${video.data.id}/${segments[0].id}`);
+    return <div />;
+  }
+  const index = segments.indexOf(segment);
   const { duration } = video.data;
 
   return (
@@ -61,12 +84,12 @@ const VideoSplitter = ({
           <Grid.Column width={5} style={{ height: '100%', padding: 0 }}>
             <Segment attached style={{ height: '100%', overflowY: 'auto' }}>
               <Segment.Group>
-                {segments.map(data => (
+                {segments.map((data, i) => (
                   <VideoSegment
                     key={data.id}
                     active={data.id === segmentId}
                     data={data}
-                    color={segmentColors[0]}
+                    color={segmentColors[i % segmentColors.length]}
                     onSelect={() => utils.history.push(`/edit/${video.data.id}/${data.id}`)}
                   />
                 ))}
@@ -77,52 +100,17 @@ const VideoSplitter = ({
                 disabled={
                   !(
                     segments.length === 1 ||
-                    segments[segments.length - 2].end + 2 * minSegmentDuration <= duration
+                    segments[segments.length - 1].end + 2 * minSegmentDuration <= duration
                   )
                 }
-                onClick={() => {
-                  const newSegments = segments.slice();
-                  const prevEnd =
-                    newSegments.length === 1 ? 0 : newSegments[newSegments.length - 2].end;
-                  const lastEnd = Math.round((prevEnd + duration) / 2);
-                  Object.assign(newSegments[newSegments.length - 1], {
-                    end: lastEnd,
-                  });
-                  newSegments.push({
-                    id: uuid(),
-                    videoId: video.data.id,
-                    start: lastEnd,
-                    end: duration,
-                    title: 'New segment title',
-                  });
-                  setSegments(newSegments);
-                }}
+                onClick={addSegment}
               >
                 <Icon name="add" /> Add
               </Button>
-              <Button
-                color="red"
-                onClick={() => {
-                  const newSegments = segments.slice(0, -1);
-                  Object.assign(newSegments[newSegments.length - 1], {
-                    end: duration,
-                  });
-                  setSegments(newSegments);
-                }}
-              >
+              <Button disabled={segments.length <= 1} color="red" onClick={removeSegment}>
                 <Icon name="trash alternate outline" /> Remove
               </Button>
-              <Button
-                color="green"
-                onClick={async () => {
-                  try {
-                    await video.updateSegments(segments);
-                    alert('OK!');
-                  } catch (e) {
-                    alert(String(e));
-                  }
-                }}
-              >
+              <Button color="green" onClick={saveChanges}>
                 <Icon name="save" /> Save
               </Button>
             </Button.Group>
@@ -142,9 +130,11 @@ const VideoSplitter = ({
               <components.Slider
                 key={segments.length} // causes slider recreation on segments count change
                 range={{ min: 0, max: duration }}
-                onHandleSet={(i, value) => updateSegmentAt(i, { end: value })}
-                start={segments.slice(0, -1).map(({ end }) => end)}
-                colors={segmentColors}
+                onHandleSet={(i, value) =>
+                  updateSegmentAt(index, i ? { end: value } : { start: value })
+                }
+                start={[segment.start, segment.end]}
+                colors={[segmentColors[index % segmentColors.length]]}
                 margin={minSegmentDuration}
                 width={900} // TODO make dependant on video duration
                 pips

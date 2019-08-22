@@ -11,8 +11,6 @@ const minSegmentDuration = 5;
 const Editor = ({ videoId, segmentId }: { videoId: string, segmentId: string }) => {
   const video = hooks.useVideo(videoId);
 
-  console.log('EDIT SEG ID:', segmentId);
-
   if (!video) {
     return <div>Loading video data</div>;
   }

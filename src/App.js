@@ -26,8 +26,6 @@ const App = () => {
               render={props => {
                 const { videoId } = props.match.params;
                 const { segmentId } = props.match.params;
-                console.log('PROPS:', props);
-                console.log('SEG FROM PROPS:', segmentId);
                 return <routes.Edit {...props} {...{ videoId, segmentId }} />;
               }}
             />
