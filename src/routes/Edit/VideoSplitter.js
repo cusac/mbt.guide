@@ -96,15 +96,7 @@ const VideoSplitter = ({
               </Segment.Group>
             </Segment>
             <Button.Group attached="bottom">
-              <Button
-                disabled={
-                  !(
-                    segments.length === 1 ||
-                    segments[segments.length - 1].end + 2 * minSegmentDuration <= duration
-                  )
-                }
-                onClick={addSegment}
-              >
+              <Button onClick={addSegment}>
                 <Icon name="add" /> Add
               </Button>
               <Button disabled={segments.length <= 1} color="red" onClick={removeSegment}>

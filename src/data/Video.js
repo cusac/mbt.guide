@@ -54,8 +54,8 @@ export default class Video {
             id: segmentId,
             videoId: id,
             title: 'Segment title',
-            start: 0,
-            end: duration,
+            start: 300,
+            end: duration - 300,
           }: db.VideoSegment)
         );
     });
