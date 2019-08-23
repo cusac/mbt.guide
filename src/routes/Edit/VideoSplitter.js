@@ -5,6 +5,7 @@ import * as data from 'data';
 import * as db from 'services/db';
 import * as React from 'react';
 import * as utils from 'utils';
+import * as services from 'services';
 import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
 import invariant from 'invariant';
@@ -28,6 +29,8 @@ const VideoSplitter = ({
   const [segments, setSegments] = React.useState(video.segments);
   invariant(segments.length > 0, 'at least one segment required');
 
+  const user = services.auth.currentUser;
+
   const updateSegmentAt = (index, data: $Shape<db.VideoSegment>) => {
     const newSegments = segments.slice();
     Object.assign(newSegments[index], data);
@@ -45,6 +48,7 @@ const VideoSplitter = ({
       title: 'New segment title',
       tags: [],
       description: '',
+      createdBy: user.email,
     });
     setSegments(newSegments);
     utils.history.push(`/edit/${video.data.id}/${newId}`);
@@ -104,7 +108,11 @@ const VideoSplitter = ({
               <Button onClick={addSegment}>
                 <Icon name="add" /> Add
               </Button>
-              <Button disabled={segments.length <= 1} color="red" onClick={removeSegment}>
+              <Button
+                disabled={segments.length <= 1 || !user || user.email !== segment.createdBy}
+                color="red"
+                onClick={removeSegment}
+              >
                 <Icon name="trash alternate outline" /> Remove
               </Button>
               <Button color="green" onClick={saveChanges}>
@@ -125,6 +133,7 @@ const VideoSplitter = ({
               }}
             >
               <components.Slider
+                disabled={!user || user.email !== segment.createdBy}
                 key={segments.length} // causes slider recreation on segments count change
                 range={{ min: 0, max: duration }}
                 onHandleSet={(i, value) =>
@@ -141,10 +150,19 @@ const VideoSplitter = ({
         </Grid.Row>
         <Grid.Row>
           <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
+            Owner
+          </Grid.Column>
+          <Grid.Column width={7}>
+            <Input disabled={true} fluid value={segment.createdBy} />
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
             Title
           </Grid.Column>
           <Grid.Column width={7}>
             <Input
+              disabled={!user || user.email !== segment.createdBy}
               fluid
               placeholder="Title"
               value={segments[index].title}
@@ -159,6 +177,7 @@ const VideoSplitter = ({
           <Grid.Column width={13}>
             <Form>
               <TextArea
+                disabled={!user || user.email !== segment.createdBy}
                 placeholder="Enter a description"
                 value={segments[index].description}
                 onChange={(event, { value }) => updateSegmentAt(index, { description: value })}
@@ -172,6 +191,7 @@ const VideoSplitter = ({
           </Grid.Column>
           <Grid.Column width={13}>
             <TagsInput
+              disabled={!user || user.email !== segment.createdBy}
               value={segments[index].tags}
               onChange={tags => updateSegmentAt(index, { tags })}
             />

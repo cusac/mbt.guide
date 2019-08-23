@@ -4,6 +4,7 @@ import { db } from '..';
 
 export type VideoSegment = {|
   id: string,
+  createdBy: string,
   videoId: string,
   title: string,
   start: number,
