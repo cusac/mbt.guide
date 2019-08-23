@@ -56,6 +56,7 @@ const Slider = ({
   }, []);
 
   React.useEffect(() => slider && slider.updateOptions({ start }), [slider, ...start]);
+  React.useEffect(() => slider && slider.updateOptions({ range }), [slider, range.min, range.max]);
   React.useEffect(
     () =>
       slider &&
