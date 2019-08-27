@@ -2,6 +2,7 @@
 
 import * as components from 'components';
 import * as data from 'data';
+import * as utils from 'utils';
 import * as db from 'services/db';
 import * as React from 'react';
 import * as services from 'services';
@@ -13,7 +14,7 @@ import logo from './logo-wide.png';
 
 const { Button, Link, Grid, Searchbar, VideoList, List } = components;
 
-const Home = () => {
+const Home = ({ videoId }: { videoId: string }) => {
   const [error, setError] = React.useState();
   const [segments, setSegments] = React.useState((undefined: Array<db.VideoSegment> | void));
   const [mySegments, setMySegments] = React.useState((undefined: Array<db.VideoSegment> | void));
@@ -25,10 +26,21 @@ const Home = () => {
     services.youtube
       .get('/search', {
         params: {
-          q: 'fire nov',
+          q: '',
         },
       })
       .then(response => setVideos(response.data.items));
+  }, []);
+
+  React.useEffect(() => {
+    videoId &&
+      services.youtube
+        .get('/search', {
+          params: {
+            q: videoId,
+          },
+        })
+        .then(response => setSelectedVideo(response.data.items[0]));
   }, []);
 
   React.useEffect(() => {
@@ -67,6 +79,7 @@ const Home = () => {
 
   const selectVideo = video => {
     setSelectedVideo(video);
+    utils.history.push(`/${video.id.videoId}`);
   };
 
   return (
@@ -118,7 +131,7 @@ const Home = () => {
             {mySegments && mySegments.length && (
               <List divided>
                 {mySegments.map(segment => (
-                  <List.Item>
+                  <List.Item key={segment.id}>
                     <List.Content floated="right">
                       <Link to={`/edit/${segment.videoId}/${segment.id}`}>
                         <Button>Edit</Button>
@@ -138,7 +151,7 @@ const Home = () => {
             {segments && segments.length > 0 ? (
               <List divided>
                 {segments.map(segment => (
-                  <List.Item>
+                  <List.Item key={segment.id}>
                     {/* <Image avatar src="/images/avatar/small/lena.png" /> */}
                     <List.Content verticalAlign="middle" floated="left">
                       <Link to={`/watch/${segment.videoId}/${segment.id}`}>{segment.title}</Link>

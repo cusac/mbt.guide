@@ -20,7 +20,15 @@ const App = () => {
       {/* <header className="App-header"> */}
       <components.ErrorBoundary onError={() => <div>Something went wrong!</div>}>
         <Router history={utils.history}>
-          <Route path="/" exact component={routes.Home} />
+          {/* <Route path="/:videoId?" exact component={routes.Home} /> */}
+          <Route
+            path="/:videoId?"
+            exact
+            render={props => {
+              const { videoId } = props.match.params;
+              return <routes.Home {...props} {...{ videoId }} />;
+            }}
+          />
           <Route
             path="/edit/:videoId/:segmentId?"
             render={props => {
