@@ -12,7 +12,7 @@ import Auth from './Auth';
 
 import logo from './logo-wide.png';
 
-const { Button, Link, Grid, Searchbar, VideoList, List, Header, Icon } = components;
+const { Button, Link, Grid, AppHeader, VideoList, List, Header, Icon } = components;
 
 const Home = ({ videoId }: { videoId: string }) => {
   const [error, setError] = React.useState();
@@ -29,7 +29,10 @@ const Home = ({ videoId }: { videoId: string }) => {
           q: '',
         },
       })
-      .then(response => setVideos(response.data.items));
+      .then(response => {
+        setVideos(response.data.items);
+        !videoId && selectVideo(response.data.items[0]);
+      });
   }, []);
 
   React.useEffect(() => {
@@ -88,32 +91,8 @@ const Home = ({ videoId }: { videoId: string }) => {
 
   return (
     <div>
+      <AppHeader onHandleSubmit={searchVideos} showSearchbar={true} />
       <Grid>
-        {/* Header */}
-        <Grid.Row>
-          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
-            <img src={logo} alt="My Big TOE guide" />
-          </Grid.Column>
-
-          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={8}>
-            <Searchbar onHandleSubmit={searchVideos} />
-          </Grid.Column>
-
-          <Grid.Column verticalAlign="middle" width={4}>
-            {user ? (
-              <div>
-                {user.email}
-                <br />
-                <Button onClick={() => services.auth.signOut()} style={{ margin: 5 }}>
-                  Sign out
-                </Button>
-              </div>
-            ) : (
-              <Auth />
-            )}
-          </Grid.Column>
-        </Grid.Row>
-
         {/* Main */}
         <Grid.Row>
           <Grid.Column style={{ marginLeft: 20 }} width={11}>
@@ -136,7 +115,7 @@ const Home = ({ videoId }: { videoId: string }) => {
               <Icon name="user" />
               <Header.Content>Your Segments</Header.Content>
             </Header>
-            {mySegments && mySegments.length && (
+            {mySegments && mySegments.length > 0 ? (
               <List divided>
                 {mySegments.map(segment => (
                   <List.Item key={segment.id}>
@@ -155,6 +134,13 @@ const Home = ({ videoId }: { videoId: string }) => {
                   </List.Item>
                 ))}
               </List>
+            ) : (
+              selectedVideo && (
+                <div>
+                  You don't have any segments for this video.{' '}
+                  <Link onClick={createVideo}>Try adding one!</Link>
+                </div>
+              )
             )}
 
             <Header as="h2">

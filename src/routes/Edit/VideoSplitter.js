@@ -13,7 +13,7 @@ import { v4 as uuid } from 'uuid';
 
 import VideoSegment from './VideoSegment';
 
-const { Button, Grid, Icon, Input, Segment, Form, TextArea, Link } = components;
+const { Button, Grid, Icon, Input, Segment, Form, TextArea, Link, AppHeader } = components;
 
 const VideoSplitter = ({
   video,
@@ -80,10 +80,11 @@ const VideoSplitter = ({
   const { duration } = video.data;
 
   return (
-    <div style={{ width: 1012 }}>
+    <div>
+      <AppHeader />
       <Grid>
         <Grid.Row style={{ height: 420 }}>
-          <Grid.Column width={11} style={{ padding: 0 }}>
+          <Grid.Column width={10} style={{ padding: 0, marginLeft: 20 }}>
             <components.YouTubePlayerWithControls
               duration={video.data.duration}
               end={segment ? segment.end : video.data.duration}
@@ -205,9 +206,11 @@ const VideoSplitter = ({
           </div>
         ) : (
           <Grid.Row>
-            <Segment>
-              No segments yet. <Link onClick={addSegment}>Add the first one!</Link>
-            </Segment>
+            <Grid.Column verticalAlign="middle" width={16}>
+              <Segment style={{ padding: 10, marginTop: 20 }}>
+                No segments yet. <Link onClick={addSegment}>Add the first one!</Link>
+              </Segment>
+            </Grid.Column>
           </Grid.Row>
         )}
       </Grid>

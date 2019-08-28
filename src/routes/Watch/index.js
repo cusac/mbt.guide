@@ -5,7 +5,7 @@ import * as hooks from 'hooks';
 import * as React from 'react';
 import * as services from 'services';
 
-import { Grid, Input, Link } from 'components';
+import { Grid, Input, Link, AppHeader } from 'components';
 
 const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) => {
   const video = hooks.useVideo(videoId);
@@ -23,6 +23,7 @@ const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) =
   const { start, end } = segment;
   return (
     <div>
+      <AppHeader />
       <h1 style={{ color: 'white' }}>{segment.title}</h1>
       <components.YouTubePlayerWithControls
         {...{ videoId, start, end }}

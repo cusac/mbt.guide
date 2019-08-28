@@ -16,3 +16,7 @@
 .App-link {
   color: #61dafb;
 }
+
+.logo {
+  cursor: pointer;
+}
