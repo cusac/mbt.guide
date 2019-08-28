@@ -28,7 +28,7 @@ const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) =
   const { start, end } = segment;
   return (
     <div>
-      <AppHeader />
+      <AppHeader currentVideoId={videoId} />
       <h1>{segment.title}</h1>
       <components.YouTubePlayerWithControls
         {...{ videoId, start, end }}

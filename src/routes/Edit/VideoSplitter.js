@@ -47,6 +47,8 @@ const VideoSplitter = ({
   }
   const [segments, setSegments] = React.useState(video.segments);
 
+  const { duration } = video.data;
+
   React.useEffect(() => {
     !segmentId && addSegment();
   }, []);
@@ -65,8 +67,8 @@ const VideoSplitter = ({
     newSegments.push({
       id: newId,
       videoId: video.data.id,
-      start: 300,
-      end: duration - 300,
+      start: duration * 0.25,
+      end: duration * 0.75,
       title: 'New segment title',
       tags: [],
       description: '',
@@ -102,11 +104,10 @@ const VideoSplitter = ({
   const owner = segment ? user.email === segment.createdBy : false;
 
   const index = segments.indexOf(segment);
-  const { duration } = video.data;
 
   return (
     <div>
-      <AppHeader />
+      <AppHeader currentVideoId={videoId} />
       <Container style={{ marginTop: 20 }}>
         <Grid>
           <Grid.Row>

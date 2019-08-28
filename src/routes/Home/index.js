@@ -105,7 +105,7 @@ const Home = ({ videoId }: { videoId: string }) => {
       <AppHeader onHandleSubmit={searchVideos} showSearchbar={true} />
       <Grid>
         <Grid.Row>
-          <Grid.Column style={{ marginLeft: 20 }} width={11}>
+          <Grid.Column style={{ marginLeft: 30 }} width={11}>
             {selectedVideo ? (
               <div>
                 <div className="ui embed">
@@ -129,15 +129,29 @@ const Home = ({ videoId }: { videoId: string }) => {
 
             <Divider horizontal>
               <Header as="h2">
-                <Icon name="user" />
+                <Icon name="user" color="blue" />
                 <Header.Content>Your Segments</Header.Content>
               </Header>
             </Divider>
             {mySegments && mySegments.length > 0 ? (
               <Container>
-                <Grid relaxed celled="internally">
+                <Grid celled="internally">
+                  <Grid.Row>
+                    <Grid.Column verticalAlign="middle" width={3}>
+                      <h4>Segment Title</h4>
+                    </Grid.Column>
+                    <Grid.Column width={9}>
+                      <h4>Description</h4>
+                    </Grid.Column>
+                    <Grid.Column width={2}>
+                      <h4>Edit</h4>
+                    </Grid.Column>
+                    <Grid.Column width={2}>
+                      <h4>Watch</h4>
+                    </Grid.Column>
+                  </Grid.Row>
                   {mySegments.map(segment => (
-                    <Grid.Row>
+                    <Grid.Row key={segment.id}>
                       <Grid.Column verticalAlign="middle" width={3}>
                         <Link to={`/watch/${segment.videoId}/${segment.id}`}>{segment.title}</Link>
                       </Grid.Column>
@@ -147,6 +161,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                       <Grid.Column width={2}>
                         <Icon
                           link={true}
+                          style={{ marginLeft: 10 }}
                           size="big"
                           name="edit"
                           color="blue"
@@ -181,15 +196,26 @@ const Home = ({ videoId }: { videoId: string }) => {
 
             <Divider horizontal>
               <Header as="h2">
-                <Icon name="video" />
+                <Icon name="video" color="green" />
                 <Header.Content>All Segments</Header.Content>
               </Header>
             </Divider>
             {segments && segments.length > 0 ? (
               <Container>
                 <Grid celled="internally">
+                  <Grid.Row>
+                    <Grid.Column verticalAlign="middle" width={3}>
+                      <h4>Segment Title</h4>
+                    </Grid.Column>
+                    <Grid.Column width={11}>
+                      <h4>Description</h4>
+                    </Grid.Column>
+                    <Grid.Column width={2}>
+                      <h4>Watch</h4>
+                    </Grid.Column>
+                  </Grid.Row>
                   {segments.map(segment => (
-                    <Grid.Row>
+                    <Grid.Row key={segment.id}>
                       <Grid.Column verticalAlign="middle" width={3}>
                         <Link to={`/watch/${segment.videoId}/${segment.id}`}>{segment.title}</Link>
                       </Grid.Column>
@@ -219,7 +245,7 @@ const Home = ({ videoId }: { videoId: string }) => {
               )
             )}
           </Grid.Column>
-          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
+          <Grid.Column style={{ color: 'white' }} verticalAlign="middle" width={4}>
             <VideoList videos={videos} handleVideoSelect={selectVideo} />
           </Grid.Column>
         </Grid.Row>

@@ -17,15 +17,15 @@ const Searchbar = ({ onHandleSubmit }: { onHandleSubmit: string => void }) => {
     <div className="search-bar ui segment">
       <form onSubmit={handleSubmit} className="ui form">
         <div className="field">
-          <div class="ui icon input">
+          <div className="ui icon input">
             <input
-              class="prompt"
+              className="prompt"
               onChange={handleChange}
               type="text"
               placeholder="Search for MBT videos"
               value={term}
             />
-            <i class="search icon" />
+            <i className="search icon" />
           </div>
         </div>
       </form>
