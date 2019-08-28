@@ -8,10 +8,6 @@ import * as React from 'react';
 import * as services from 'services';
 import * as errors from 'errors';
 
-import Auth from './Auth';
-
-import logo from './logo-wide.png';
-
 const {
   Button,
   Link,
@@ -23,6 +19,7 @@ const {
   Icon,
   Container,
   Divider,
+  Loading,
 } = components;
 
 const Home = ({ videoId }: { videoId: string }) => {
@@ -32,6 +29,11 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [selectedVideo, setSelectedVideo] = React.useState();
   const [videos, setVideos] = React.useState([]);
   const [segmentVideo, setSegmentVideo] = React.useState();
+
+  const selectVideo = video => {
+    setSelectedVideo(video);
+    utils.history.push(`/${video.id.videoId}`);
+  };
 
   React.useEffect(() => {
     services.youtube
@@ -70,11 +72,16 @@ const Home = ({ videoId }: { videoId: string }) => {
   }, [segmentVideo]);
 
   React.useEffect(() => {
-    segments && setMySegments(segments.filter(s => s.createdBy === user.email));
+    segments && setMySegments(segments.filter(s => user && s.createdBy === user.email));
   }, [segments]);
 
-  if (!videos) {
-    return <div>Loading videos...</div>;
+  if (videos.length === 0) {
+    return (
+      <div>
+        <AppHeader showSearchbar={true} />
+        <Loading>Loading videos...</Loading>
+      </div>
+    );
   }
 
   const videoSrc = selectedVideo ? `https://www.youtube.com/embed/${selectedVideo.id.videoId}` : '';
@@ -89,11 +96,6 @@ const Home = ({ videoId }: { videoId: string }) => {
         },
       })
       .then(response => setVideos(response.data.items));
-  };
-
-  const selectVideo = video => {
-    setSelectedVideo(video);
-    utils.history.push(`/${video.id.videoId}`);
   };
 
   const createVideo = () => {
@@ -127,74 +129,80 @@ const Home = ({ videoId }: { videoId: string }) => {
 
             <br />
 
-            <Divider horizontal>
-              <Header as="h2">
-                <Icon name="user" color="blue" />
-                <Header.Content>Your Segments</Header.Content>
-              </Header>
-            </Divider>
-            {mySegments && mySegments.length > 0 ? (
-              <Container>
-                <Grid celled="internally">
-                  <Grid.Row>
-                    <Grid.Column verticalAlign="middle" width={3}>
-                      <h4>Segment Title</h4>
-                    </Grid.Column>
-                    <Grid.Column width={9}>
-                      <h4>Description</h4>
-                    </Grid.Column>
-                    <Grid.Column width={2}>
-                      <h4>Edit</h4>
-                    </Grid.Column>
-                    <Grid.Column width={2}>
-                      <h4>Watch</h4>
-                    </Grid.Column>
-                  </Grid.Row>
-                  {mySegments.map(segment => (
-                    <Grid.Row key={segment.id}>
-                      <Grid.Column verticalAlign="middle" width={3}>
-                        <Link to={`/watch/${segment.videoId}/${segment.id}`}>{segment.title}</Link>
-                      </Grid.Column>
-                      <Grid.Column textAlign="left" width={9}>
-                        {segment.description || 'No description available.'}
-                      </Grid.Column>
-                      <Grid.Column width={2}>
-                        <Icon
-                          link={true}
-                          style={{ marginLeft: 10 }}
-                          size="big"
-                          name="edit"
-                          color="blue"
-                          onClick={() =>
-                            utils.history.push(`/edit/${segment.videoId}/${segment.id}`)
-                          }
-                        />
-                      </Grid.Column>
-                      <Grid.Column width={2}>
-                        <Icon
-                          link={true}
-                          size="big"
-                          name="video play"
-                          color="green"
-                          onClick={() =>
-                            utils.history.push(`/watch/${segment.videoId}/${segment.id}`)
-                          }
-                        />
-                      </Grid.Column>
-                    </Grid.Row>
-                  ))}
-                </Grid>
-              </Container>
-            ) : (
-              selectedVideo && (
-                <div>
-                  You don't have any segments for this video.{' '}
-                  <Link onClick={createVideo}>Try adding one!</Link>
-                </div>
-              )
+            {user && (
+              <div>
+                <Divider horizontal>
+                  <Header as="h2">
+                    <Icon name="user" color="blue" />
+                    <Header.Content>Your Segments</Header.Content>
+                  </Header>
+                </Divider>
+                {mySegments && mySegments.length > 0 ? (
+                  <Container>
+                    <Grid celled="internally">
+                      <Grid.Row>
+                        <Grid.Column verticalAlign="middle" width={3}>
+                          <h4>Segment Title</h4>
+                        </Grid.Column>
+                        <Grid.Column width={9}>
+                          <h4>Description</h4>
+                        </Grid.Column>
+                        <Grid.Column width={2}>
+                          <h4>Edit</h4>
+                        </Grid.Column>
+                        <Grid.Column width={2}>
+                          <h4>Watch</h4>
+                        </Grid.Column>
+                      </Grid.Row>
+                      {mySegments.map(segment => (
+                        <Grid.Row key={segment.id}>
+                          <Grid.Column verticalAlign="middle" width={3}>
+                            <Link to={`/watch/${segment.videoId}/${segment.id}`}>
+                              {segment.title}
+                            </Link>
+                          </Grid.Column>
+                          <Grid.Column textAlign="left" width={9}>
+                            {segment.description || 'No description available.'}
+                          </Grid.Column>
+                          <Grid.Column width={2}>
+                            <Icon
+                              link={true}
+                              style={{ marginLeft: 10 }}
+                              size="big"
+                              name="edit"
+                              color="blue"
+                              onClick={() =>
+                                utils.history.push(`/edit/${segment.videoId}/${segment.id}`)
+                              }
+                            />
+                          </Grid.Column>
+                          <Grid.Column width={2}>
+                            <Icon
+                              link={true}
+                              size="big"
+                              name="video play"
+                              color="green"
+                              onClick={() =>
+                                utils.history.push(`/watch/${segment.videoId}/${segment.id}`)
+                              }
+                            />
+                          </Grid.Column>
+                        </Grid.Row>
+                      ))}
+                    </Grid>
+                  </Container>
+                ) : (
+                  selectedVideo && (
+                    <div>
+                      You don't have any segments for this video.{' '}
+                      <Link onClick={createVideo}>Try adding one!</Link>
+                    </div>
+                  )
+                )}
+              </div>
             )}
 
-            <Divider horizontal>
+            <Divider horizontal style={{ marginTop: 75 }}>
               <Header as="h2">
                 <Icon name="video" color="green" />
                 <Header.Content>All Segments</Header.Content>

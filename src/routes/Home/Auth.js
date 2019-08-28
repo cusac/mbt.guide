@@ -1,23 +1,21 @@
 // @flow
 
 import * as React from 'react';
-import { authUI, firebase } from 'services';
+import { firebase } from 'services';
+import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
 const Auth = () => {
-  const ref = React.createRef();
-  React.useEffect(() => {
-    authUI.start(ref.current, {
-      callbacks: {
-        signInSuccessWithAuthResult: () => false,
-      },
-      signInFlow: 'popup',
-      signInOptions: [
-        firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      ],
-    });
-  }, []);
-  return <div ref={ref} />;
+  const uiConfig = {
+    callbacks: {
+      signInSuccessWithAuthResult: () => false,
+    },
+    signInFlow: 'popup',
+    signInOptions: [
+      firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+    ],
+  };
+  return <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()} />;
 };
 
 export default Auth;

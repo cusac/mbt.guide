@@ -18,8 +18,7 @@ const app = firebase.initializeApp({
 
 const auth = app.auth();
 const db = app.firestore();
-const authUI = new firebaseui.auth.AuthUI(auth);
 
-export { auth, authUI, db, firebase, firebaseui, youtube };
+export { auth, db, firebase, firebaseui, youtube };
 
 export default app;

@@ -26,6 +26,8 @@ const {
   AppHeader,
   Container,
   Label,
+  Loading,
+  Header,
 } = components;
 
 const VideoSplitter = ({
@@ -43,17 +45,33 @@ const VideoSplitter = ({
 }) => {
   if (!video.data) {
     data.Video.create(videoId);
-    return <div>Creating video...</div>;
+    return (
+      <div>
+        <AppHeader />
+        <Loading>Creating video...</Loading>
+      </div>
+    );
   }
   const [segments, setSegments] = React.useState(video.segments);
 
   const { duration } = video.data;
 
+  const user = services.auth.currentUser;
+
   React.useEffect(() => {
     !segmentId && addSegment();
   }, []);
 
-  const user = services.auth.currentUser;
+  if (!user) {
+    return (
+      <div>
+        <AppHeader />
+        <Header style={{ marginTop: 50 }}>
+          <h1>You must sign in to create segments!</h1>
+        </Header>
+      </div>
+    );
+  }
 
   const updateSegmentAt = (index, data: $Shape<db.VideoSegment>) => {
     const newSegments = segments.slice();
