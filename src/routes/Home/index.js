@@ -12,7 +12,18 @@ import Auth from './Auth';
 
 import logo from './logo-wide.png';
 
-const { Button, Link, Grid, AppHeader, VideoList, List, Header, Icon } = components;
+const {
+  Button,
+  Link,
+  Grid,
+  AppHeader,
+  VideoList,
+  List,
+  Header,
+  Icon,
+  Container,
+  Divider,
+} = components;
 
 const Home = ({ videoId }: { videoId: string }) => {
   const [error, setError] = React.useState();
@@ -93,7 +104,6 @@ const Home = ({ videoId }: { videoId: string }) => {
     <div>
       <AppHeader onHandleSubmit={searchVideos} showSearchbar={true} />
       <Grid>
-        {/* Main */}
         <Grid.Row>
           <Grid.Column style={{ marginLeft: 20 }} width={11}>
             {selectedVideo ? (
@@ -111,29 +121,55 @@ const Home = ({ videoId }: { videoId: string }) => {
             )}
             <br />
 
-            <Header as="h2">
-              <Icon name="user" />
-              <Header.Content>Your Segments</Header.Content>
-            </Header>
+            <Button color="teal" size="big" onClick={() => utils.history.push(`/edit/${videoId}`)}>
+              <Icon name="plus" /> New Segment
+            </Button>
+
+            <br />
+
+            <Divider horizontal>
+              <Header as="h2">
+                <Icon name="user" />
+                <Header.Content>Your Segments</Header.Content>
+              </Header>
+            </Divider>
             {mySegments && mySegments.length > 0 ? (
-              <List divided>
-                {mySegments.map(segment => (
-                  <List.Item key={segment.id}>
-                    <List.Content floated="right">
-                      <Link to={`/edit/${segment.videoId}/${segment.id}`}>
-                        <Button>Edit</Button>
-                      </Link>
-                    </List.Content>
-                    {/* <Image avatar src="/images/avatar/small/lena.png" /> */}
-                    <List.Content verticalAlign="middle" floated="left">
-                      <Link to={`/watch/${segment.videoId}/${segment.id}`}>{segment.title}</Link>
-                    </List.Content>
-                    <List.Content verticalAlign="middle" floated="left">
-                      {segment.description}
-                    </List.Content>
-                  </List.Item>
-                ))}
-              </List>
+              <Container>
+                <Grid relaxed celled="internally">
+                  {mySegments.map(segment => (
+                    <Grid.Row>
+                      <Grid.Column verticalAlign="middle" width={3}>
+                        <Link to={`/watch/${segment.videoId}/${segment.id}`}>{segment.title}</Link>
+                      </Grid.Column>
+                      <Grid.Column textAlign="left" width={9}>
+                        {segment.description || 'No description available.'}
+                      </Grid.Column>
+                      <Grid.Column width={2}>
+                        <Icon
+                          link={true}
+                          size="big"
+                          name="edit"
+                          color="blue"
+                          onClick={() =>
+                            utils.history.push(`/edit/${segment.videoId}/${segment.id}`)
+                          }
+                        />
+                      </Grid.Column>
+                      <Grid.Column width={2}>
+                        <Icon
+                          link={true}
+                          size="big"
+                          name="video play"
+                          color="green"
+                          onClick={() =>
+                            utils.history.push(`/watch/${segment.videoId}/${segment.id}`)
+                          }
+                        />
+                      </Grid.Column>
+                    </Grid.Row>
+                  ))}
+                </Grid>
+              </Container>
             ) : (
               selectedVideo && (
                 <div>
@@ -143,24 +179,38 @@ const Home = ({ videoId }: { videoId: string }) => {
               )
             )}
 
-            <Header as="h2">
-              <Icon name="video" />
-              <Header.Content>All Segments</Header.Content>
-            </Header>
+            <Divider horizontal>
+              <Header as="h2">
+                <Icon name="video" />
+                <Header.Content>All Segments</Header.Content>
+              </Header>
+            </Divider>
             {segments && segments.length > 0 ? (
-              <List divided>
-                {segments.map(segment => (
-                  <List.Item key={segment.id}>
-                    {/* <Image avatar src="/images/avatar/small/lena.png" /> */}
-                    <List.Content verticalAlign="middle" floated="left">
-                      <Link to={`/watch/${segment.videoId}/${segment.id}`}>{segment.title}</Link>
-                    </List.Content>
-                    <List.Content verticalAlign="middle" floated="left">
-                      {segment.description}
-                    </List.Content>
-                  </List.Item>
-                ))}
-              </List>
+              <Container>
+                <Grid celled="internally">
+                  {segments.map(segment => (
+                    <Grid.Row>
+                      <Grid.Column verticalAlign="middle" width={3}>
+                        <Link to={`/watch/${segment.videoId}/${segment.id}`}>{segment.title}</Link>
+                      </Grid.Column>
+                      <Grid.Column textAlign="left" width={11}>
+                        {segment.description || 'No description available.'}
+                      </Grid.Column>
+                      <Grid.Column width={2}>
+                        <Icon
+                          link={true}
+                          size="big"
+                          name="video play"
+                          color="green"
+                          onClick={() =>
+                            utils.history.push(`/watch/${segment.videoId}/${segment.id}`)
+                          }
+                        />
+                      </Grid.Column>
+                    </Grid.Row>
+                  ))}
+                </Grid>
+              </Container>
             ) : (
               selectedVideo && (
                 <div>

@@ -112,6 +112,7 @@ Slider.defaultProps = {
   width: 400,
   colors: ['red', 'rgb(255, 255, 255, 0.5)'],
   pips: false,
+  disabled: false,
 };
 
 export default Slider;

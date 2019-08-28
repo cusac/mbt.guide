@@ -20,3 +20,26 @@
 .logo {
   cursor: pointer;
 }
+
+.video-segment {
+  cursor: pointer;
+}
+
+.video-segment:hover {
+  background-color: whitesmoke;
+}
+
+.AppHeader {
+  background-color: #282c34;
+}
+
+.video-item {
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer;
+}
+
+.video-item.item img {
+  max-width: 200px;
+  max-height: 250px;
+}

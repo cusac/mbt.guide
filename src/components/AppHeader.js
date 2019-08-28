@@ -25,7 +25,7 @@ const AppHeader = ({
   };
 
   return (
-    <Grid>
+    <Grid className="AppHeader">
       {/* Header */}
       <Grid.Row>
         <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
@@ -36,7 +36,7 @@ const AppHeader = ({
           {showSearchbar && <Searchbar onHandleSubmit={onHandleSubmit} />}
         </Grid.Column>
 
-        <Grid.Column verticalAlign="middle" width={4}>
+        <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
           {user ? (
             <div>
               {user.email}

@@ -10,6 +10,9 @@ export {
   TextArea,
   List,
   Header,
+  Container,
+  Label,
+  Divider,
 } from 'semantic-ui-react';
 export { Link } from 'react-router-dom';
 
