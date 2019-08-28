@@ -1,6 +1,16 @@
 // @flow
 
-export { Button, Grid, Icon, Input, Segment, Form, TextArea, List } from 'semantic-ui-react';
+export {
+  Button,
+  Grid,
+  Icon,
+  Input,
+  Segment,
+  Form,
+  TextArea,
+  List,
+  Header,
+} from 'semantic-ui-react';
 export { Link } from 'react-router-dom';
 
 export { default as ErrorBoundary } from './ErrorBoundary';

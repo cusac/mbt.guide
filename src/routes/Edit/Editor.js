@@ -15,7 +15,7 @@ const Editor = ({ videoId, segmentId }: { videoId: string, segmentId: string }) 
     return <div>Loading video data</div>;
   }
 
-  return <VideoSplitter {...{ segmentId, video, segmentColors, minSegmentDuration }} />;
+  return <VideoSplitter {...{ segmentId, video, videoId, segmentColors, minSegmentDuration }} />;
 };
 
 export default Editor;

@@ -38,7 +38,7 @@ export default class Video {
       }
       const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
 
-      const segmentId = uuid();
+      // const segmentId = uuid();
 
       const user = services.auth.currentUser;
 
@@ -46,28 +46,27 @@ export default class Video {
         throw new Error(`Must be logged in to create a segment`);
       }
 
-      transaction
-        .set(
-          videoRef,
-          ({
-            id,
-            duration,
-            youtube: ytVideo,
-          }: db.Video)
-        )
-        .set(
-          db.videoSegments.doc(segmentId),
-          ({
-            id: segmentId,
-            videoId: id,
-            title: 'Segment title',
-            start: 300,
-            end: duration - 300,
-            tags: [],
-            description: '',
-            createdBy: user.email,
-          }: db.VideoSegment)
-        );
+      transaction.set(
+        videoRef,
+        ({
+          id,
+          duration,
+          youtube: ytVideo,
+        }: db.Video)
+      );
+      // .set(
+      //   db.videoSegments.doc(segmentId),
+      //   ({
+      //     id: segmentId,
+      //     videoId: id,
+      //     title: 'Segment title',
+      //     start: 300,
+      //     end: duration - 300,
+      //     tags: [],
+      //     description: '',
+      //     createdBy: user.email,
+      //   }: db.VideoSegment)
+      // );
     });
   }
 
@@ -107,9 +106,9 @@ export default class Video {
 
     const { videos, videoSegments } = dbSnapshot;
     invariant(videos && videoSegments, 'videos and videoSegments snapshots required');
-    if (videos.length !== 1 || videoSegments.length === 0) {
-      throw new errors.MissingVideoError('Expected one video with segments');
-    }
+    // if (videos.length !== 1 || videoSegments.length === 0) {
+    //   throw new errors.MissingVideoError('Expected one video with segments');
+    // }
 
     this.data = videos[0];
     this.segments = videoSegments;

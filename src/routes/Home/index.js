@@ -12,7 +12,7 @@ import Auth from './Auth';
 
 import logo from './logo-wide.png';
 
-const { Button, Link, Grid, Searchbar, VideoList, List } = components;
+const { Button, Link, Grid, Searchbar, VideoList, List, Header, Icon } = components;
 
 const Home = ({ videoId }: { videoId: string }) => {
   const [error, setError] = React.useState();
@@ -82,6 +82,10 @@ const Home = ({ videoId }: { videoId: string }) => {
     utils.history.push(`/${video.id.videoId}`);
   };
 
+  const createVideo = () => {
+    utils.history.push(`/edit/${videoId}`);
+  };
+
   return (
     <div>
       <Grid>
@@ -120,7 +124,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                 </div>
                 <div className="ui segment">
                   <h4 className="ui header">{selectedVideo.snippet.title}</h4>
-                  {/* <p>{video.snippet.description}</p> */}
+                  <p>{selectedVideo.snippet.description}</p>
                 </div>
               </div>
             ) : (
@@ -128,6 +132,10 @@ const Home = ({ videoId }: { videoId: string }) => {
             )}
             <br />
 
+            <Header as="h2">
+              <Icon name="user" />
+              <Header.Content>Your Segments</Header.Content>
+            </Header>
             {mySegments && mySegments.length && (
               <List divided>
                 {mySegments.map(segment => (
@@ -148,6 +156,11 @@ const Home = ({ videoId }: { videoId: string }) => {
                 ))}
               </List>
             )}
+
+            <Header as="h2">
+              <Icon name="video" />
+              <Header.Content>All Segments</Header.Content>
+            </Header>
             {segments && segments.length > 0 ? (
               <List divided>
                 {segments.map(segment => (
@@ -163,7 +176,11 @@ const Home = ({ videoId }: { videoId: string }) => {
                 ))}
               </List>
             ) : (
-              selectedVideo && <div> No segments for this video </div>
+              selectedVideo && (
+                <div>
+                  No segments for this video. <Link onClick={createVideo}>Add the first one!</Link>
+                </div>
+              )
             )}
           </Grid.Column>
           <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>

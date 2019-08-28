@@ -13,21 +13,26 @@ import { v4 as uuid } from 'uuid';
 
 import VideoSegment from './VideoSegment';
 
-const { Button, Grid, Icon, Input, Segment, Form, TextArea } = components;
+const { Button, Grid, Icon, Input, Segment, Form, TextArea, Link } = components;
 
 const VideoSplitter = ({
   video,
+  videoId,
   segmentId,
   segmentColors,
   minSegmentDuration,
 }: {
   video: data.Video,
+  videoId: string,
   segmentId: string,
   segmentColors: Array<string>,
   minSegmentDuration: number,
 }) => {
+  if (!video.data) {
+    data.Video.create(videoId);
+    return <div>Creating video...</div>;
+  }
   const [segments, setSegments] = React.useState(video.segments);
-  invariant(segments.length > 0, 'at least one segment required');
 
   const user = services.auth.currentUser;
 
@@ -70,10 +75,6 @@ const VideoSplitter = ({
   };
 
   const segment = segments.find(s => s.id === segmentId);
-  if (!segment) {
-    utils.history.push(`/edit/${video.data.id}/${segments[0].id}`);
-    return <div />;
-  }
 
   const index = segments.indexOf(segment);
   const { duration } = video.data;
@@ -85,8 +86,8 @@ const VideoSplitter = ({
           <Grid.Column width={11} style={{ padding: 0 }}>
             <components.YouTubePlayerWithControls
               duration={video.data.duration}
-              end={segments[index].end}
-              start={segments[index].start}
+              end={segment ? segment.end : video.data.duration}
+              start={segment ? segment.start : 0}
               videoId={video.data.id}
             />
           </Grid.Column>
@@ -109,7 +110,9 @@ const VideoSplitter = ({
                 <Icon name="add" /> Add
               </Button>
               <Button
-                disabled={segments.length <= 1 || !user || user.email !== segment.createdBy}
+                disabled={
+                  segments.length <= 0 || !user || (segment && user.email !== segment.createdBy)
+                }
                 color="red"
                 onClick={removeSegment}
               >
@@ -121,82 +124,92 @@ const VideoSplitter = ({
             </Button.Group>
           </Grid.Column>
         </Grid.Row>
-        <Grid.Row>
-          <Grid.Column style={{ padding: 0 }}>
-            <div
-              style={{
-                height: 120,
-                overflowX: 'auto',
-                overflowY: 'hidden',
-                paddingLeft: 50,
-                paddingTop: 50,
-              }}
-            >
-              <components.Slider
-                disabled={!user || user.email !== segment.createdBy}
-                key={segments.length} // causes slider recreation on segments count change
-                range={{ min: 0, max: duration }}
-                onHandleSet={(i, value) =>
-                  updateSegmentAt(index, i ? { end: value } : { start: value })
-                }
-                start={[segment.start, segment.end]}
-                colors={[segmentColors[index % segmentColors.length]]}
-                margin={minSegmentDuration}
-                width={900} // TODO make dependant on video duration
-                pips
-              />
-            </div>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
-            Owner
-          </Grid.Column>
-          <Grid.Column width={7}>
-            <Input disabled={true} fluid value={segment.createdBy} />
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
-            Title
-          </Grid.Column>
-          <Grid.Column width={7}>
-            <Input
-              disabled={!user || user.email !== segment.createdBy}
-              fluid
-              placeholder="Title"
-              value={segments[index].title}
-              onChange={(event, { value }) => updateSegmentAt(index, { title: value })}
-            />
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
-            Description
-          </Grid.Column>
-          <Grid.Column width={13}>
-            <Form>
-              <TextArea
-                disabled={!user || user.email !== segment.createdBy}
-                placeholder="Enter a description"
-                value={segments[index].description}
-                onChange={(event, { value }) => updateSegmentAt(index, { description: value })}
-              />
-            </Form>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
-            Tags
-          </Grid.Column>
-          <Grid.Column width={13}>
-            <TagsInput
-              disabled={!user || user.email !== segment.createdBy}
-              value={segments[index].tags}
-              onChange={tags => updateSegmentAt(index, { tags })}
-            />
-          </Grid.Column>
-        </Grid.Row>
+        {segment ? (
+          <div>
+            <Grid.Row>
+              <Grid.Column style={{ padding: 0 }}>
+                <div
+                  style={{
+                    height: 120,
+                    overflowX: 'auto',
+                    overflowY: 'hidden',
+                    paddingLeft: 50,
+                    paddingTop: 50,
+                  }}
+                >
+                  <components.Slider
+                    disabled={!user || user.email !== segment.createdBy}
+                    key={segments.length} // causes slider recreation on segments count change
+                    range={{ min: 0, max: duration }}
+                    onHandleSet={(i, value) =>
+                      updateSegmentAt(index, i ? { end: value } : { start: value })
+                    }
+                    start={[segment.start, segment.end]}
+                    colors={[segmentColors[index % segmentColors.length]]}
+                    margin={minSegmentDuration}
+                    width={900} // TODO make dependant on video duration
+                    pips
+                  />
+                </div>
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
+                Owner
+              </Grid.Column>
+              <Grid.Column width={7}>
+                <Input disabled={true} fluid value={segment.createdBy} />
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
+                Title
+              </Grid.Column>
+              <Grid.Column width={7}>
+                <Input
+                  disabled={!user || user.email !== segment.createdBy}
+                  fluid
+                  placeholder="Title"
+                  value={segments[index].title}
+                  onChange={(event, { value }) => updateSegmentAt(index, { title: value })}
+                />
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
+                Description
+              </Grid.Column>
+              <Grid.Column width={13}>
+                <Form>
+                  <TextArea
+                    disabled={!user || user.email !== segment.createdBy}
+                    placeholder="Enter a description"
+                    value={segments[index].description}
+                    onChange={(event, { value }) => updateSegmentAt(index, { description: value })}
+                  />
+                </Form>
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
+                Tags
+              </Grid.Column>
+              <Grid.Column width={13}>
+                <TagsInput
+                  disabled={!user || user.email !== segment.createdBy}
+                  value={segments[index].tags}
+                  onChange={tags => updateSegmentAt(index, { tags })}
+                />
+              </Grid.Column>
+            </Grid.Row>
+          </div>
+        ) : (
+          <Grid.Row>
+            <Segment>
+              No segments yet. <Link onClick={addSegment}>Add the first one!</Link>
+            </Segment>
+          </Grid.Row>
+        )}
       </Grid>
     </div>
   );
