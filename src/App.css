@@ -43,3 +43,15 @@
   max-width: 200px;
   max-height: 250px;
 }
+
+.segment-field[disabled] {
+  cursor: not-allowed;
+}
+
+.segment-field.disabled {
+  cursor: not-allowed;
+}
+
+.segment-field .disabled {
+  cursor: not-allowed;
+}

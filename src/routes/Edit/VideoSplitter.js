@@ -191,19 +191,25 @@ const VideoSplitter = ({
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
-                <Grid.Column verticalAlign="middle" width={3}>
+                <Grid.Column verticalAlign="middle" style={{ textAlign: 'right' }} width={2}>
                   <Label>Creator:</Label>
                 </Grid.Column>
-                <Grid.Column width={7}>
-                  <Input disabled={true} fluid value={segment.createdBy} />
+                <Grid.Column width={8}>
+                  <Input
+                    disabled={true}
+                    className="segment-field"
+                    fluid
+                    value={segment.createdBy}
+                  />
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
-                <Grid.Column verticalAlign="middle" width={3}>
+                <Grid.Column verticalAlign="middle" style={{ textAlign: 'right' }} width={2}>
                   <Label>Title:</Label>
                 </Grid.Column>
-                <Grid.Column width={7}>
+                <Grid.Column width={8}>
                   <Input
+                    className="segment-field"
                     disabled={!user || !owner}
                     fluid
                     placeholder="Title"
@@ -213,13 +219,15 @@ const VideoSplitter = ({
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
-                <Grid.Column verticalAlign="middle" width={3}>
+                <Grid.Column verticalAlign="top" style={{ textAlign: 'right' }} width={2}>
                   <Label>Description:</Label>
                 </Grid.Column>
-                <Grid.Column width={13}>
+                <Grid.Column width={14}>
                   <Form>
                     <TextArea
+                      className="segment-field"
                       disabled={!user || !owner}
+                      style={{ color: !owner && 'darkgray' }}
                       placeholder="Enter a description"
                       value={segments[index].description}
                       onChange={(event, { value }) =>
@@ -230,15 +238,17 @@ const VideoSplitter = ({
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
-                <Grid.Column verticalAlign="middle" width={3}>
+                <Grid.Column verticalAlign="middle" style={{ textAlign: 'right' }} width={2}>
                   <Label>Tags:</Label>
                 </Grid.Column>
-                <Grid.Column width={13}>
-                  <TagsInput
-                    disabled={!user || !owner}
-                    value={segments[index].tags}
-                    onChange={tags => updateSegmentAt(index, { tags })}
-                  />
+                <Grid.Column width={14}>
+                  <div className="segment-field" disabled={!user || !owner}>
+                    <TagsInput
+                      disabled={!user || !owner}
+                      value={segments[index].tags}
+                      onChange={tags => updateSegmentAt(index, { tags })}
+                    />
+                  </div>
                 </Grid.Column>
               </Grid.Row>
             </Grid>
