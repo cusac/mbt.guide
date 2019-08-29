@@ -18,6 +18,7 @@ const Slider = ({
   margin,
   width,
   pips,
+  disabled,
 }: {
   onChange: (Array<number>) => void,
   onHandleUpdate: (number, number) => void,
@@ -28,6 +29,7 @@ const Slider = ({
   margin: number,
   width: number,
   pips: boolean,
+  disabled: boolean,
 }) => {
   const [slider, setSlider] = React.useState(undefined);
   const ref = React.createRef();
@@ -38,7 +40,7 @@ const Slider = ({
     const slider = noUiSlider.create(ref.current, {
       start,
       step: 1,
-      connect: Array(start.length + 1).fill(true),
+      connect: true,
       margin,
       range,
       pips: pips && {
@@ -56,7 +58,12 @@ const Slider = ({
   }, []);
 
   React.useEffect(() => slider && slider.updateOptions({ range }), [slider, range.min, range.max]);
-  React.useEffect(() => slider && slider.updateOptions({ start }), [slider, ...start]);
+  React.useEffect(() => {
+    slider && slider.updateOptions({ start });
+    disabled && ref
+      ? ref.current && ref.current.setAttribute('disabled', disabled)
+      : ref.current && ref.current.removeAttribute('disabled');
+  }, [slider, ...start]);
   React.useEffect(
     () =>
       slider &&
@@ -89,6 +96,7 @@ const Slider = ({
     }, [slider, callback])
   );
 
+  // $FlowFixMe
   return <div ref={ref} style={{ margin: '0px auto', width }} />;
 };
 
@@ -105,6 +113,7 @@ Slider.defaultProps = {
   width: 400,
   colors: ['red', 'rgb(255, 255, 255, 0.5)'],
   pips: false,
+  disabled: false,
 };
 
 export default Slider;

@@ -5,17 +5,22 @@ import * as hooks from 'hooks';
 import * as React from 'react';
 import * as services from 'services';
 
-import { Link } from 'components';
+import { Grid, Link, AppHeader, Label, Button, Container } from 'components';
 
-const Watch = ({ videoId, segmentIndex }: { videoId: string, segmentIndex: number }) => {
+const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) => {
   const video = hooks.useVideo(videoId);
   if (!video) {
     return <div>Loading video data</div>;
   }
 
-  const segment = video.segments[segmentIndex];
+  const segment = video.segments.find(s => s.id === segmentId);
   if (!segment) {
-    return <div>Missing segment</div>;
+    return (
+      <div>
+        <AppHeader />
+        <div>Missing segment</div>
+      </div>
+    );
   }
 
   const user = services.auth.currentUser;
@@ -23,7 +28,8 @@ const Watch = ({ videoId, segmentIndex }: { videoId: string, segmentIndex: numbe
   const { start, end } = segment;
   return (
     <div>
-      <h1 style={{ color: 'white' }}>{segment.title}</h1>
+      <AppHeader currentVideoId={videoId} />
+      <h1>{segment.title}</h1>
       <components.YouTubePlayerWithControls
         {...{ videoId, start, end }}
         autoplay
@@ -31,11 +37,32 @@ const Watch = ({ videoId, segmentIndex }: { videoId: string, segmentIndex: numbe
         end={segment.end}
         start={segment.start}
       />
-      {user && (
-        <div style={{ marginTop: 15 }}>
-          <Link to={`/edit/${videoId}/${segment.index}`}>Edit segment</Link>
-        </div>
+      {user && user.email === segment.createdBy && (
+        <Button style={{ margin: 15 }}>
+          <Link to={`/edit/${videoId}/${segmentId}`}>Edit segment</Link>
+        </Button>
       )}
+      <br />
+      <Container>
+        <Grid relaxed celled="internally">
+          <Grid.Row>
+            <Grid.Column verticalAlign="middle" width={3}>
+              <Label>Description:</Label>
+            </Grid.Column>
+            <Grid.Column textAlign="left" width={13}>
+              {segment.description || 'No description available.'}
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column verticalAlign="middle" width={3}>
+              <Label>Tags:</Label>
+            </Grid.Column>
+            <Grid.Column textAlign="left" width={13}>
+              {segment.tags.join(', ')}
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
+      </Container>
     </div>
   );
 };
