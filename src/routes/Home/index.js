@@ -32,7 +32,7 @@ const Home = ({ videoId }: { videoId: string }) => {
 
   const selectVideo = video => {
     setSelectedVideo(video);
-    utils.history.push(`/${video.id.videoId}`);
+    video && utils.history.push(`/${video.id.videoId}`);
   };
 
   React.useEffect(() => {

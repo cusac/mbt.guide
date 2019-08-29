@@ -2,7 +2,13 @@
 
 import React from 'react';
 
-const VideoItem = ({ video, handleVideoSelect }) => {
+const VideoItem = ({
+  video,
+  handleVideoSelect,
+}: {
+  video: any,
+  handleVideoSelect: (video: any) => any,
+}) => {
   return (
     <div onClick={() => handleVideoSelect(video)} className=" video-item item">
       <img

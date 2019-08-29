@@ -60,9 +60,9 @@ const Slider = ({
   React.useEffect(() => slider && slider.updateOptions({ range }), [slider, range.min, range.max]);
   React.useEffect(() => {
     slider && slider.updateOptions({ start });
-    disabled
-      ? ref.current.setAttribute('disabled', disabled)
-      : ref.current.removeAttribute('disabled');
+    disabled && ref
+      ? ref.current && ref.current.setAttribute('disabled', disabled)
+      : ref.current && ref.current.removeAttribute('disabled');
   }, [slider, ...start]);
   React.useEffect(
     () =>
@@ -96,6 +96,7 @@ const Slider = ({
     }, [slider, callback])
   );
 
+  // $FlowFixMe
   return <div ref={ref} style={{ margin: '0px auto', width }} />;
 };
 
