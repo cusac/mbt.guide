@@ -52,19 +52,34 @@ const VideoSplitter = ({
     );
   }
   const [segments, setSegments] = React.useState(video.segments);
+  const [saveData, setSaveData] = React.useState(false);
 
   const { duration } = video.data;
 
   const user = services.auth.currentUser;
 
+  const saveIfNeeded = async () => {
+    if (saveData) {
+      await video.updateSegments(segments);
+      setSaveData(false);
+    }
+  };
+
+  // Autosave data every 5s if needed
+  React.useEffect(() => {
+    const stopSaving = setInterval(saveIfNeeded, 5000);
+    return () => clearInterval(stopSaving);
+  }, [saveData]);
+
   const updateSegmentAt = (index, data: $Shape<db.VideoSegment>) => {
     const newSegments = segments.slice();
     Object.assign(newSegments[index], data);
     setSegments(newSegments);
+    setSaveData(true);
   };
 
   const addSegment = () => {
-    const newSegments = segments.slice();
+    const newSegments: any = segments.slice();
     const newId = uuid();
     newSegments.push({
       id: newId,
@@ -75,16 +90,31 @@ const VideoSplitter = ({
       tags: [],
       description: '',
       createdBy: user.email,
+      pristine: true,
     });
     setSegments(newSegments);
     segmentId = newId;
-    utils.history.push(`/edit/${video.data.id}/${newId}`);
+    goTo(`/edit/${video.data.id}/${newId}`);
   };
 
   const removeSegment = () => {
-    const newSegments = segments.filter(s => s !== segment);
-    setSegments(newSegments);
-    utils.history.push(`/edit/${video.data.id}/${segments[0].id}`);
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    }).then(result => {
+      if (result.value) {
+        const newSegments = segments.filter(s => s !== segment);
+        setSegments(newSegments);
+        goTo(`/edit/${video.data.id}/${newSegments[newSegments.length - 1].id}`);
+        video.updateSegments(newSegments);
+        Swal.fire('Deleted!', 'Your segment has been deleted.', 'success');
+      }
+    });
   };
 
   const saveChanges = async () => {
@@ -99,6 +129,10 @@ const VideoSplitter = ({
     } catch (e) {
       alert(String(e));
     }
+  };
+
+  const goTo = path => {
+    utils.history.push(path);
   };
 
   React.useEffect(() => {
@@ -145,7 +179,7 @@ const VideoSplitter = ({
                       active={data.id === segmentId}
                       data={data}
                       color={segmentColors[i % segmentColors.length]}
-                      onSelect={() => utils.history.push(`/edit/${video.data.id}/${data.id}`)}
+                      onSelect={() => goTo(`/edit/${video.data.id}/${data.id}`)}
                       canEdit={user.email === data.createdBy}
                     />
                   ))}

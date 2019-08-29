@@ -34,6 +34,8 @@ const Home = ({ videoId }: { videoId: string }) => {
     video && utils.history.push(`/${video.id.videoId}`);
   };
 
+  const user = services.auth.currentUser;
+
   React.useEffect(() => {
     // We grab videos from the MBT 'uploads' playlist to save on youtube api search quota points
     services.youtube
@@ -81,7 +83,9 @@ const Home = ({ videoId }: { videoId: string }) => {
   }, [segmentVideo]);
 
   React.useEffect(() => {
-    segments && setMySegments(segments.filter(s => user && s.createdBy === user.email));
+    segments &&
+      segments.length > 0 &&
+      setMySegments(segments.filter(s => user && s.createdBy === user.email));
   }, [segments]);
 
   if (videos.length === 0) {
@@ -96,8 +100,6 @@ const Home = ({ videoId }: { videoId: string }) => {
   const videoSrc = selectedVideo
     ? `https://www.youtube.com/embed/${selectedVideo.id.videoId || selectedVideo.id}`
     : '';
-
-  const user = services.auth.currentUser;
 
   const searchVideos = term => {
     services.youtube
