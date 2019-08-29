@@ -9,7 +9,6 @@ import * as services from 'services';
 import Swal from 'sweetalert2';
 import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
-import invariant from 'invariant';
 import { v4 as uuid } from 'uuid';
 
 import VideoSegment from './VideoSegment';
@@ -58,21 +57,6 @@ const VideoSplitter = ({
 
   const user = services.auth.currentUser;
 
-  React.useEffect(() => {
-    !segmentId && addSegment();
-  }, []);
-
-  if (!user) {
-    return (
-      <div>
-        <AppHeader />
-        <Header style={{ marginTop: 50 }}>
-          <h1>You must sign in to create segments!</h1>
-        </Header>
-      </div>
-    );
-  }
-
   const updateSegmentAt = (index, data: $Shape<db.VideoSegment>) => {
     const newSegments = segments.slice();
     Object.assign(newSegments[index], data);
@@ -116,6 +100,21 @@ const VideoSplitter = ({
       alert(String(e));
     }
   };
+
+  React.useEffect(() => {
+    !segmentId && addSegment();
+  }, []);
+
+  if (!user) {
+    return (
+      <div>
+        <AppHeader />
+        <Header style={{ marginTop: 50 }}>
+          <h1>You must sign in to create segments!</h1>
+        </Header>
+      </div>
+    );
+  }
 
   const segment = segments.find(s => s.id === segmentId);
 

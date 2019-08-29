@@ -14,7 +14,6 @@ const {
   Grid,
   AppHeader,
   VideoList,
-  List,
   Header,
   Icon,
   Container,

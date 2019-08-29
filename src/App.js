@@ -2,7 +2,6 @@
 
 import { Router, Route } from 'react-router-dom';
 import * as components from 'components';
-import * as data from 'data';
 import * as React from 'react';
 import * as routes from 'routes';
 import * as services from 'services';

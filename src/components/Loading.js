@@ -5,7 +5,7 @@ import 'nouislider/distribute/nouislider.css';
 import * as React from 'react';
 import * as components from 'components';
 
-const { AppHeader, Container, Header, Icon } = components;
+const { Container, Header, Icon } = components;
 
 export type Range = {| min: number, max: number |};
 

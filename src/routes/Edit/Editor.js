@@ -6,7 +6,7 @@ import * as components from 'components';
 
 import VideoSplitter from './VideoSplitter';
 
-const { AppHeader, Container, Header, Icon, Loading } = components;
+const { AppHeader, Loading } = components;
 
 const segmentColors = ['orange', 'green', 'yellow', 'blue', 'red', 'purple'];
 const minSegmentDuration = 5;

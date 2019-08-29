@@ -5,7 +5,7 @@ import * as hooks from 'hooks';
 import * as React from 'react';
 import * as services from 'services';
 
-import { Grid, Link, AppHeader, Label, Button, List, Container } from 'components';
+import { Grid, Link, AppHeader, Label, Button, Container } from 'components';
 
 const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) => {
   const video = hooks.useVideo(videoId);
