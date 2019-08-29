@@ -43,8 +43,11 @@ const Home = ({ videoId }: { videoId: string }) => {
         },
       })
       .then(response => {
-        setVideos(response.data.items);
-        !videoId && selectVideo(response.data.items[0]);
+        const mbtVids = response.data.items.filter(
+          v => v.snippet.channelId === 'UCYwlraEwuFB4ZqASowjoM0g'
+        );
+        setVideos(mbtVids);
+        !videoId && selectVideo(mbtVids[0]);
       });
   }, []);
 
@@ -95,7 +98,12 @@ const Home = ({ videoId }: { videoId: string }) => {
           q: term,
         },
       })
-      .then(response => setVideos(response.data.items));
+      .then(response => {
+        const mbtVids = response.data.items.filter(
+          v => v.snippet.channelId === 'UCYwlraEwuFB4ZqASowjoM0g'
+        );
+        setVideos(mbtVids);
+      });
   };
 
   const createVideo = () => {

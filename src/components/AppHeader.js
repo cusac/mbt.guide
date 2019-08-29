@@ -4,11 +4,10 @@ import * as React from 'react';
 import * as utils from 'utils';
 import * as components from 'components';
 import * as services from 'services';
-import Auth from '../routes/Home/Auth';
 
 import logo from './logo-wide.png';
 
-const { Button, Grid, Searchbar, Icon } = components;
+const { Button, Grid, Searchbar, Icon, Auth } = components;
 
 const AppHeader = ({
   onHandleSubmit,
@@ -23,7 +22,6 @@ const AppHeader = ({
 
   return (
     <Grid className="AppHeader">
-      {/* Header */}
       <Grid.Row>
         <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
           <img
