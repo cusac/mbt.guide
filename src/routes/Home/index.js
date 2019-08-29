@@ -35,16 +35,20 @@ const Home = ({ videoId }: { videoId: string }) => {
   };
 
   React.useEffect(() => {
+    // We grab videos from the MBT 'uploads' playlist to save on youtube api search quota points
     services.youtube
-      .get('/search', {
+      .get('/playlistItems', {
         params: {
-          q: '',
+          playlistId: 'UUYwlraEwuFB4ZqASowjoM0g',
         },
       })
       .then(response => {
-        const mbtVids = response.data.items.filter(
-          v => v.snippet.channelId === 'UCYwlraEwuFB4ZqASowjoM0g'
-        );
+        const mbtVids = response.data.items.map(v => ({
+          snippet: v.snippet,
+          id: {
+            videoId: v.snippet.resourceId.videoId,
+          },
+        }));
         setVideos(mbtVids);
         !videoId && selectVideo(mbtVids[0]);
       });
@@ -53,12 +57,14 @@ const Home = ({ videoId }: { videoId: string }) => {
   React.useEffect(() => {
     videoId &&
       services.youtube
-        .get('/search', {
+        .get('/videos', {
           params: {
-            q: videoId,
+            id: videoId,
           },
         })
-        .then(response => setSelectedVideo(response.data.items[0]));
+        .then(response => {
+          setSelectedVideo(response.data.items[0]);
+        });
   }, []);
 
   React.useEffect(() => {
@@ -66,7 +72,8 @@ const Home = ({ videoId }: { videoId: string }) => {
   }, [error]);
 
   React.useEffect(() => {
-    selectedVideo && data.Video.subscribe(selectedVideo.id.videoId, setSegmentVideo, setError);
+    selectedVideo &&
+      data.Video.subscribe(selectedVideo.id.videoId || selectedVideo.id, setSegmentVideo, setError);
   }, [selectedVideo]);
 
   React.useEffect(() => {
@@ -86,7 +93,9 @@ const Home = ({ videoId }: { videoId: string }) => {
     );
   }
 
-  const videoSrc = selectedVideo ? `https://www.youtube.com/embed/${selectedVideo.id.videoId}` : '';
+  const videoSrc = selectedVideo
+    ? `https://www.youtube.com/embed/${selectedVideo.id.videoId || selectedVideo.id}`
+    : '';
 
   const user = services.auth.currentUser;
 
