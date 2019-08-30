@@ -98,10 +98,24 @@ export default class Video {
   +data: db.Video;
   +segments: Array<db.VideoSegment>;
 
-  async updateSegments(segments: Array<db.VideoSegment>): Promise<void> {
+  async updateSegments(
+    segments: Array<db.VideoSegment>,
+    setSegments: (Array<db.VideoSegment>) => void
+  ): Promise<void> {
+    const updatedSegments = segments.filter(s => !s.pristine);
+    segments = segments.map(s => ({ ...s, pristine: true }));
+    setSegments(segments);
+
     const batch = db.default.batch();
-    segments.forEach(s => batch.set(db.videoSegments.doc(s.id), s));
-    this.segments.slice(segments.length).forEach(s => batch.delete(db.videoSegments.doc(s.id)));
+    // Save updates
+    updatedSegments.forEach(s => batch.set(db.videoSegments.doc(s.id), s));
+
+    // Persist deletions
+    let deletedSegments = this.segments.filter(
+      s => segments.find(ss => ss.id === s.id) === undefined
+    );
+
+    deletedSegments.forEach(s => batch.delete(db.videoSegments.doc(s.id)));
     await batch.commit();
   }
 }

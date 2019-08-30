@@ -58,28 +58,27 @@ const VideoSplitter = ({
 
   const user = services.auth.currentUser;
 
-  const saveIfNeeded = async () => {
-    if (saveData) {
-      await video.updateSegments(segments);
-      setSaveData(false);
-    }
+  const segment = segments.find(s => s.id === segmentId);
+
+  const owner = segment ? user.email === segment.createdBy : false;
+
+  const index = segments.indexOf(segment);
+
+  const goTo = path => {
+    utils.history.push(path);
   };
 
-  // Autosave data every 5s if needed
-  React.useEffect(() => {
-    const stopSaving = setInterval(saveIfNeeded, 5000);
-    return () => clearInterval(stopSaving);
-  }, [saveData]);
+  !segment && segments.length > 0 && goTo(`/edit/${video.data.id}/${segments[0].id}`);
 
   const updateSegmentAt = (index, data: $Shape<db.VideoSegment>) => {
     const newSegments = segments.slice();
-    Object.assign(newSegments[index], data);
+    Object.assign(newSegments[index], { ...data, pristine: false });
     setSegments(newSegments);
     setSaveData(true);
   };
 
   const addSegment = () => {
-    const newSegments: any = segments.slice();
+    const newSegments = segments.slice();
     const newId = uuid();
     newSegments.push({
       id: newId,
@@ -93,7 +92,6 @@ const VideoSplitter = ({
       pristine: true,
     });
     setSegments(newSegments);
-    segmentId = newId;
     goTo(`/edit/${video.data.id}/${newId}`);
   };
 
@@ -108,18 +106,17 @@ const VideoSplitter = ({
       confirmButtonText: 'Yes, delete it!',
     }).then(result => {
       if (result.value) {
-        const newSegments = segments.filter(s => s !== segment);
-        setSegments(newSegments);
-        goTo(`/edit/${video.data.id}/${newSegments[newSegments.length - 1].id}`);
-        video.updateSegments(newSegments);
+        const newSegments = segments.filter(s => segment && s.id !== segment.id);
+        video.updateSegments(newSegments, setSegments);
         Swal.fire('Deleted!', 'Your segment has been deleted.', 'success');
+        goTo(`/edit/${video.data.id}/${newSegments[0].id}`);
       }
     });
   };
 
   const saveChanges = async () => {
     try {
-      await video.updateSegments(segments);
+      await video.updateSegments(segments, setSegments);
       Swal.fire({
         title: 'Saved!',
         text: 'Your changes have been saved.',
@@ -131,9 +128,18 @@ const VideoSplitter = ({
     }
   };
 
-  const goTo = path => {
-    utils.history.push(path);
+  const saveIfNeeded = async () => {
+    if (saveData) {
+      await video.updateSegments(segments, setSegments);
+      setSaveData(false);
+    }
   };
+
+  // Autosave data every 5s if needed
+  React.useEffect(() => {
+    const stopSaving = setInterval(saveIfNeeded, 5000);
+    return () => clearInterval(stopSaving);
+  }, [saveData]);
 
   React.useEffect(() => {
     !segmentId && addSegment();
@@ -149,12 +155,6 @@ const VideoSplitter = ({
       </div>
     );
   }
-
-  const segment = segments.find(s => s.id === segmentId);
-
-  const owner = segment ? user.email === segment.createdBy : false;
-
-  const index = segments.indexOf(segment);
 
   return (
     <div>

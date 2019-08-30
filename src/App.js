@@ -16,10 +16,8 @@ const App = () => {
   }, []);
   return (
     <div className="App">
-      {/* <header className="App-header"> */}
       <components.ErrorBoundary onError={() => <div>Something went wrong!</div>}>
         <Router history={utils.history}>
-          {/* <Route path="/:videoId?" exact component={routes.Home} /> */}
           <Route
             path="/:videoId?"
             exact
@@ -46,7 +44,6 @@ const App = () => {
           />
         </Router>
       </components.ErrorBoundary>
-      {/* </header> */}
     </div>
   );
 };

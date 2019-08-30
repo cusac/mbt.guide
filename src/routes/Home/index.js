@@ -29,9 +29,15 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [videos, setVideos] = React.useState([]);
   const [segmentVideo, setSegmentVideo] = React.useState();
 
-  const selectVideo = video => {
+  const selectVideo = async videoId => {
+    const response = await services.youtube.get('/videos', {
+      params: {
+        id: videoId,
+      },
+    });
+    const video = response.data.items[0];
     setSelectedVideo(video);
-    video && utils.history.push(`/${video.id.videoId}`);
+    video && utils.history.push(`/${videoId}`);
   };
 
   const user = services.auth.currentUser;
@@ -52,7 +58,7 @@ const Home = ({ videoId }: { videoId: string }) => {
           },
         }));
         setVideos(mbtVids);
-        !videoId && selectVideo(mbtVids[0]);
+        !videoId && selectVideo(`_ok27SPHhwA`);
       });
   }, []);
 
@@ -83,9 +89,7 @@ const Home = ({ videoId }: { videoId: string }) => {
   }, [segmentVideo]);
 
   React.useEffect(() => {
-    segments &&
-      segments.length > 0 &&
-      setMySegments(segments.filter(s => user && s.createdBy === user.email));
+    segments && setMySegments(segments.filter(s => user && s.createdBy === user.email));
   }, [segments]);
 
   if (videos.length === 0) {
@@ -272,7 +276,10 @@ const Home = ({ videoId }: { videoId: string }) => {
             )}
           </Grid.Column>
           <Grid.Column style={{ color: 'white' }} verticalAlign="middle" width={4}>
-            <VideoList videos={videos} handleVideoSelect={selectVideo} />
+            <VideoList
+              videos={videos}
+              handleVideoSelect={video => video && selectVideo(video.id.videoId)}
+            />
           </Grid.Column>
         </Grid.Row>
       </Grid>

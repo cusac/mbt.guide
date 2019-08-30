@@ -11,6 +11,7 @@ export type VideoSegment = {|
   end: number, // seconds, last segment's end is the video duration
   tags: string[],
   description: string,
+  pristine: boolean, // used to indicate the segment has changes that need saving
 |};
 
 export default db.collection('videoSegments');
