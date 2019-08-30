@@ -39,6 +39,7 @@
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-firebaseui": "^4.0.0",
+    "react-input-mask": "^2.0.4",
     "react-router-dom": "^5.0.0",
     "react-scripts": "2.1.8",
     "react-tagsinput": "^3.19.0",

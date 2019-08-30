@@ -4,6 +4,7 @@ import * as components from 'components';
 import * as hooks from 'hooks';
 import * as React from 'react';
 import * as services from 'services';
+import * as utils from 'utils';
 
 import { Grid, Link, AppHeader, Label, Button, Container, Loading, List } from 'components';
 
@@ -41,9 +42,10 @@ const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) =
         duration={video.data.duration}
         end={segment.end}
         start={segment.start}
+        offsetTooltip={true}
       />
       {user && user.email === segment.createdBy && (
-        <Button style={{ margin: 15 }}>
+        <Button style={{ margin: 15, marginTop: 50 }}>
           <Link to={`/edit/${videoId}/${segmentId}`}>Edit segment</Link>
         </Button>
       )}
@@ -52,10 +54,38 @@ const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) =
         <Grid relaxed celled="internally">
           <Grid.Row>
             <Grid.Column verticalAlign="middle" width={3}>
+              <Label>From Video:</Label>
+            </Grid.Column>
+            <Grid.Column textAlign="left" width={13}>
+              <List horizontal bulleted>
+                <List.Item>
+                  <List.Content>
+                    <Link to={`/${videoId}`}>{video.data.youtube.snippet.title}</Link>
+                  </List.Content>
+                </List.Item>
+                <List.Item>
+                  <List.Content>
+                    {utils.timeFormat.to(segment.start)} - {utils.timeFormat.to(segment.end)}
+                  </List.Content>
+                </List.Item>
+              </List>
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column verticalAlign="middle" width={3}>
               <Label>Description:</Label>
             </Grid.Column>
             <Grid.Column textAlign="left" width={13}>
               {segment.description || 'No description available.'}
+            </Grid.Column>
+          </Grid.Row>
+
+          <Grid.Row>
+            <Grid.Column verticalAlign="middle" width={3}>
+              <Label>Segment Length:</Label>
+            </Grid.Column>
+            <Grid.Column textAlign="left" width={13}>
+              {utils.timeFormat.to(segment.end - segment.start)}
             </Grid.Column>
           </Grid.Row>
           <Grid.Row>
@@ -65,7 +95,7 @@ const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) =
             <Grid.Column textAlign="left" width={13}>
               <List horizontal bulleted>
                 {segment.tags.map(tag => (
-                  <List.Item>
+                  <List.Item key={tag}>
                     <List.Content>
                       <List.Header>{tag}</List.Header>
                     </List.Content>

@@ -55,3 +55,15 @@
 .segment-field .disabled {
   cursor: not-allowed;
 }
+
+.segment-time-field {
+  width: 80px;
+  text-align: center;
+  height: 35px;
+  border-radius: 5px;
+  border: 1px solid rgba(34, 36, 38, 0.15);
+}
+
+.noUi-pips {
+  height: 40px;
+}

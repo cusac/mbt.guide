@@ -9,6 +9,7 @@ import * as services from 'services';
 import Swal from 'sweetalert2';
 import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
+import InputMask from 'react-input-mask';
 import { v4 as uuid } from 'uuid';
 
 import VideoSegment from './VideoSegment';
@@ -53,6 +54,7 @@ const VideoSplitter = ({
   }
   const [segments, setSegments] = React.useState(video.segments);
   const [saveData, setSaveData] = React.useState(false);
+  const [refresh, setRefresh] = React.useState([true]);
 
   const { duration } = video.data;
 
@@ -64,6 +66,9 @@ const VideoSplitter = ({
 
   const index = segments.indexOf(segment);
 
+  const startRef = React.createRef();
+  const endRef = React.createRef();
+
   const goTo = path => {
     utils.history.push(path);
   };
@@ -73,8 +78,24 @@ const VideoSplitter = ({
   const updateSegmentAt = (index, data: $Shape<db.VideoSegment>) => {
     const newSegments = segments.slice();
     Object.assign(newSegments[index], { ...data, pristine: false });
+    startRef.current &&
+      startRef.current.value &&
+      (startRef.current.value = utils.timeFormat.to(data.start));
+    endRef.current &&
+      endRef.current.value &&
+      (endRef.current.value = utils.timeFormat.to(data.end));
     setSegments(newSegments);
     setSaveData(true);
+  };
+
+  const updateStart = (index, value) => {
+    const start = utils.timeFormat.from(value);
+    start && updateSegmentAt(index, { start });
+  };
+
+  const updateEnd = (index, value) => {
+    const end = utils.timeFormat.from(value);
+    end && updateSegmentAt(index, { end });
   };
 
   const addSegment = () => {
@@ -134,6 +155,14 @@ const VideoSplitter = ({
       setSaveData(false);
     }
   };
+
+  // Keep start/end input fields in sync
+  React.useEffect(() => {
+    segment && startRef.current && (startRef.current.value = utils.timeFormat.to(segment.start));
+    segment && endRef.current && (endRef.current.value = utils.timeFormat.to(segment.end));
+    // Update the state to make sure things are rendered properly
+    setRefresh(refresh.slice());
+  }, [segments, index]);
 
   // Autosave data every 5s if needed
   React.useEffect(() => {
@@ -257,6 +286,19 @@ const VideoSplitter = ({
               </Grid.Row>
               <Grid.Row>
                 <Grid.Column verticalAlign="middle" style={{ textAlign: 'right' }} width={2}>
+                  <Label>Video:</Label>
+                </Grid.Column>
+                <Grid.Column width={8}>
+                  <Input
+                    disabled={true}
+                    className="segment-field"
+                    fluid
+                    value={video.data.youtube.snippet.title}
+                  />
+                </Grid.Column>
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column verticalAlign="middle" style={{ textAlign: 'right' }} width={2}>
                   <Label>Title:</Label>
                 </Grid.Column>
                 <Grid.Column width={8}>
@@ -265,8 +307,31 @@ const VideoSplitter = ({
                     disabled={!user || !owner}
                     fluid
                     placeholder="Title"
-                    value={segments[index].title}
+                    defaultValue={segments[index].title}
                     onChange={(event, { value }) => updateSegmentAt(index, { title: value })}
+                  />
+                </Grid.Column>
+              </Grid.Row>
+
+              <Grid.Row>
+                <Grid.Column verticalAlign="middle" style={{ textAlign: 'right' }} width={2}>
+                  <Label>Start - End:</Label>
+                </Grid.Column>
+                <Grid.Column width={4} style={{ textAlign: 'left' }}>
+                  <InputMask
+                    ref={startRef}
+                    className="segment-time-field"
+                    mask="99:99:99"
+                    defaultValue={utils.timeFormat.to(segment.start)}
+                    onChange={event => updateStart(index, event.target.value)}
+                  />{' '}
+                  -{' '}
+                  <InputMask
+                    ref={endRef}
+                    className="segment-time-field"
+                    mask="99:99:99"
+                    defaultValue={utils.timeFormat.to(segment.end)}
+                    onChange={event => updateEnd(index, event.target.value)}
                   />
                 </Grid.Column>
               </Grid.Row>

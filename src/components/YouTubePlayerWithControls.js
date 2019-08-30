@@ -12,6 +12,7 @@ const YouTubePlayerWithControls = ({
   controls,
   start,
   end,
+  offsetTooltip,
 }: {
   videoId: string,
   duration: number,
@@ -19,6 +20,7 @@ const YouTubePlayerWithControls = ({
   controls: boolean,
   start: number,
   end: number,
+  offsetTooltip: boolean,
 }) => {
   const [seconds, setSeconds] = React.useState(start);
   // eslint-disable-next-line no-unused-vars
@@ -57,9 +59,11 @@ const YouTubePlayerWithControls = ({
           </Button.Group>
           <components.Slider
             start={[seconds]}
-            range={{ min: start, max: end }}
+            range={{ min: Math.round(start), max: Math.round(end) }}
             width={640}
             onHandleUpdate={(i, value) => setSeconds(value)}
+            pips={true}
+            offsetTooltip={offsetTooltip}
           />
         </div>
       )}
@@ -70,6 +74,7 @@ const YouTubePlayerWithControls = ({
 YouTubePlayerWithControls.defaultProps = {
   autoplay: false,
   controls: true,
+  offsetTooltip: false,
 };
 
 export default YouTubePlayerWithControls;

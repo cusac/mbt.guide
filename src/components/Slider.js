@@ -19,6 +19,7 @@ const Slider = ({
   width,
   pips,
   disabled,
+  offsetTooltip,
 }: {
   onChange: (Array<number>) => void,
   onHandleUpdate: (number, number) => void,
@@ -30,6 +31,7 @@ const Slider = ({
   width: number,
   pips: boolean,
   disabled: boolean,
+  offsetTooltip: boolean,
 }) => {
   const [slider, setSlider] = React.useState(undefined);
   const ref = React.createRef();
@@ -48,7 +50,14 @@ const Slider = ({
         density: 3,
         format: utils.timeFormat,
       },
-      tooltips: true,
+      tooltips: offsetTooltip
+        ? [
+            {
+              to: value => utils.timeFormat.to(value - range.min),
+              from: value => utils.timeFormat.from((parseInt(value) - range.min).toString()),
+            },
+          ]
+        : true,
       format: utils.timeFormat,
     });
 
@@ -114,6 +123,7 @@ Slider.defaultProps = {
   colors: ['red', 'rgb(255, 255, 255, 0.5)'],
   pips: false,
   disabled: false,
+  offsetTooltip: false,
 };
 
 export default Slider;
