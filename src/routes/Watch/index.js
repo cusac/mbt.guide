@@ -5,7 +5,7 @@ import * as hooks from 'hooks';
 import * as React from 'react';
 import * as services from 'services';
 
-import { Grid, Link, AppHeader, Label, Button, Container, Loading } from 'components';
+import { Grid, Link, AppHeader, Label, Button, Container, Loading, List } from 'components';
 
 const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) => {
   const video = hooks.useVideo(videoId);
@@ -63,7 +63,15 @@ const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) =
               <Label>Tags:</Label>
             </Grid.Column>
             <Grid.Column textAlign="left" width={13}>
-              {segment.tags.join(', ')}
+              <List horizontal bulleted>
+                {segment.tags.map(tag => (
+                  <List.Item>
+                    <List.Content>
+                      <List.Header>{tag}</List.Header>
+                    </List.Content>
+                  </List.Item>
+                ))}
+              </List>
             </Grid.Column>
           </Grid.Row>
         </Grid>
