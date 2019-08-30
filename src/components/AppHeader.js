@@ -28,7 +28,7 @@ const AppHeader = ({
             src={logo}
             className="logo"
             alt="My Big TOE guide"
-            onClick={() => utils.history.push(`/${currentVideoId}`)}
+            onClick={() => utils.history.push(`/`)}
           />
         </Grid.Column>
 

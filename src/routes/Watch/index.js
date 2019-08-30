@@ -6,7 +6,7 @@ import * as React from 'react';
 import * as services from 'services';
 import * as utils from 'utils';
 
-import { Grid, Link, AppHeader, Label, Button, Container, Loading, List } from 'components';
+import { Grid, Link, AppHeader, Label, Button, Container, Loading, List, Icon } from 'components';
 
 const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) => {
   const video = hooks.useVideo(videoId);
@@ -46,7 +46,7 @@ const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) =
       />
       {user && user.email === segment.createdBy && (
         <Button style={{ margin: 15, marginTop: 50 }}>
-          <Link to={`/edit/${videoId}/${segmentId}`}>Edit segment</Link>
+          <Icon name="edit" /> <Link to={`/edit/${videoId}/${segmentId}`}>Edit segment</Link>
         </Button>
       )}
       <br />
