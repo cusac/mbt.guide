@@ -62,7 +62,7 @@ const VideoSplitter = ({
 
   const segment = segments.find(s => s.id === segmentId);
 
-  const owner = segment ? user.email === segment.createdBy : false;
+  const owner = segment && user ? user.email === segment.createdBy : false;
 
   const index = segments.indexOf(segment);
 
@@ -171,7 +171,7 @@ const VideoSplitter = ({
   }, [saveData]);
 
   React.useEffect(() => {
-    !segmentId && addSegment();
+    !segmentId && user && addSegment();
   }, []);
 
   if (!user) {
