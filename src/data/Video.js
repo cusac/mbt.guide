@@ -108,7 +108,16 @@ export default class Video {
 
     const batch = db.default.batch();
     // Save updates
-    updatedSegments.forEach(s => batch.set(db.videoSegments.doc(s.id), s));
+    updatedSegments.forEach(s =>
+      batch.set(
+        db.videoSegments.doc(s.id),
+        {
+          ...s,
+          pristine: services.firebase.firestore.FieldValue.delete(),
+        },
+        { merge: true }
+      )
+    );
 
     // Persist deletions
     let deletedSegments = this.segments.filter(
