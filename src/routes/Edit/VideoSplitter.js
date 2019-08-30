@@ -307,7 +307,7 @@ const VideoSplitter = ({
                     disabled={!user || !owner}
                     fluid
                     placeholder="Title"
-                    defaultValue={segments[index].title}
+                    value={segments[index].title}
                     onChange={(event, { value }) => updateSegmentAt(index, { title: value })}
                   />
                 </Grid.Column>
