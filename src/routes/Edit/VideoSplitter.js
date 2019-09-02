@@ -319,6 +319,7 @@ const VideoSplitter = ({
                 </Grid.Column>
                 <Grid.Column width={4} style={{ textAlign: 'left' }}>
                   <InputMask
+                    disabled={!user || !owner}
                     ref={startRef}
                     className="segment-time-field"
                     mask="99:99:99"
@@ -327,6 +328,7 @@ const VideoSplitter = ({
                   />{' '}
                   -{' '}
                   <InputMask
+                    disabled={!user || !owner}
                     ref={endRef}
                     className="segment-time-field"
                     mask="99:99:99"
