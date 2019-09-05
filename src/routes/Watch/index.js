@@ -5,7 +5,7 @@ import * as hooks from 'hooks';
 import * as React from 'react';
 import * as services from 'services';
 
-import { Link } from 'components';
+import { Grid, Input, Link } from 'components';
 
 const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) => {
   const video = hooks.useVideo(videoId);
@@ -31,11 +31,26 @@ const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) =
         end={segment.end}
         start={segment.start}
       />
-      {user && (
+      {user && user.email === segment.createdBy && (
         <div style={{ marginTop: 15 }}>
           <Link to={`/edit/${videoId}/${segmentId}`}>Edit segment</Link>
         </div>
       )}
+      <br />
+      <Grid>
+        <Grid.Row>
+          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
+            Description:
+          </Grid.Column>
+          <Grid.Column width={7}>{segment.description}</Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={3}>
+            Tags:
+          </Grid.Column>
+          <Grid.Column width={7}>{segment.tags.join(', ')}</Grid.Column>
+        </Grid.Row>
+      </Grid>
     </div>
   );
 };

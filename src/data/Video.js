@@ -4,6 +4,7 @@ import * as db from 'services/db';
 import * as errors from 'errors';
 import * as luxon from 'luxon';
 import * as utils from 'utils';
+import * as services from 'services';
 import invariant from 'invariant';
 import { v4 as uuid } from 'uuid';
 
@@ -39,6 +40,12 @@ export default class Video {
 
       const segmentId = uuid();
 
+      const user = services.auth.currentUser;
+
+      if (!user) {
+        throw new Error(`Must be logged in to create a segment`);
+      }
+
       transaction
         .set(
           videoRef,
@@ -56,6 +63,9 @@ export default class Video {
             title: 'Segment title',
             start: 300,
             end: duration - 300,
+            tags: [],
+            description: '',
+            createdBy: user.email,
           }: db.VideoSegment)
         );
     });

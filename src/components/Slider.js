@@ -18,6 +18,7 @@ const Slider = ({
   margin,
   width,
   pips,
+  disabled,
 }: {
   onChange: (Array<number>) => void,
   onHandleUpdate: (number, number) => void,
@@ -28,6 +29,7 @@ const Slider = ({
   margin: number,
   width: number,
   pips: boolean,
+  disabled: boolean,
 }) => {
   const [slider, setSlider] = React.useState(undefined);
   const ref = React.createRef();
@@ -55,7 +57,13 @@ const Slider = ({
     return () => slider.destroy();
   }, []);
 
-  React.useEffect(() => slider && slider.updateOptions({ start }), [slider, ...start]);
+  React.useEffect(() => slider && slider.updateOptions({ range }), [slider, range.min, range.max]);
+  React.useEffect(() => {
+    slider && slider.updateOptions({ start });
+    disabled
+      ? ref.current.setAttribute('disabled', disabled)
+      : ref.current.removeAttribute('disabled');
+  }, [slider, ...start]);
   React.useEffect(
     () =>
       slider &&
