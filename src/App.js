@@ -22,19 +22,19 @@ const App = () => {
           <Router history={utils.history}>
             <Route path="/" exact component={routes.Home} />
             <Route
-              path="/edit/:videoId/:index?"
+              path="/edit/:videoId/:segmentId?"
               render={props => {
                 const { videoId } = props.match.params;
-                const index = Number(props.match.params.index || 0);
-                return <routes.Edit {...props} {...{ videoId, index }} />;
+                const { segmentId } = props.match.params;
+                return <routes.Edit {...props} {...{ videoId, segmentId }} />;
               }}
             />
             <Route
-              path="/watch/:title/:segmentId"
+              path="/watch/:videoId/:segmentId"
               render={props => {
+                const { videoId } = props.match.params;
                 const { segmentId } = props.match.params;
-                const [videoId, segmentIndex] = data.Video.parseSegmentId(segmentId);
-                return <routes.Watch {...props} {...{ videoId, segmentIndex }} />;
+                return <routes.Watch {...props} {...{ videoId, segmentId }} />;
               }}
             />
           </Router>

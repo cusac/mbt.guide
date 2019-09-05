@@ -7,13 +7,13 @@ import * as services from 'services';
 
 import { Link } from 'components';
 
-const Watch = ({ videoId, segmentIndex }: { videoId: string, segmentIndex: number }) => {
+const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) => {
   const video = hooks.useVideo(videoId);
   if (!video) {
     return <div>Loading video data</div>;
   }
 
-  const segment = video.segments[segmentIndex];
+  const segment = video.segments.find(s => s.id === segmentId);
   if (!segment) {
     return <div>Missing segment</div>;
   }
@@ -33,7 +33,7 @@ const Watch = ({ videoId, segmentIndex }: { videoId: string, segmentIndex: numbe
       />
       {user && (
         <div style={{ marginTop: 15 }}>
-          <Link to={`/edit/${videoId}/${segment.index}`}>Edit segment</Link>
+          <Link to={`/edit/${videoId}/${segmentId}`}>Edit segment</Link>
         </div>
       )}
     </div>

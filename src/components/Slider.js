@@ -38,7 +38,7 @@ const Slider = ({
     const slider = noUiSlider.create(ref.current, {
       start,
       step: 1,
-      connect: Array(start.length + 1).fill(true),
+      connect: true,
       margin,
       range,
       pips: pips && {
@@ -55,7 +55,6 @@ const Slider = ({
     return () => slider.destroy();
   }, []);
 
-  React.useEffect(() => slider && slider.updateOptions({ range }), [slider, range.min, range.max]);
   React.useEffect(() => slider && slider.updateOptions({ start }), [slider, ...start]);
   React.useEffect(
     () =>

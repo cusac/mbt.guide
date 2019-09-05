@@ -40,7 +40,8 @@
     "react-router-dom": "^5.0.0",
     "react-scripts": "2.1.8",
     "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^0.86.0"
+    "semantic-ui-react": "^0.86.0",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "eslint-config-prettier": "^4.1.0",
