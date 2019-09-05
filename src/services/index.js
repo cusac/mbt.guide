@@ -4,6 +4,7 @@ import * as firebase from 'firebase/app';
 import firebaseui from 'firebaseui';
 import 'firebase/auth';
 import 'firebase/firestore';
+import youtube from './youtube';
 
 const app = firebase.initializeApp({
   apiKey: 'AIzaSyAn6loR5s_OC4aqA-nlMfpwOH2BogTM79g',
@@ -17,8 +18,7 @@ const app = firebase.initializeApp({
 
 const auth = app.auth();
 const db = app.firestore();
-const authUI = new firebaseui.auth.AuthUI(auth);
 
-export { auth, authUI, db, firebase, firebaseui };
+export { auth, db, firebase, firebaseui, youtube };
 
 export default app;

@@ -1,12 +1,9 @@
 // @flow
 
 import * as db from 'services/db';
-import * as errors from 'errors';
 import * as luxon from 'luxon';
-import * as utils from 'utils';
 import * as services from 'services';
 import invariant from 'invariant';
-import { v4 as uuid } from 'uuid';
 
 const YOUTUBE_API_KEY = 'AIzaSyBTOgZacvh2HpWGO-8Fbd7dUOvMJvf-l_o';
 
@@ -38,36 +35,20 @@ export default class Video {
       }
       const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
 
-      const segmentId = uuid();
-
       const user = services.auth.currentUser;
 
       if (!user) {
         throw new Error(`Must be logged in to create a segment`);
       }
 
-      transaction
-        .set(
-          videoRef,
-          ({
-            id,
-            duration,
-            youtube: ytVideo,
-          }: db.Video)
-        )
-        .set(
-          db.videoSegments.doc(segmentId),
-          ({
-            id: segmentId,
-            videoId: id,
-            title: 'Segment title',
-            start: 300,
-            end: duration - 300,
-            tags: [],
-            description: '',
-            createdBy: user.email,
-          }: db.VideoSegment)
-        );
+      transaction.set(
+        videoRef,
+        ({
+          id,
+          duration,
+          youtube: ytVideo,
+        }: db.Video)
+      );
     });
   }
 
@@ -107,17 +88,9 @@ export default class Video {
 
     const { videos, videoSegments } = dbSnapshot;
     invariant(videos && videoSegments, 'videos and videoSegments snapshots required');
-    if (videos.length !== 1 || videoSegments.length === 0) {
-      throw new errors.MissingVideoError('Expected one video with segments');
-    }
 
     this.data = videos[0];
     this.segments = videoSegments;
-
-    // invariant(
-    //   utils.isArraySorted(this.segments, (x, y) => x.index - y.index),
-    //   'segments should be sorted by index'
-    // );
   }
 
   _dbSnapshot: DbSnapshot;
@@ -126,11 +99,6 @@ export default class Video {
   +segments: Array<db.VideoSegment>;
 
   async updateSegments(segments: Array<db.VideoSegment>): Promise<void> {
-    // invariant(
-    //   utils.isArraySorted(segments, (x, y) => x.index - y.index),
-    //   'segments should be sorted by index'
-    // );
-
     const batch = db.default.batch();
     segments.forEach(s => batch.set(db.videoSegments.doc(s.id), s));
     this.segments.slice(segments.length).forEach(s => batch.delete(db.videoSegments.doc(s.id)));
