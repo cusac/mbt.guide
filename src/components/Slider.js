@@ -2,7 +2,7 @@
 // https://refreshless.com/nouislider/
 
 import 'nouislider/distribute/nouislider.css';
-import * as React from 'react';
+import React from 'reactn';
 import * as utils from 'utils';
 import noUiSlider from 'nouislider';
 

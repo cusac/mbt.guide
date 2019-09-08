@@ -3,7 +3,7 @@
 // https://developers.google.com/youtube/iframe_api_reference
 // https://developers.google.com/youtube/player_parameters
 
-import * as React from 'react';
+import React from 'reactn';
 import nullthrows from 'nullthrows';
 
 export type State = 'unstarted' | 'ended' | 'playing' | 'paused' | 'buffering' | 'cued';

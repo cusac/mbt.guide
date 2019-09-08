@@ -3,7 +3,7 @@
 import * as components from 'components';
 import * as data from 'data';
 import * as errors from 'errors';
-import * as React from 'react';
+import React from 'reactn';
 
 import Editor from './Editor';
 

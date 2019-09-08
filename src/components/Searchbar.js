@@ -1,6 +1,6 @@
 // @flow
 
-import * as React from 'react';
+import React from 'reactn';
 
 const Searchbar = ({ onHandleSubmit }: { onHandleSubmit: string => void }) => {
   const [term, setTerm] = React.useState('');

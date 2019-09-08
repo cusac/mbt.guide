@@ -1,6 +1,6 @@
 // @flow
 
-import * as React from 'react';
+import React from 'reactn';
 
 /**
  * Returns the previous value of the given argument

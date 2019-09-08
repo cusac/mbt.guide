@@ -1,7 +1,7 @@
 // @flow
 
 import * as hooks from 'hooks';
-import * as React from 'react';
+import React from 'reactn';
 import * as components from 'components';
 
 import VideoSplitter from './VideoSplitter';

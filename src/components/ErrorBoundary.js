@@ -1,6 +1,6 @@
 // @flow
 
-import * as React from 'react';
+import React from 'reactn';
 
 type Props = {
   children: React.Node,

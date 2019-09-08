@@ -2,7 +2,7 @@
 
 import * as components from 'components';
 import * as db from 'services/db';
-import * as React from 'react';
+import React from 'reactn';
 import * as utils from 'utils';
 
 const { Button, Grid, Segment } = components;

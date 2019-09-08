@@ -4,7 +4,7 @@ import * as components from 'components';
 import * as data from 'data';
 import * as utils from 'utils';
 import * as db from 'services/db';
-import * as React from 'react';
+import React from 'reactn';
 import * as services from 'services';
 import * as errors from 'errors';
 

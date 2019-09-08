@@ -1,6 +1,6 @@
 // @flow
 
-import * as React from 'react';
+import React from 'reactn';
 import * as utils from 'utils';
 import * as components from 'components';
 import * as services from 'services';
@@ -19,6 +19,7 @@ const AppHeader = ({
   currentVideoId: string,
 }) => {
   const user = services.auth.currentUser;
+  const [loading, setLoading] = React.useState(false);
 
   return (
     <Grid className="AppHeader">
@@ -42,19 +43,23 @@ const AppHeader = ({
           )}
         </Grid.Column>
 
-        <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
-          {user ? (
-            <div>
-              {user.email}
-              <br />
-              <Button onClick={() => services.auth.signOut()} style={{ margin: 5 }}>
-                Sign out
-              </Button>
-            </div>
-          ) : (
-            <Auth />
-          )}
-        </Grid.Column>
+        {!loading ? (
+          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
+            {user ? (
+              <div>
+                {user.email}
+                <br />
+                <Button onClick={() => services.auth.signOut()} style={{ margin: 5 }}>
+                  Sign out
+                </Button>
+              </div>
+            ) : (
+              <Auth setLoading={setLoading} />
+            )}
+          </Grid.Column>
+        ) : (
+          <h1>Loading...</h1>
+        )}
       </Grid.Row>
     </Grid>
   );
