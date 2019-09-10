@@ -6,10 +6,11 @@ import 'firebase/auth';
 import 'firebase/firestore';
 import axios from 'axios';
 import qs from 'querystring';
-import config from '../config';
-import youtube from './youtube';
+import config, { resources } from '../config';
+import youtube from './youtube.service';
 import httpClient from './http-client.service';
-import authService from './auth.service';
+import auth from './auth.service';
+import repository from './repository.service';
 
 const app = firebase.initializeApp({
   apiKey: 'AIzaSyAn6loR5s_OC4aqA-nlMfpwOH2BogTM79g',
@@ -21,7 +22,7 @@ const app = firebase.initializeApp({
   appId: '1:461006931750:web:3c39f2584c45ac7c',
 });
 
-const auth = app.auth();
+const firebaseAuth = app.auth();
 const db = app.firestore();
 
 axios.defaults.baseURL = config.serverURI;
@@ -31,6 +32,9 @@ axios.defaults.paramsSerializer = function(params) {
   return qs.stringify(params);
 };
 
-export { auth, db, firebase, firebaseui, youtube, httpClient, authService };
+// Initialize the repository
+repository.install({ httpClient, log: true, resources });
+
+export { firebaseAuth, db, firebase, firebaseui, youtube, httpClient, auth, repository };
 
 export default app;

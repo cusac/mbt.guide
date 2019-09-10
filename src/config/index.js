@@ -1,7 +1,9 @@
 // @flow
 
+import type { Crud, Association } from '../utils/restful-resource-utility';
+
 export default {
-  serverURI: 'http://localhost:8081',
+  serverURI: 'http://localhost:8080',
   // websocketURI: 'ws://localhost:8080',
   // serverURI: 'http://192.168.86.42:8080',
   // websocketURI: 'ws://192.168.86.42:8080',
@@ -16,9 +18,15 @@ export default {
 
 /**
  * Adding a property to this object will create a repository for that property.
- * Ex: user: { alias: 'user' } will create $visitorRepository accessible in each component's "this".
+ * Ex: user: { alias: 'user' } will create repository.user.
  * */
 export const resources = {
+  auditLog: {
+    alias: 'auditLog',
+    options: {
+      filterDeleted: false,
+    },
+  },
   user: {
     alias: 'user',
     associations: {
@@ -28,49 +36,8 @@ export const resources = {
       permissions: {
         alias: 'permission',
       },
-      connections: {
-        alias: 'connection',
-      },
       segments: {
         alias: 'segment',
-      },
-      conversations: {
-        alias: 'conversation',
-      },
-      notifications: {
-        alias: 'notification',
-      },
-      documents: {
-        alias: 'document',
-      },
-      sharedDocuments: {
-        alias: 'shared-document',
-      },
-      images: {
-        alias: 'image',
-      },
-    },
-  },
-  conversation: {
-    alias: 'conversation',
-  },
-  notification: {
-    alias: 'notification',
-  },
-  connection: {
-    alias: 'connection',
-  },
-  auditLog: {
-    alias: 'auditLog',
-    options: {
-      filterDeleted: false,
-    },
-  },
-  document: {
-    alias: 'document',
-    associations: {
-      users: {
-        alias: 'user',
       },
     },
   },
@@ -92,9 +59,6 @@ export const resources = {
   },
   tag: {
     alias: 'tag',
-  },
-  image: {
-    alias: 'image',
   },
   visitor: {
     alias: 'visitor',
@@ -137,9 +101,41 @@ export const resources = {
   },
 };
 
+// This should be updated along with the resource list above
+export type Repository = {|
+  install: (...args: any) => any,
+  auditLog: Crud,
+  user: Crud & {
+    groups: Association,
+    permissions: Association,
+    segments: Association,
+  },
+  video: Crud & {
+    segments: Association,
+  },
+  segment: Crud & {
+    tags: Association,
+  },
+  tag: Crud,
+  visitor: Crud,
+  role: Crud & {
+    users: Association,
+    permissions: Association,
+  },
+  group: Crud & {
+    users: Association,
+    permissions: Association,
+  },
+  permissions: Crud & {
+    users: Association,
+    roles: Association,
+    groups: Association,
+  },
+|};
+
 export const API = {
-  USER: resources.user.alias || 'user',
-  PERMISSION: resources.permission.alias || 'permission',
+  USER: 'user',
+  PERMISSION: 'permission',
 };
 
 export const REQUIRED_PASSWORD_STRENGTH = 3;

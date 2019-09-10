@@ -2,7 +2,7 @@
 
 import * as store from '../store';
 
-import { httpClient as http } from '../services';
+import { httpClient as http, firebaseAuth } from '../services';
 
 const internals = {};
 
@@ -24,6 +24,7 @@ internals.logout = () => {
   return http
     .delete('/logout')
     .then(response => {
+      firebaseAuth.signOut();
       store.auth.clearAuth();
     })
     .catch(error => {

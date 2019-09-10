@@ -3,7 +3,7 @@
 import * as components from 'components';
 import * as data from 'data';
 import * as db from 'services/db';
-import React from 'reactn';
+import React, { useGlobal } from 'reactn';
 import * as utils from 'utils';
 import * as services from 'services';
 import Swal from 'sweetalert2';
@@ -55,14 +55,13 @@ const VideoSplitter = ({
   const [segments, setSegments] = React.useState(video.segments);
   const [saveData, setSaveData] = React.useState(false);
   const [refresh, setRefresh] = React.useState([true]);
+  const [currentUser] = useGlobal('user');
 
   const { duration } = video.data;
 
-  const user = services.auth.currentUser;
-
   const segment = segments.find(s => s.id === segmentId);
 
-  const owner = segment && user ? user.email === segment.createdBy : false;
+  const owner = segment && currentUser ? currentUser.email === segment.createdBy : false;
 
   const index = segments.indexOf(segment);
 
@@ -109,7 +108,7 @@ const VideoSplitter = ({
       title: 'New segment title',
       tags: [],
       description: '',
-      createdBy: user.email,
+      createdBy: currentUser.email,
       pristine: true,
     });
     setSegments(newSegments);
@@ -171,10 +170,10 @@ const VideoSplitter = ({
   }, [saveData]);
 
   React.useEffect(() => {
-    !segmentId && user && addSegment();
+    !segmentId && currentUser && addSegment();
   }, []);
 
-  if (!user) {
+  if (!currentUser) {
     return (
       <div>
         <AppHeader />
@@ -209,7 +208,7 @@ const VideoSplitter = ({
                       data={data}
                       color={segmentColors[i % segmentColors.length]}
                       onSelect={() => goTo(`/edit/${video.data.id}/${data.id}`)}
-                      canEdit={user.email === data.createdBy}
+                      canEdit={currentUser.email === data.createdBy}
                     />
                   ))}
                 </Segment.Group>
@@ -219,7 +218,7 @@ const VideoSplitter = ({
                   <Icon name="add" /> Add
                 </Button>
                 <Button
-                  disabled={segments.length <= 0 || !user || (segment && !owner)}
+                  disabled={segments.length <= 0 || !currentUser || (segment && !owner)}
                   color="red"
                   onClick={removeSegment}
                 >
@@ -256,7 +255,7 @@ const VideoSplitter = ({
                     }}
                   >
                     <components.Slider
-                      disabled={!user || !owner}
+                      disabled={!currentUser || !owner}
                       key={segments.length} // causes slider recreation on segments count change
                       range={{ min: 0, max: duration }}
                       onHandleSet={(i, value) =>
@@ -304,7 +303,7 @@ const VideoSplitter = ({
                 <Grid.Column width={8}>
                   <Input
                     className="segment-field"
-                    disabled={!user || !owner}
+                    disabled={!currentUser || !owner}
                     fluid
                     placeholder="Title"
                     value={segments[index].title}
@@ -319,7 +318,7 @@ const VideoSplitter = ({
                 </Grid.Column>
                 <Grid.Column width={4} style={{ textAlign: 'left' }}>
                   <InputMask
-                    disabled={!user || !owner}
+                    disabled={!currentUser || !owner}
                     ref={startRef}
                     className="segment-time-field"
                     mask="99:99:99"
@@ -328,7 +327,7 @@ const VideoSplitter = ({
                   />{' '}
                   -{' '}
                   <InputMask
-                    disabled={!user || !owner}
+                    disabled={!currentUser || !owner}
                     ref={endRef}
                     className="segment-time-field"
                     mask="99:99:99"
@@ -345,7 +344,7 @@ const VideoSplitter = ({
                   <Form>
                     <TextArea
                       className="segment-field"
-                      disabled={!user || !owner}
+                      disabled={!currentUser || !owner}
                       style={{ color: !owner && 'darkgray' }}
                       placeholder="Enter a description"
                       value={segments[index].description}
@@ -361,9 +360,9 @@ const VideoSplitter = ({
                   <Label>Tags:</Label>
                 </Grid.Column>
                 <Grid.Column width={14}>
-                  <div className="segment-field" disabled={!user || !owner}>
+                  <div className="segment-field" disabled={!currentUser || !owner}>
                     <TagsInput
-                      disabled={!user || !owner}
+                      disabled={!currentUser || !owner}
                       value={segments[index].tags}
                       onChange={tags => updateSegmentAt(index, { tags })}
                     />

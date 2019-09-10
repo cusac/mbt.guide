@@ -2,13 +2,14 @@
 
 import * as components from 'components';
 import * as hooks from 'hooks';
-import React from 'reactn';
-import * as services from 'services';
+import React, { useGlobal } from 'reactn';
 import * as utils from 'utils';
 
 import { Grid, Link, AppHeader, Label, Button, Container, Loading, List, Icon } from 'components';
 
 const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) => {
+  const [currentUser] = useGlobal('user');
+
   const video = hooks.useVideo(videoId);
   if (!video) {
     return (
@@ -29,8 +30,6 @@ const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) =
     );
   }
 
-  const user = services.auth.currentUser;
-
   const { start, end } = segment;
   return (
     <div>
@@ -44,7 +43,7 @@ const Watch = ({ videoId, segmentId }: { videoId: string, segmentId: string }) =
         start={segment.start}
         offsetTooltip={true}
       />
-      {user && user.email === segment.createdBy && (
+      {currentUser && currentUser.email === segment.createdBy && (
         <Button style={{ margin: 15, marginTop: 50 }}>
           <Icon name="edit" /> <Link to={`/edit/${videoId}/${segmentId}`}>Edit segment</Link>
         </Button>

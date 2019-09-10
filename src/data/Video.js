@@ -35,7 +35,7 @@ export default class Video {
       }
       const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
 
-      const user = services.auth.currentUser;
+      const user = services.firebaseAuth.currentUser;
 
       if (!user) {
         throw new Error(`Must be logged in to create a segment`);

@@ -12,11 +12,12 @@ import * as utils from 'utils';
 import './App.css';
 
 const App = () => {
-  // const [, setUser] = React.useState(undefined);
-  // React.useEffect(() => {
-  //   services.auth.onAuthStateChanged(setUser);
-  // }, []);
+  const [, setUser] = React.useState(undefined);
+  React.useEffect(() => {
+    services.firebaseAuth.onAuthStateChanged(setUser);
+  }, []);
   store.init();
+
   return (
     <div className="App">
       <components.ErrorBoundary onError={() => <div>Something went wrong!</div>}>

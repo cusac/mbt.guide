@@ -4,7 +4,7 @@ import * as components from 'components';
 import * as data from 'data';
 import * as utils from 'utils';
 import * as db from 'services/db';
-import React from 'reactn';
+import React, { useGlobal } from 'reactn';
 import * as services from 'services';
 import * as errors from 'errors';
 
@@ -28,6 +28,7 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [selectedVideo, setSelectedVideo] = React.useState();
   const [videos, setVideos] = React.useState([]);
   const [segmentVideo, setSegmentVideo] = React.useState();
+  const [currentUser] = useGlobal('user');
 
   const selectVideo = async videoId => {
     const response = await services.youtube.get('/videos', {
@@ -39,8 +40,6 @@ const Home = ({ videoId }: { videoId: string }) => {
     setSelectedVideo(video);
     video && utils.history.push(`/${videoId}`);
   };
-
-  const user = services.auth.currentUser;
 
   React.useEffect(() => {
     // We grab videos from the MBT 'uploads' playlist to save on youtube api search quota points
@@ -89,7 +88,8 @@ const Home = ({ videoId }: { videoId: string }) => {
   }, [segmentVideo]);
 
   React.useEffect(() => {
-    segments && setMySegments(segments.filter(s => user && s.createdBy === user.email));
+    segments &&
+      setMySegments(segments.filter(s => currentUser && s.createdBy === currentUser.email));
   }, [segments]);
 
   if (videos.length === 0) {
@@ -151,7 +151,7 @@ const Home = ({ videoId }: { videoId: string }) => {
 
             <br />
 
-            {user && (
+            {currentUser && (
               <div>
                 <Divider horizontal>
                   <Header as="h2">

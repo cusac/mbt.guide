@@ -1,13 +1,14 @@
 // @flow
 
-import React from 'reactn';
+import React, { useGlobal } from 'reactn';
 import * as utils from 'utils';
 import * as components from 'components';
 import * as services from 'services';
+import * as store from 'store';
 
 import logo from './logo-wide.png';
 
-const { Button, Grid, Searchbar, Icon, Auth } = components;
+const { Button, Grid, Searchbar, Icon, Auth, Header } = components;
 
 const AppHeader = ({
   onHandleSubmit,
@@ -18,8 +19,8 @@ const AppHeader = ({
   showSearchbar: boolean,
   currentVideoId: string,
 }) => {
-  const user = services.auth.currentUser;
   const [loading, setLoading] = React.useState(false);
+  const [currentUser] = useGlobal('user');
 
   return (
     <Grid className="AppHeader">
@@ -45,11 +46,11 @@ const AppHeader = ({
 
         {!loading ? (
           <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
-            {user ? (
+            {currentUser ? (
               <div>
-                {user.email}
+                {currentUser.email}
                 <br />
-                <Button onClick={() => services.auth.signOut()} style={{ margin: 5 }}>
+                <Button onClick={() => services.auth.logout()} style={{ margin: 5 }}>
                   Sign out
                 </Button>
               </div>
@@ -58,7 +59,10 @@ const AppHeader = ({
             )}
           </Grid.Column>
         ) : (
-          <h1>Loading...</h1>
+          <Header as="h2" icon textAlign="center" style={{ color: 'white ' }}>
+            <Icon loading name="spinner" />
+            <Header.Content>Signing In...</Header.Content>
+          </Header>
         )}
       </Grid.Row>
     </Grid>
