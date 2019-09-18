@@ -16,7 +16,7 @@ const App = () => {
   React.useEffect(() => {
     services.firebaseAuth.onAuthStateChanged(setUser);
   }, []);
-  store.init();
+  store.useStore();
 
   return (
     <div className="App">

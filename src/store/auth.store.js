@@ -12,7 +12,7 @@ const initalAuthState = {
 
 const internals = {};
 
-const initAuth = () => {
+const useAuth = () => {
   internals.updateTokens = useDispatch((state, dispatch, { accessToken, refreshToken }) => {
     updateAuthHeader(accessToken);
 
@@ -45,5 +45,5 @@ const updateAuthHeader = token => {
   axios.defaults.headers.common.Authorization = 'Bearer ' + token;
 };
 
-export { initalAuthState, initAuth };
+export { initalAuthState, useAuth };
 export default internals;
