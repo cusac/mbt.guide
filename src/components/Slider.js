@@ -1,4 +1,7 @@
 // @flow
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/rules-of-hooks */
+
 // https://refreshless.com/nouislider/
 
 import 'nouislider/distribute/nouislider.css';

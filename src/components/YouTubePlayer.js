@@ -77,6 +77,7 @@ const YouTubePlayer = ({
       });
     });
     return () => ytReady(() => player && player.destroy());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId]);
 
   const [prevTime, setPrevTime] = React.useState((undefined: number | void));
@@ -98,6 +99,7 @@ const YouTubePlayer = ({
     }
 
     player.seekTo(seconds, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player, seconds]);
 
   // broadcast current player time as it changes
@@ -119,6 +121,7 @@ const YouTubePlayer = ({
       onSecondsChange(time);
     }, 200);
     return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [counter]);
 
   // allow playing/pausing video using the playing prop
