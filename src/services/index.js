@@ -10,6 +10,7 @@ import config, { resources } from '../config';
 import youtube from './youtube.service';
 import httpClient from './http-client.service';
 import auth from './auth.service';
+import video from './video.service';
 import repository from './repository.service';
 
 const app = firebase.initializeApp({
@@ -35,6 +36,6 @@ axios.defaults.paramsSerializer = function(params) {
 // Initialize the repository
 repository.install({ httpClient, log: true, resources });
 
-export { firebaseAuth, db, firebase, firebaseui, youtube, httpClient, auth, repository };
+export { firebaseAuth, db, firebase, firebaseui, youtube, httpClient, repository, auth, video };
 
 export default app;

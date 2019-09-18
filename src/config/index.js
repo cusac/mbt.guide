@@ -1,6 +1,7 @@
 // @flow
 
 import type { Crud, Association } from '../utils/restful-resource-utility';
+import type { Video } from '../services/video.service';
 
 export default {
   serverURI: 'http://localhost:8080',
@@ -104,32 +105,32 @@ export const resources = {
 // This should be updated along with the resource list above
 export type Repository = {|
   install: (...args: any) => any,
-  auditLog: Crud,
-  user: Crud & {
-    groups: Association,
-    permissions: Association,
-    segments: Association,
+  auditLog: Crud<any>,
+  user: Crud<any> & {
+    groups: Association<any>,
+    permissions: Association<any>,
+    segments: Association<any>,
   },
-  video: Crud & {
-    segments: Association,
+  video: Crud<Video> & {
+    segments: Association<any>,
   },
-  segment: Crud & {
-    tags: Association,
+  segment: Crud<any> & {
+    tags: Association<any>,
   },
-  tag: Crud,
-  visitor: Crud,
-  role: Crud & {
-    users: Association,
-    permissions: Association,
+  tag: Crud<any>,
+  visitor: Crud<any>,
+  role: Crud<any> & {
+    users: Association<any>,
+    permissions: Association<any>,
   },
-  group: Crud & {
-    users: Association,
-    permissions: Association,
+  group: Crud<any> & {
+    users: Association<any>,
+    permissions: Association<any>,
   },
-  permissions: Crud & {
-    users: Association,
-    roles: Association,
-    groups: Association,
+  permissions: Crud<any> & {
+    users: Association<any>,
+    roles: Association<any>,
+    groups: Association<any>,
   },
 |};
 

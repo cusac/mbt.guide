@@ -9,17 +9,23 @@ export type Params = {
   $embed?: string | [string],
 };
 
-export type Crud = {|
-  list: (params: Params) => Promise<any>,
-  find: (_id: string, params: Params) => Promise<any>,
-  update: (_id: string, payload: any) => Promise<any>,
-  create: (payload: any | [any]) => Promise<any>,
+export type ListResponse<T> = {|
+  data: {
+    docs: [T],
+  },
+|};
+
+export type Crud<T> = {|
+  list: (params: Params) => Promise<ListResponse<T>>,
+  find: (_id: string, params: Params) => Promise<T>,
+  update: (_id: string, payload: any) => Promise<T>,
+  create: (payload: any | [any]) => Promise<T>,
   deleteOne: (_id: string, hardDelete: boolean) => Promise<any>,
   deleteMany: (payload: [any]) => Promise<any>,
 |};
 
-export type Association = {|
-  get: (ownerId: string, params: Params) => Promise<any>,
+export type Association<T> = {|
+  get: (ownerId: string, params: Params) => Promise<ListResponse<T>>,
   addOne: (ownerId: string, childId: string, payload: any) => Promise<any>,
   removeOne: (ownerId: string, childId: string) => Promise<any>,
   addMany: (ownerId: string, payload: [any]) => Promise<any>,
@@ -34,7 +40,7 @@ const ResourceHelper = function(httpClient: HttpClient, logger: Logger) {
      * @param resourceRoute: The API route for the resource.
      * @param options: Additional options to customize the caller.
      */
-    generateCrudCallers: function(resourceRoute: string, options: any): Crud {
+    generateCrudCallers: function(resourceRoute: string, options: any): Crud<any> {
       options = options || {};
       return {
         list: this.generateListCaller(resourceRoute, options),
