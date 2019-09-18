@@ -29,7 +29,7 @@ const httpClient: HttpClient = {
       .catch(function(error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
           store.auth.useRefreshToken();
-          return this.get(url, params, options);
+          return httpClient.get(url, params, options);
         } else {
           store.auth.clearAuth();
           throw error;
@@ -54,7 +54,7 @@ const httpClient: HttpClient = {
       .catch(function(error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
           store.auth.useRefreshToken();
-          return this.put(url, payload, options);
+          return httpClient.put(url, payload, options);
         } else {
           store.auth.clearAuth();
           throw error;
@@ -79,7 +79,7 @@ const httpClient: HttpClient = {
       .catch(function(error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
           store.auth.useRefreshToken();
-          return this.post(url, payload, options);
+          return httpClient.post(url, payload, options);
         } else {
           store.auth.clearAuth();
           throw error;
@@ -104,7 +104,7 @@ const httpClient: HttpClient = {
       .catch(function(error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
           store.auth.useRefreshToken();
-          return this.delete(url, payload, options);
+          return httpClient.delete(url, payload, options);
         } else {
           store.auth.clearAuth();
           throw error;

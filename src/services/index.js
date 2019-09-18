@@ -12,6 +12,7 @@ import httpClient from './http-client.service';
 import auth from './auth.service';
 import video from './video.service';
 import repository from './repository.service';
+import authInterceptor from './auth-interceptor.service';
 
 const app = firebase.initializeApp({
   apiKey: 'AIzaSyAn6loR5s_OC4aqA-nlMfpwOH2BogTM79g',
@@ -36,6 +37,17 @@ axios.defaults.paramsSerializer = function(params) {
 // Initialize the repository
 repository.install({ httpClient, log: true, resources });
 
-export { firebaseAuth, db, firebase, firebaseui, youtube, httpClient, repository, auth, video };
+export {
+  firebaseAuth,
+  db,
+  firebase,
+  firebaseui,
+  youtube,
+  httpClient,
+  repository,
+  auth,
+  authInterceptor,
+  video,
+};
 
 export default app;
