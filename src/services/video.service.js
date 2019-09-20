@@ -6,8 +6,18 @@ import * as services from 'services';
 
 import { httpClient as http, firebaseAuth } from '../services';
 
+export type Tag = {|
+  _id?: string,
+  name: string,
+|};
+
+export type TagEmbed = {|
+  tag: Tag,
+  rank: number,
+|};
+
 export type VideoSegment = {|
-  _id: string,
+  _id?: string,
   segmentId: string,
   owner: string,
   ownerEmail: string,
@@ -15,13 +25,13 @@ export type VideoSegment = {|
   title: string,
   start: number,
   end: number, // seconds, last segment's end is the video duration
-  tags: string[],
+  tags: TagEmbed[],
   description: string,
   pristine: boolean, // used to indicate the segment has changes that need saving
 |};
 
 export type Video = {|
-  _id: string,
+  _id?: string,
   ytId: string,
   duration: number, // video length in seconds
   youtube: Object, // cached information about the video from YouTube
@@ -67,7 +77,7 @@ internals.updateVideoSegments = async ({
   segments: VideoSegment[],
 }) => {
   return http.post('/update-video-segments', { videoId, segments }).catch(error => {
-    console.error('authService.login-error:\n', error);
+    console.error('videoService.updateVideoSegments-error:\n', error);
     throw error;
   });
 };

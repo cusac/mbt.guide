@@ -9,8 +9,9 @@ import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
 import InputMask from 'react-input-mask';
 import { v4 as uuid } from 'uuid';
+import { differenceBy, uniq } from 'lodash';
 
-import type { Video, VideoSegment } from 'types';
+import type { Video, VideoSegment, Tag } from 'types';
 
 import VideoSegmentItem from './VideoSegmentItem';
 
@@ -67,6 +68,22 @@ const VideoSplitter = ({
       (endRef.current.value = utils.timeFormat.to(data.end));
     setSegments(newSegments);
     setSaveData(true);
+  };
+
+  const updateTags = (index, tags: string[], rank: number) => {
+    // Remove duplicates
+    tags = uniq(tags);
+    // Remove old tag if rank changed
+    currentSegment.tags = differenceBy(
+      currentSegment.tags,
+      tags.map(t => ({ tag: { name: t } })),
+      'tag.name'
+    );
+    // Keep segments of other ranks
+    currentSegment.tags = currentSegment.tags.filter(t => t.rank !== rank);
+    // Add new tags to old
+    tags = [...currentSegment.tags, ...tags.map(t => ({ tag: { name: t }, rank }))];
+    updateSegmentAt(index, { ...currentSegment, tags });
   };
 
   const updateStart = (index, value) => {
@@ -245,9 +262,11 @@ const VideoSplitter = ({
 
   const index = segments.indexOf(currentSegment);
 
+  console.log('CURR SEG:', currentSegment);
+
   !currentSegment && segments.length > 0 && goTo(`/edit/${video.ytId}/${segments[0].segmentId}`);
 
-  if (index < 0) {
+  if (currentSegment && index < 0) {
     return (
       <div>
         <AppHeader />
@@ -429,20 +448,37 @@ const VideoSplitter = ({
                   </Form>
                 </Grid.Column>
               </Grid.Row>
-              {/* <Grid.Row>
+              <Grid.Row>
                 <Grid.Column verticalAlign="middle" style={{ textAlign: 'right' }} width={2}>
                   <Label>Tags:</Label>
                 </Grid.Column>
                 <Grid.Column width={14}>
+                  <h2>High Relevance</h2>
                   <div className="segment-field" disabled={!currentUser || !owner}>
                     <TagsInput
                       disabled={!currentUser || !owner}
-                      value={segments[index].tags}
-                      onChange={tags => updateSegmentAt(index, { tags })}
+                      value={currentSegment.tags.filter(t => t.rank === 11).map(t => t.tag.name)}
+                      onChange={tags => updateTags(index, tags, 11)}
+                    />
+                  </div>
+                  <h2>Mid Relevance</h2>
+                  <div className="segment-field" disabled={!currentUser || !owner}>
+                    <TagsInput
+                      disabled={!currentUser || !owner}
+                      value={currentSegment.tags.filter(t => t.rank === 6).map(t => t.tag.name)}
+                      onChange={tags => updateTags(index, tags, 6)}
+                    />
+                  </div>
+                  <h2>Low Relevance</h2>
+                  <div className="segment-field" disabled={!currentUser || !owner}>
+                    <TagsInput
+                      disabled={!currentUser || !owner}
+                      value={currentSegment.tags.filter(t => t.rank === 1).map(t => t.tag.name)}
+                      onChange={tags => updateTags(index, tags, 1)}
                     />
                   </div>
                 </Grid.Column>
-              </Grid.Row> */}
+              </Grid.Row>
             </Grid>
           </div>
         ) : (

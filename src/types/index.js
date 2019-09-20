@@ -1,5 +1,5 @@
 // @flow
 
-import type { Video, VideoSegment } from '../services/video.service';
+import type { Video, VideoSegment, Tag, TagEmbed } from '../services/video.service';
 
-export type { Video, VideoSegment };
+export type { Video, VideoSegment, Tag, TagEmbed };
