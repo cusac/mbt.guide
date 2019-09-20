@@ -9,6 +9,11 @@ const internals = {};
 internals.responseError = function(error: any) {
   let response = error.response;
 
+  if (!response) {
+    console.error('NO RESPONSE IN ERROR');
+    throw error;
+  }
+
   // var Notification = $injector.get('Notification');
 
   // If the access token was expired, allow the apiHelperService to try a refresh token

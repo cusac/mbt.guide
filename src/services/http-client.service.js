@@ -31,7 +31,6 @@ const httpClient: HttpClient = {
           store.auth.useRefreshToken();
           return httpClient.get(url, params, options);
         } else {
-          store.auth.clearAuth();
           throw error;
         }
       });
@@ -56,7 +55,6 @@ const httpClient: HttpClient = {
           store.auth.useRefreshToken();
           return httpClient.put(url, payload, options);
         } else {
-          store.auth.clearAuth();
           throw error;
         }
       });
@@ -81,7 +79,6 @@ const httpClient: HttpClient = {
           store.auth.useRefreshToken();
           return httpClient.post(url, payload, options);
         } else {
-          store.auth.clearAuth();
           throw error;
         }
       });
@@ -106,7 +103,6 @@ const httpClient: HttpClient = {
           store.auth.useRefreshToken();
           return httpClient.delete(url, payload, options);
         } else {
-          store.auth.clearAuth();
           throw error;
         }
       });
