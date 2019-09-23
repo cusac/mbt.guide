@@ -4,6 +4,7 @@ import * as components from 'components';
 import * as db from 'services/db';
 import React from 'reactn';
 import * as utils from 'utils';
+import type { VideoSegment } from 'types';
 
 const { Button, Grid, Segment } = components;
 
@@ -15,7 +16,7 @@ const VideoSegmentItem = ({
   canEdit,
 }: {
   active: boolean,
-  data: db.VideoSegment,
+  data: VideoSegment,
   color: string,
   onSelect: () => void,
   canEdit: boolean,
