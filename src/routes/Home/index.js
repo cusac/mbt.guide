@@ -8,6 +8,8 @@ import React, { useGlobal } from 'reactn';
 import * as services from 'services';
 import * as errors from 'errors';
 
+const channelId = 'UCYwlraEwuFB4ZqASowjoM0g';
+
 const {
   Button,
   Link,
@@ -31,47 +33,48 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [currentUser] = useGlobal('user');
 
   const selectVideo = async videoId => {
-    const response = await services.youtube.get('/videos', {
+    const [video] = await services.youtube({
+      endpoint: 'videos',
       params: {
         id: videoId,
       },
     });
-    const video = response.data.items[0];
     setSelectedVideo(video);
     video && utils.history.push(`/${videoId}`);
   };
 
   React.useEffect(() => {
     // We grab videos from the MBT 'uploads' playlist to save on youtube api search quota points
-    services.youtube
-      .get('/playlistItems', {
+    async function fetchVideos() {
+      const response = await services.youtube({
+        endpoint: 'playlistItems',
         params: {
           playlistId: 'UUYwlraEwuFB4ZqASowjoM0g',
         },
-      })
-      .then(response => {
-        const mbtVids = response.data.items.map(v => ({
-          snippet: v.snippet,
-          id: {
-            videoId: v.snippet.resourceId.videoId,
-          },
-        }));
-        setVideos(mbtVids);
-        !videoId && selectVideo(`_ok27SPHhwA`);
       });
+      const mbtVids = response.map(v => ({
+        snippet: v.snippet,
+        id: {
+          videoId: v.snippet.resourceId.videoId,
+        },
+      }));
+      setVideos(mbtVids);
+      !videoId && selectVideo(`_ok27SPHhwA`);
+    }
+    fetchVideos();
   }, []);
 
   React.useEffect(() => {
-    videoId &&
-      services.youtube
-        .get('/videos', {
-          params: {
-            id: videoId,
-          },
-        })
-        .then(response => {
-          setSelectedVideo(response.data.items[0]);
-        });
+    async function fetchSelectedVideo() {
+      const [video] = await services.youtube({
+        endpoint: 'videos',
+        params: {
+          id: videoId,
+        },
+      });
+      setSelectedVideo(video);
+    }
+    videoId && fetchSelectedVideo();
   }, []);
 
   React.useEffect(() => {
@@ -105,19 +108,16 @@ const Home = ({ videoId }: { videoId: string }) => {
     ? `https://www.youtube.com/embed/${selectedVideo.id.videoId || selectedVideo.id}`
     : '';
 
-  const searchVideos = term => {
-    services.youtube
-      .get('/search', {
-        params: {
-          q: term,
-        },
-      })
-      .then(response => {
-        const mbtVids = response.data.items.filter(
-          v => v.snippet.channelId === 'UCYwlraEwuFB4ZqASowjoM0g'
-        );
-        setVideos(mbtVids);
-      });
+  const searchVideos = async term => {
+    const response = await services.youtube({
+      endpoint: 'search',
+      params: {
+        q: term,
+      },
+    });
+
+    const mbtVids = response.filter(v => v.snippet.channelId === channelId);
+    setVideos(mbtVids);
   };
 
   const createVideo = () => {

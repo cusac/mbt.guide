@@ -1,15 +1,32 @@
 // @flow
 
-import axios from 'axios';
 // const KEY = 'AIzaSyBTOgZacvh2HpWGO-8Fbd7dUOvMJvf-l_o';
-const KEY = 'AIzaSyCaOgq4IfzE_5JrLFqyKCdigruqiSOz2q4';
+const key = 'AIzaSyCaOgq4IfzE_5JrLFqyKCdigruqiSOz2q4';
+const channelId = 'UCYwlraEwuFB4ZqASowjoM0g';
 
-export default axios.create({
-  baseURL: 'https://www.googleapis.com/youtube/v3/',
-  params: {
-    part: 'snippet',
-    maxResults: 50,
-    key: KEY,
-    channelId: 'UCYwlraEwuFB4ZqASowjoM0g',
-  },
-});
+export default async function({ endpoint, params }: { endpoint: string, params: any }) {
+  let url = `https://www.googleapis.com/youtube/v3/${endpoint}`;
+  params = Object.assign(
+    {
+      part: 'snippet',
+      maxResults: 50,
+      key,
+      channelId,
+    },
+    params
+  );
+
+  let first = true;
+
+  for (const paramKey in params) {
+    if (params[paramKey]) {
+      url = first
+        ? `${url}?${paramKey}=${params[paramKey]}`
+        : `${url}&${paramKey}=${params[paramKey]}`;
+      first = false;
+    }
+  }
+  console.log('URL:', url);
+  const response = await fetch(url);
+  return (await response.json()).items;
+}
