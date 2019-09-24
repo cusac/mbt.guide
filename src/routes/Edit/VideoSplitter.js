@@ -110,6 +110,7 @@ const VideoSplitter = ({
       ownerEmail: currentUser.email,
       tags: [],
       description: '',
+      pristine: true,
     });
     setSegments(newSegments);
     goTo(`/edit/${video.ytId}/${newId}`);
