@@ -4,7 +4,7 @@ import * as store from '../store';
 import * as luxon from 'luxon';
 import * as services from 'services';
 
-import { httpClient as http, firebaseAuth } from '../services';
+import { httpClient as http } from '../services';
 
 export type Tag = {|
   _id?: string,
@@ -38,15 +38,16 @@ export type Video = {|
   segments: [VideoSegment],
 |};
 
-const YOUTUBE_API_KEY = 'AIzaSyBTOgZacvh2HpWGO-8Fbd7dUOvMJvf-l_o';
-
 const internals = {};
 
-internals.create = async ({ videoId, setVideo }: { videoId: string, setVideo: Video => void }) => {
-  const ytResponse = await fetch(
-    `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,contentDetails&key=${YOUTUBE_API_KEY}`
-  );
-  const [ytVideo] = (await ytResponse.json()).items;
+internals.create = async ({ videoId }: { videoId: string }) => {
+  const [ytVideo] = await services.youtube({
+    endpoint: 'videos',
+    params: {
+      id: videoId,
+      part: 'snippet,contentDetails',
+    },
+  });
 
   if (!ytVideo) {
     throw new Error(`Missing YouTube Video with id ${videoId}`);
@@ -59,8 +60,6 @@ internals.create = async ({ videoId, setVideo }: { videoId: string, setVideo: Vi
       duration: duration,
       ytId: videoId,
     });
-
-    setVideo && setVideo(video);
 
     return video;
   } catch (error) {

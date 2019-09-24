@@ -26,7 +26,6 @@ export default async function({ endpoint, params }: { endpoint: string, params: 
       first = false;
     }
   }
-  console.log('URL:', url);
   const response = await fetch(url);
   return (await response.json()).items;
 }
