@@ -46,11 +46,13 @@ const VideoSplitter = ({
 }) => {
   const [currentUser] = useGlobal('user');
   const [video, setVideo]: [Video, any] = React.useState();
+  const [videoLoading, setVideoLoading]: [boolean, any] = React.useState(false);
   const [segments, setSegments]: [VideoSegment[], any] = React.useState([]);
   const [currentSegment, setCurrentSegment]: [VideoSegment, any] = React.useState();
   const [saveData, setSaveData]: [boolean, any] = React.useState(false);
   const [refresh, setRefresh]: [[boolean], any] = React.useState([true]);
   const [newVid, setNewVid]: [boolean, any] = React.useState(false);
+  const [newVidCreating, setnewVidCreating]: [boolean, any] = React.useState(false);
   const [wait, setWait]: [boolean, any] = React.useState(true);
   const [error, setError] = React.useState();
 
@@ -161,16 +163,20 @@ const VideoSplitter = ({
   };
 
   const getVideoData = async videoId => {
-    const [video] = (await services.repository.video.list({
-      ytId: videoId,
-      $embed: ['segments.tags'],
-    })).data.docs;
+    if (!videoLoading) {
+      setVideoLoading(true);
+      const [video] = (await services.repository.video.list({
+        ytId: videoId,
+        $embed: ['segments.tags'],
+      })).data.docs;
+      setVideoLoading(false);
 
-    if (!video) {
-      setNewVid(true);
-    } else {
-      setVideo(video);
-      setSegments(video.segments);
+      if (!video) {
+        setNewVid(true);
+      } else {
+        setVideo(video);
+        setSegments(video.segments);
+      }
     }
   };
 
@@ -215,7 +221,13 @@ const VideoSplitter = ({
   }
 
   if (newVid) {
-    services.video.create({ videoId, setVideo }).then(() => setNewVid(false));
+    !newVidCreating &&
+      services.video.create({ videoId }).then(() => {
+        setNewVid(false);
+        setnewVidCreating(false);
+        getVideoData(videoId);
+      });
+    !newVidCreating && setnewVidCreating(true);
     return (
       <div>
         <AppHeader />
