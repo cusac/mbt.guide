@@ -31,6 +31,7 @@ const initState = () => {
   axios.interceptors.response.use(function(response) {
     return Promise.resolve(response);
   }, authInterceptor.responseError);
+
   setGlobal({ ...initalAuthState, ...initGlobalState });
 };
 

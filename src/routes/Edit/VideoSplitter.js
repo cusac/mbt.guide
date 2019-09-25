@@ -275,8 +275,6 @@ const VideoSplitter = ({
 
   const index = segments.indexOf(currentSegment);
 
-  console.log('CURR SEG:', currentSegment);
-
   !currentSegment && segments.length > 0 && goTo(`/edit/${video.ytId}/${segments[0].segmentId}`);
 
   if (currentSegment && index < 0) {

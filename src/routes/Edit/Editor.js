@@ -1,6 +1,5 @@
 // @flow
 
-import * as hooks from 'hooks';
 import React from 'reactn';
 import * as components from 'components';
 

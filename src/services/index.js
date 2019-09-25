@@ -25,7 +25,6 @@ const app = firebase.initializeApp({
 });
 
 const firebaseAuth = app.auth();
-const db = app.firestore();
 
 axios.defaults.baseURL = config.serverURI;
 
@@ -39,7 +38,6 @@ repository.install({ httpClient, log: true, resources });
 
 export {
   firebaseAuth,
-  db,
   firebase,
   firebaseui,
   youtube,

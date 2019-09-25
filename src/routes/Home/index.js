@@ -1,12 +1,12 @@
 // @flow
 
 import * as components from 'components';
-import * as data from 'data';
 import * as utils from 'utils';
-import * as db from 'services/db';
 import React, { useGlobal } from 'reactn';
 import * as services from 'services';
 import * as errors from 'errors';
+
+import type { Video, VideoSegment } from 'types';
 
 const channelId = 'UCYwlraEwuFB4ZqASowjoM0g';
 
@@ -25,8 +25,8 @@ const {
 
 const Home = ({ videoId }: { videoId: string }) => {
   const [error, setError] = React.useState();
-  const [segments, setSegments] = React.useState((undefined: Array<db.VideoSegment> | void));
-  const [mySegments, setMySegments] = React.useState((undefined: Array<db.VideoSegment> | void));
+  const [segments, setSegments] = React.useState((undefined: Array<VideoSegment> | void));
+  const [mySegments, setMySegments] = React.useState((undefined: Array<VideoSegment> | void));
   const [selectedVideo, setSelectedVideo] = React.useState();
   const [videos, setVideos] = React.useState([]);
   const [segmentVideo, setSegmentVideo] = React.useState();
@@ -75,15 +75,17 @@ const Home = ({ videoId }: { videoId: string }) => {
       setSelectedVideo(video);
     }
     videoId && fetchSelectedVideo();
-  }, []);
+  }, [videoId]);
 
   React.useEffect(() => {
-    error instanceof errors.MissingVideoError && segments && segments.length > 0 && setSegments([]);
-  }, [error]);
-
-  React.useEffect(() => {
-    selectedVideo &&
-      data.Video.subscribe(selectedVideo.id.videoId || selectedVideo.id, setSegmentVideo, setError);
+    const fetchSegmentVideo = async () => {
+      const video = (await services.repository.video.list({
+        ytId: videoId,
+        $embed: ['segments'],
+      })).data.docs[0];
+      video ? setSegmentVideo(video) : setSegments([]);
+    };
+    selectedVideo ? fetchSegmentVideo() : setSegments([]);
   }, [selectedVideo]);
 
   React.useEffect(() => {
@@ -92,7 +94,7 @@ const Home = ({ videoId }: { videoId: string }) => {
 
   React.useEffect(() => {
     segments &&
-      setMySegments(segments.filter(s => currentUser && s.createdBy === currentUser.email));
+      setMySegments(segments.filter(s => currentUser && s.ownerEmail === currentUser.email));
   }, [segments]);
 
   if (videos.length === 0) {
@@ -177,9 +179,9 @@ const Home = ({ videoId }: { videoId: string }) => {
                         </Grid.Column>
                       </Grid.Row>
                       {mySegments.map(segment => (
-                        <Grid.Row key={segment.id}>
+                        <Grid.Row key={segment.segmentId}>
                           <Grid.Column verticalAlign="middle" width={3}>
-                            <Link to={`/watch/${segment.videoId}/${segment.id}`}>
+                            <Link to={`/watch/${segment.videoYtId}/${segment.segmentId}`}>
                               {segment.title}
                             </Link>
                           </Grid.Column>
@@ -194,7 +196,9 @@ const Home = ({ videoId }: { videoId: string }) => {
                               name="edit"
                               color="blue"
                               onClick={() =>
-                                utils.history.push(`/edit/${segment.videoId}/${segment.id}`)
+                                utils.history.push(
+                                  `/edit/${segment.videoYtId}/${segment.segmentId}`
+                                )
                               }
                             />
                           </Grid.Column>
@@ -205,7 +209,9 @@ const Home = ({ videoId }: { videoId: string }) => {
                               name="video play"
                               color="green"
                               onClick={() =>
-                                utils.history.push(`/watch/${segment.videoId}/${segment.id}`)
+                                utils.history.push(
+                                  `/watch/${segment.videoYtId}/${segment.segmentId}`
+                                )
                               }
                             />
                           </Grid.Column>
@@ -245,9 +251,11 @@ const Home = ({ videoId }: { videoId: string }) => {
                     </Grid.Column>
                   </Grid.Row>
                   {segments.map(segment => (
-                    <Grid.Row key={segment.id}>
+                    <Grid.Row key={segment.segmentId}>
                       <Grid.Column verticalAlign="middle" width={3}>
-                        <Link to={`/watch/${segment.videoId}/${segment.id}`}>{segment.title}</Link>
+                        <Link to={`/watch/${segment.videoYtId}/${segment.segmentId}`}>
+                          {segment.title}
+                        </Link>
                       </Grid.Column>
                       <Grid.Column textAlign="left" width={11}>
                         {segment.description || 'No description available.'}
@@ -259,7 +267,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                           name="video play"
                           color="green"
                           onClick={() =>
-                            utils.history.push(`/watch/${segment.videoId}/${segment.id}`)
+                            utils.history.push(`/watch/${segment.videoYtId}/${segment.segmentId}`)
                           }
                         />
                       </Grid.Column>

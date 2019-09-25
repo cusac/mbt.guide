@@ -1,7 +1,6 @@
 // @flow
 
 import * as components from 'components';
-import * as db from 'services/db';
 import React from 'reactn';
 import * as utils from 'utils';
 
