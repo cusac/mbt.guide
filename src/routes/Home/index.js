@@ -86,7 +86,7 @@ const Home = ({ videoId }: { videoId: string }) => {
       video ? setSegmentVideo(video) : setSegments([]);
     };
     selectedVideo ? fetchSegmentVideo() : setSegments([]);
-  }, [selectedVideo]);
+  }, [selectedVideo, currentUser]);
 
   React.useEffect(() => {
     setSegments(segmentVideo ? segmentVideo.segments : []);
