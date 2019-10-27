@@ -9,6 +9,7 @@ import { Grid, Link, AppHeader, Label, Button, Container, Loading, List, Icon } 
 
 const Watch = ({ segmentId }: { segmentId: string }) => {
   const [currentUser] = useGlobal('user');
+  const [currentUserScope] = useGlobal('scope');
   const [segment, setSegment] = React.useState();
   const [segmentMissing, setSegmentMissing] = React.useState(false);
 
@@ -41,6 +42,12 @@ const Watch = ({ segmentId }: { segmentId: string }) => {
     );
   }
 
+  const canEdit =
+    segment && currentUser
+      ? currentUser.email === segment.ownerEmail ||
+        utils.hasPermission({ currentScope: currentUserScope, requiredScope: ['Admin'] })
+      : false;
+
   const { start, end } = segment;
   return (
     <div>
@@ -54,7 +61,7 @@ const Watch = ({ segmentId }: { segmentId: string }) => {
         start={segment.start}
         offsetTooltip={true}
       />
-      {currentUser && currentUser.email === segment.ownerEmail && (
+      {canEdit && (
         <Button style={{ margin: 15, marginTop: 50 }}>
           <Icon name="edit" />
           <Link to={`/edit/${segment.videoYtId}/${segmentId}`}>Edit segment</Link>

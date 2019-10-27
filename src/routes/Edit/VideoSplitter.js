@@ -10,6 +10,7 @@ import 'react-tagsinput/react-tagsinput.css';
 import InputMask from 'react-input-mask';
 import { v4 as uuid } from 'uuid';
 import { differenceBy, uniq } from 'lodash';
+import { hasPermission } from 'utils';
 
 import type { Video, VideoSegment, Tag } from 'types';
 
@@ -45,6 +46,7 @@ const VideoSplitter = ({
   minSegmentDuration: number,
 }) => {
   const [currentUser] = useGlobal('user');
+  const [currentUserScope] = useGlobal('scope');
   const [video, setVideo]: [Video, any] = React.useState();
   const [videoLoading, setVideoLoading]: [boolean, any] = React.useState(false);
   const [segments, setSegments]: [VideoSegment[], any] = React.useState([]);
@@ -270,8 +272,11 @@ const VideoSplitter = ({
 
   const { duration } = video;
 
-  const owner =
-    currentSegment && currentUser ? currentUser.email === currentSegment.ownerEmail : false;
+  const canEdit =
+    currentSegment && currentUser
+      ? currentUser.email === currentSegment.ownerEmail ||
+        hasPermission({ currentScope: currentUserScope, requiredScope: ['Admin'] })
+      : false;
 
   const index = segments.indexOf(currentSegment);
 
@@ -322,7 +327,7 @@ const VideoSplitter = ({
                   <Icon name="add" /> Add
                 </Button>
                 <Button
-                  disabled={segments.length <= 0 || !currentUser || (currentSegment && !owner)}
+                  disabled={segments.length <= 0 || !currentUser || (currentSegment && !canEdit)}
                   color="red"
                   onClick={removeSegment}
                 >
@@ -338,7 +343,7 @@ const VideoSplitter = ({
         {currentSegment ? (
           <div>
             <Grid relaxed style={{ marginTop: 20 }}>
-              {!owner && (
+              {!canEdit && (
                 <Grid.Row>
                   <Grid.Column>
                     <Segment color="red" style={{ color: 'red' }}>
@@ -359,7 +364,7 @@ const VideoSplitter = ({
                     }}
                   >
                     <components.Slider
-                      disabled={!currentUser || !owner}
+                      disabled={!currentUser || !canEdit}
                       key={segments.length} // causes slider recreation on segments count change
                       range={{ min: 0, max: duration }}
                       onHandleSet={(i, value) =>
@@ -407,7 +412,7 @@ const VideoSplitter = ({
                 <Grid.Column width={8}>
                   <Input
                     className="segment-field"
-                    disabled={!currentUser || !owner}
+                    disabled={!currentUser || !canEdit}
                     fluid
                     placeholder="Title"
                     value={segments[index].title}
@@ -422,7 +427,7 @@ const VideoSplitter = ({
                 </Grid.Column>
                 <Grid.Column width={4} style={{ textAlign: 'left' }}>
                   <InputMask
-                    disabled={!currentUser || !owner}
+                    disabled={!currentUser || !canEdit}
                     ref={startRef}
                     className="segment-time-field"
                     mask="99:99:99"
@@ -431,7 +436,7 @@ const VideoSplitter = ({
                   />{' '}
                   -{' '}
                   <InputMask
-                    disabled={!currentUser || !owner}
+                    disabled={!currentUser || !canEdit}
                     ref={endRef}
                     className="segment-time-field"
                     mask="99:99:99"
@@ -448,8 +453,8 @@ const VideoSplitter = ({
                   <Form>
                     <TextArea
                       className="segment-field"
-                      disabled={!currentUser || !owner}
-                      style={{ color: !owner && 'darkgray' }}
+                      disabled={!currentUser || !canEdit}
+                      style={{ color: !canEdit && 'darkgray' }}
                       placeholder="Enter a description"
                       value={segments[index].description}
                       onChange={(event, { value }) =>
@@ -465,25 +470,25 @@ const VideoSplitter = ({
                 </Grid.Column>
                 <Grid.Column width={14}>
                   <h2>High Relevance</h2>
-                  <div className="segment-field" disabled={!currentUser || !owner}>
+                  <div className="segment-field" disabled={!currentUser || !canEdit}>
                     <TagsInput
-                      disabled={!currentUser || !owner}
+                      disabled={!currentUser || !canEdit}
                       value={currentSegment.tags.filter(t => t.rank === 11).map(t => t.tag.name)}
                       onChange={tags => updateTags(index, tags, 11)}
                     />
                   </div>
                   <h2>Mid Relevance</h2>
-                  <div className="segment-field" disabled={!currentUser || !owner}>
+                  <div className="segment-field" disabled={!currentUser || !canEdit}>
                     <TagsInput
-                      disabled={!currentUser || !owner}
+                      disabled={!currentUser || !canEdit}
                       value={currentSegment.tags.filter(t => t.rank === 6).map(t => t.tag.name)}
                       onChange={tags => updateTags(index, tags, 6)}
                     />
                   </div>
                   <h2>Low Relevance</h2>
-                  <div className="segment-field" disabled={!currentUser || !owner}>
+                  <div className="segment-field" disabled={!currentUser || !canEdit}>
                     <TagsInput
-                      disabled={!currentUser || !owner}
+                      disabled={!currentUser || !canEdit}
                       value={currentSegment.tags.filter(t => t.rank === 1).map(t => t.tag.name)}
                       onChange={tags => updateTags(index, tags, 1)}
                     />
