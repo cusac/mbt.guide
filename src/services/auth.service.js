@@ -6,9 +6,19 @@ import { httpClient as http, firebaseAuth } from '../services';
 
 const internals = {};
 
-internals.login = (idToken: string) => {
+internals.login = ({
+  idToken,
+  email,
+  password,
+  displayName,
+}: {
+  idToken?: string,
+  email?: string,
+  password?: string,
+  displayName?: string,
+}) => {
   return http
-    .post('/login', { idToken })
+    .post('/login', { idToken, email, password, displayName })
     .then(response => {
       console.log('LOGIN:', response);
       return store.auth.setAuth(response.data);
