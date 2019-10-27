@@ -1,3 +1,5 @@
-printWidth: 100
-singleQuote: true
-trailingComma: "es5" # NOTE 'all' requires transform
+{
+    "printWidth": 100,
+    "singleQuote": true,
+    "trailingComma": "es5"
+}

@@ -4,7 +4,15 @@ import * as firebase from 'firebase/app';
 import firebaseui from 'firebaseui';
 import 'firebase/auth';
 import 'firebase/firestore';
-import youtube from './youtube';
+import axios from 'axios';
+import qs from 'querystring';
+import config, { resources } from '../config';
+import youtube from './youtube.service';
+import httpClient from './http-client.service';
+import auth from './auth.service';
+import video from './video.service';
+import repository from './repository.service';
+import authInterceptor from './auth-interceptor.service';
 
 const app = firebase.initializeApp({
   apiKey: 'AIzaSyAn6loR5s_OC4aqA-nlMfpwOH2BogTM79g',
@@ -16,9 +24,28 @@ const app = firebase.initializeApp({
   appId: '1:461006931750:web:3c39f2584c45ac7c',
 });
 
-const auth = app.auth();
-const db = app.firestore();
+const firebaseAuth = app.auth();
 
-export { auth, db, firebase, firebaseui, youtube };
+axios.defaults.baseURL = config.serverURI;
+
+// Replace default serializer with one that works with Joi validation
+axios.defaults.paramsSerializer = function(params) {
+  return qs.stringify(params);
+};
+
+// Initialize the repository
+repository.install({ httpClient, log: true, resources });
+
+export {
+  firebaseAuth,
+  firebase,
+  firebaseui,
+  youtube,
+  httpClient,
+  repository,
+  auth,
+  authInterceptor,
+  video,
+};
 
 export default app;

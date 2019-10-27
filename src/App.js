@@ -2,18 +2,26 @@
 
 import { Router, Route } from 'react-router-dom';
 import * as components from 'components';
-import * as React from 'react';
+import React from 'reactn';
 import * as routes from 'routes';
 import * as services from 'services';
+import * as store from 'store';
 import * as utils from 'utils';
+import { toast } from 'react-toastify';
 
+// Import css
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+
+toast.configure();
 
 const App = () => {
   const [, setUser] = React.useState(undefined);
   React.useEffect(() => {
-    services.auth.onAuthStateChanged(setUser);
+    services.firebaseAuth.onAuthStateChanged(setUser);
   }, []);
+  store.useStore();
+
   return (
     <div className="App">
       <components.ErrorBoundary onError={() => <div>Something went wrong!</div>}>

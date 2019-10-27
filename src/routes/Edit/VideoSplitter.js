@@ -1,9 +1,7 @@
 // @flow
 
 import * as components from 'components';
-import * as data from 'data';
-import * as db from 'services/db';
-import * as React from 'react';
+import React, { useGlobal } from 'reactn';
 import * as utils from 'utils';
 import * as services from 'services';
 import Swal from 'sweetalert2';
@@ -11,8 +9,12 @@ import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
 import InputMask from 'react-input-mask';
 import { v4 as uuid } from 'uuid';
+import { differenceBy, uniq } from 'lodash';
+import { hasPermission } from 'utils';
 
-import VideoSegment from './VideoSegment';
+import type { Video, VideoSegment, Tag } from 'types';
+
+import VideoSegmentItem from './VideoSegmentItem';
 
 const {
   Button,
@@ -30,52 +32,36 @@ const {
   Header,
 } = components;
 
+//TODO: Error Handling
+
 const VideoSplitter = ({
-  video,
   videoId,
   segmentId,
   segmentColors,
   minSegmentDuration,
 }: {
-  video: data.Video,
   videoId: string,
   segmentId: string,
   segmentColors: Array<string>,
   minSegmentDuration: number,
 }) => {
-  if (!video.data) {
-    data.Video.create(videoId);
-    return (
-      <div>
-        <AppHeader />
-        <Loading>Creating video...</Loading>
-      </div>
-    );
-  }
-  const [segments, setSegments] = React.useState(video.segments);
-  const [saveData, setSaveData] = React.useState(false);
-  const [refresh, setRefresh] = React.useState([true]);
-
-  const { duration } = video.data;
-
-  const user = services.auth.currentUser;
-
-  const segment = segments.find(s => s.id === segmentId);
-
-  const owner = segment && user ? user.email === segment.createdBy : false;
-
-  const index = segments.indexOf(segment);
+  const [currentUser] = useGlobal('user');
+  const [currentUserScope] = useGlobal('scope');
+  const [video, setVideo]: [Video, any] = React.useState();
+  const [videoLoading, setVideoLoading]: [boolean, any] = React.useState(false);
+  const [segments, setSegments]: [VideoSegment[], any] = React.useState([]);
+  const [currentSegment, setCurrentSegment]: [VideoSegment, any] = React.useState();
+  const [saveData, setSaveData]: [boolean, any] = React.useState(false);
+  const [refresh, setRefresh]: [[boolean], any] = React.useState([true]);
+  const [newVid, setNewVid]: [boolean, any] = React.useState(false);
+  const [newVidCreating, setnewVidCreating]: [boolean, any] = React.useState(false);
+  const [wait, setWait]: [boolean, any] = React.useState(true);
+  const [error, setError] = React.useState();
 
   const startRef = React.createRef();
   const endRef = React.createRef();
 
-  const goTo = path => {
-    utils.history.push(path);
-  };
-
-  !segment && segments.length > 0 && goTo(`/edit/${video.data.id}/${segments[0].id}`);
-
-  const updateSegmentAt = (index, data: $Shape<db.VideoSegment>) => {
+  const updateSegmentAt = (index, data: $Shape<VideoSegment>) => {
     const newSegments = segments.slice();
     Object.assign(newSegments[index], { ...data, pristine: false });
     startRef.current &&
@@ -88,6 +74,22 @@ const VideoSplitter = ({
     setSaveData(true);
   };
 
+  const updateTags = (index, tags: string[], rank: number) => {
+    // Remove duplicates
+    tags = uniq(tags);
+    // Remove old tag if rank changed
+    currentSegment.tags = differenceBy(
+      currentSegment.tags,
+      tags.map(t => ({ tag: { name: t } })),
+      'tag.name'
+    );
+    // Keep segments of other ranks
+    currentSegment.tags = currentSegment.tags.filter(t => t.rank !== rank);
+    // Add new tags to old
+    tags = [...currentSegment.tags, ...tags.map(t => ({ tag: { name: t }, rank }))];
+    updateSegmentAt(index, { ...currentSegment, tags });
+  };
+
   const updateStart = (index, value) => {
     const start = utils.timeFormat.from(value);
     start && updateSegmentAt(index, { start });
@@ -98,22 +100,22 @@ const VideoSplitter = ({
     end && updateSegmentAt(index, { end });
   };
 
-  const addSegment = () => {
-    const newSegments = segments.slice();
+  const addSegment = async () => {
+    const newSegments: any = segments.slice();
     const newId = uuid();
     newSegments.push({
-      id: newId,
-      videoId: video.data.id,
+      segmentId: newId,
+      video: video._id,
       start: duration * 0.25,
       end: duration * 0.75,
       title: 'New segment title',
+      ownerEmail: currentUser.email,
       tags: [],
       description: '',
-      createdBy: user.email,
       pristine: true,
     });
     setSegments(newSegments);
-    goTo(`/edit/${video.data.id}/${newId}`);
+    goTo(`/edit/${video.ytId}/${newId}`);
   };
 
   const removeSegment = () => {
@@ -125,19 +127,26 @@ const VideoSplitter = ({
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, delete it!',
-    }).then(result => {
+    }).then(async result => {
       if (result.value) {
-        const newSegments = segments.filter(s => segment && s.id !== segment.id);
-        video.updateSegments(newSegments, setSegments);
+        const newSegments = segments.filter(
+          s => currentSegment && s.segmentId !== currentSegment.segmentId
+        );
+        const response = await services.video.updateVideoSegments({
+          videoId,
+          segments: newSegments,
+        });
+        setSegments(response.data);
         Swal.fire('Deleted!', 'Your segment has been deleted.', 'success');
-        goTo(`/edit/${video.data.id}/${newSegments[0].id}`);
+        goTo(`/edit/${video.ytId}/${(newSegments[0] || {}).segmentId}`);
       }
     });
   };
 
   const saveChanges = async () => {
     try {
-      await video.updateSegments(segments, setSegments);
+      const response = await services.video.updateVideoSegments({ videoId, segments });
+      setSegments(response.data);
       Swal.fire({
         title: 'Saved!',
         text: 'Your changes have been saved.',
@@ -151,36 +160,133 @@ const VideoSplitter = ({
 
   const saveIfNeeded = async () => {
     if (saveData) {
-      await video.updateSegments(segments, setSegments);
+      await services.video.updateVideoSegments({ videoId, segments });
       setSaveData(false);
     }
   };
 
+  const getVideoData = async videoId => {
+    if (!videoLoading) {
+      setVideoLoading(true);
+      const [video] = (await services.repository.video.list({
+        ytId: videoId,
+        $embed: ['segments.tags'],
+      })).data.docs;
+      setVideoLoading(false);
+
+      if (!video) {
+        setNewVid(true);
+      } else {
+        setVideo(video);
+        setSegments(video.segments);
+      }
+    }
+  };
+
+  const goTo = path => {
+    utils.history.push(path);
+  };
+
   // Keep start/end input fields in sync
   React.useEffect(() => {
-    segment && startRef.current && (startRef.current.value = utils.timeFormat.to(segment.start));
-    segment && endRef.current && (endRef.current.value = utils.timeFormat.to(segment.end));
+    currentSegment &&
+      startRef.current &&
+      (startRef.current.value = utils.timeFormat.to(currentSegment.start));
+    currentSegment &&
+      endRef.current &&
+      (endRef.current.value = utils.timeFormat.to(currentSegment.end));
     // Update the state to make sure things are rendered properly
     setRefresh(refresh.slice());
-  }, [segments, index]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSegment, segments]);
 
   // Autosave data every 5s if needed
   React.useEffect(() => {
     const stopSaving = setInterval(saveIfNeeded, 5000);
     return () => clearInterval(stopSaving);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [saveData]);
 
   React.useEffect(() => {
-    !segmentId && user && addSegment();
-  }, []);
+    segments && setCurrentSegment(segments.find(s => s.segmentId === segmentId));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [segmentId, segments]);
 
-  if (!user) {
+  if (!currentUser) {
     return (
       <div>
         <AppHeader />
         <Header style={{ marginTop: 50 }}>
           <h1>You must sign in to create segments!</h1>
         </Header>
+      </div>
+    );
+  }
+
+  if (newVid) {
+    !newVidCreating &&
+      services.video.create({ videoId }).then(() => {
+        setNewVid(false);
+        setnewVidCreating(false);
+        getVideoData(videoId);
+      });
+    !newVidCreating && setnewVidCreating(true);
+    return (
+      <div>
+        <AppHeader />
+        <Loading>Creating video...</Loading>
+      </div>
+    );
+  }
+
+  if (!video) {
+    getVideoData(videoId);
+    return (
+      <div>
+        <AppHeader />
+        <Loading>Loading video...</Loading>
+      </div>
+    );
+  }
+
+  if (wait) {
+    setTimeout(() => {
+      setWait(false);
+    }, 500);
+    return (
+      <div>
+        <AppHeader />
+        <Loading>Loading player...</Loading>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <AppHeader />
+        <Header>There was an error loading the video. Please refresh the page.</Header>
+      </div>
+    );
+  }
+
+  const { duration } = video;
+
+  const canEdit =
+    currentSegment && currentUser
+      ? currentUser.email === currentSegment.ownerEmail ||
+        hasPermission({ currentScope: currentUserScope, requiredScope: ['Admin'] })
+      : false;
+
+  const index = segments.indexOf(currentSegment);
+
+  !currentSegment && segments.length > 0 && goTo(`/edit/${video.ytId}/${segments[0].segmentId}`);
+
+  if (currentSegment && index < 0) {
+    return (
+      <div>
+        <AppHeader />
+        <Header>Loading segment...</Header>
       </div>
     );
   }
@@ -192,24 +298,26 @@ const VideoSplitter = ({
         <Grid>
           <Grid.Row>
             <Grid.Column width={11} style={{ padding: 0 }}>
-              <components.YouTubePlayerWithControls
-                duration={video.data.duration}
-                end={segment ? segment.end : video.data.duration}
-                start={segment ? segment.start : 0}
-                videoId={video.data.id}
-              />
+              {video && (
+                <components.YouTubePlayerWithControls
+                  duration={video.duration}
+                  end={currentSegment ? currentSegment.end : video.duration}
+                  start={currentSegment ? currentSegment.start : 0}
+                  videoId={video.ytId}
+                />
+              )}
             </Grid.Column>
             <Grid.Column width={5}>
               <Segment attached style={{ height: '385px', overflowY: 'auto' }}>
                 <Segment.Group>
                   {segments.map((data, i) => (
-                    <VideoSegment
-                      key={data.id}
-                      active={data.id === segmentId}
+                    <VideoSegmentItem
+                      key={data.segmentId}
+                      active={data.segmentId === segmentId}
                       data={data}
                       color={segmentColors[i % segmentColors.length]}
-                      onSelect={() => goTo(`/edit/${video.data.id}/${data.id}`)}
-                      canEdit={user.email === data.createdBy}
+                      onSelect={() => goTo(`/edit/${video.ytId}/${data.segmentId}`)}
+                      canEdit={currentUser.email === data.ownerEmail}
                     />
                   ))}
                 </Segment.Group>
@@ -219,7 +327,7 @@ const VideoSplitter = ({
                   <Icon name="add" /> Add
                 </Button>
                 <Button
-                  disabled={segments.length <= 0 || !user || (segment && !owner)}
+                  disabled={segments.length <= 0 || !currentUser || (currentSegment && !canEdit)}
                   color="red"
                   onClick={removeSegment}
                 >
@@ -232,10 +340,10 @@ const VideoSplitter = ({
             </Grid.Column>
           </Grid.Row>
         </Grid>
-        {segment ? (
+        {currentSegment ? (
           <div>
             <Grid relaxed style={{ marginTop: 20 }}>
-              {!owner && (
+              {!canEdit && (
                 <Grid.Row>
                   <Grid.Column>
                     <Segment color="red" style={{ color: 'red' }}>
@@ -256,13 +364,13 @@ const VideoSplitter = ({
                     }}
                   >
                     <components.Slider
-                      disabled={!user || !owner}
+                      disabled={!currentUser || !canEdit}
                       key={segments.length} // causes slider recreation on segments count change
                       range={{ min: 0, max: duration }}
                       onHandleSet={(i, value) =>
                         updateSegmentAt(index, i ? { end: value } : { start: value })
                       }
-                      start={[segment.start, segment.end]}
+                      start={[currentSegment.start, currentSegment.end]}
                       colors={[segmentColors[index % segmentColors.length]]}
                       margin={minSegmentDuration}
                       width={1000} // TODO make dependant on video duration
@@ -280,7 +388,7 @@ const VideoSplitter = ({
                     disabled={true}
                     className="segment-field"
                     fluid
-                    value={segment.createdBy}
+                    value={currentSegment.ownerEmail}
                   />
                 </Grid.Column>
               </Grid.Row>
@@ -293,7 +401,7 @@ const VideoSplitter = ({
                     disabled={true}
                     className="segment-field"
                     fluid
-                    value={video.data.youtube.snippet.title}
+                    value={video.youtube.snippet.title}
                   />
                 </Grid.Column>
               </Grid.Row>
@@ -304,7 +412,7 @@ const VideoSplitter = ({
                 <Grid.Column width={8}>
                   <Input
                     className="segment-field"
-                    disabled={!user || !owner}
+                    disabled={!currentUser || !canEdit}
                     fluid
                     placeholder="Title"
                     value={segments[index].title}
@@ -319,20 +427,20 @@ const VideoSplitter = ({
                 </Grid.Column>
                 <Grid.Column width={4} style={{ textAlign: 'left' }}>
                   <InputMask
-                    disabled={!user || !owner}
+                    disabled={!currentUser || !canEdit}
                     ref={startRef}
                     className="segment-time-field"
                     mask="99:99:99"
-                    defaultValue={utils.timeFormat.to(segment.start)}
+                    defaultValue={utils.timeFormat.to(currentSegment.start)}
                     onChange={event => updateStart(index, event.target.value)}
                   />{' '}
                   -{' '}
                   <InputMask
-                    disabled={!user || !owner}
+                    disabled={!currentUser || !canEdit}
                     ref={endRef}
                     className="segment-time-field"
                     mask="99:99:99"
-                    defaultValue={utils.timeFormat.to(segment.end)}
+                    defaultValue={utils.timeFormat.to(currentSegment.end)}
                     onChange={event => updateEnd(index, event.target.value)}
                   />
                 </Grid.Column>
@@ -345,8 +453,8 @@ const VideoSplitter = ({
                   <Form>
                     <TextArea
                       className="segment-field"
-                      disabled={!user || !owner}
-                      style={{ color: !owner && 'darkgray' }}
+                      disabled={!currentUser || !canEdit}
+                      style={{ color: !canEdit && 'darkgray' }}
                       placeholder="Enter a description"
                       value={segments[index].description}
                       onChange={(event, { value }) =>
@@ -361,11 +469,28 @@ const VideoSplitter = ({
                   <Label>Tags:</Label>
                 </Grid.Column>
                 <Grid.Column width={14}>
-                  <div className="segment-field" disabled={!user || !owner}>
+                  <h2>High Relevance</h2>
+                  <div className="segment-field" disabled={!currentUser || !canEdit}>
                     <TagsInput
-                      disabled={!user || !owner}
-                      value={segments[index].tags}
-                      onChange={tags => updateSegmentAt(index, { tags })}
+                      disabled={!currentUser || !canEdit}
+                      value={currentSegment.tags.filter(t => t.rank === 11).map(t => t.tag.name)}
+                      onChange={tags => updateTags(index, tags, 11)}
+                    />
+                  </div>
+                  <h2>Mid Relevance</h2>
+                  <div className="segment-field" disabled={!currentUser || !canEdit}>
+                    <TagsInput
+                      disabled={!currentUser || !canEdit}
+                      value={currentSegment.tags.filter(t => t.rank === 6).map(t => t.tag.name)}
+                      onChange={tags => updateTags(index, tags, 6)}
+                    />
+                  </div>
+                  <h2>Low Relevance</h2>
+                  <div className="segment-field" disabled={!currentUser || !canEdit}>
+                    <TagsInput
+                      disabled={!currentUser || !canEdit}
+                      value={currentSegment.tags.filter(t => t.rank === 1).map(t => t.tag.name)}
+                      onChange={tags => updateTags(index, tags, 1)}
                     />
                   </div>
                 </Grid.Column>

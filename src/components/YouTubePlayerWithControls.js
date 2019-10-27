@@ -1,7 +1,7 @@
 // @flow
 
 import * as components from 'components';
-import * as React from 'react';
+import React from 'reactn';
 
 const { Button } = components;
 

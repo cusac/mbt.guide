@@ -1,12 +1,14 @@
 // @flow
 
 import * as components from 'components';
-import * as data from 'data';
 import * as utils from 'utils';
-import * as db from 'services/db';
-import * as React from 'react';
+import React, { useGlobal } from 'reactn';
 import * as services from 'services';
 import * as errors from 'errors';
+
+import type { Video, VideoSegment } from 'types';
+
+const channelId = 'UCYwlraEwuFB4ZqASowjoM0g';
 
 const {
   Button,
@@ -23,73 +25,76 @@ const {
 
 const Home = ({ videoId }: { videoId: string }) => {
   const [error, setError] = React.useState();
-  const [segments, setSegments] = React.useState((undefined: Array<db.VideoSegment> | void));
-  const [mySegments, setMySegments] = React.useState((undefined: Array<db.VideoSegment> | void));
+  const [segments, setSegments] = React.useState((undefined: Array<VideoSegment> | void));
+  const [mySegments, setMySegments] = React.useState((undefined: Array<VideoSegment> | void));
   const [selectedVideo, setSelectedVideo] = React.useState();
   const [videos, setVideos] = React.useState([]);
   const [segmentVideo, setSegmentVideo] = React.useState();
+  const [currentUser] = useGlobal('user');
 
   const selectVideo = async videoId => {
-    const response = await services.youtube.get('/videos', {
+    const [video] = await services.youtube({
+      endpoint: 'videos',
       params: {
         id: videoId,
       },
     });
-    const video = response.data.items[0];
     setSelectedVideo(video);
     video && utils.history.push(`/${videoId}`);
   };
 
-  const user = services.auth.currentUser;
-
   React.useEffect(() => {
     // We grab videos from the MBT 'uploads' playlist to save on youtube api search quota points
-    services.youtube
-      .get('/playlistItems', {
+    async function fetchVideos() {
+      const response = await services.youtube({
+        endpoint: 'playlistItems',
         params: {
           playlistId: 'UUYwlraEwuFB4ZqASowjoM0g',
         },
-      })
-      .then(response => {
-        const mbtVids = response.data.items.map(v => ({
-          snippet: v.snippet,
-          id: {
-            videoId: v.snippet.resourceId.videoId,
-          },
-        }));
-        setVideos(mbtVids);
-        !videoId && selectVideo(`_ok27SPHhwA`);
       });
+      const mbtVids = response.map(v => ({
+        snippet: v.snippet,
+        id: {
+          videoId: v.snippet.resourceId.videoId,
+        },
+      }));
+      setVideos(mbtVids);
+      !videoId && selectVideo(`_ok27SPHhwA`);
+    }
+    fetchVideos();
   }, []);
 
   React.useEffect(() => {
-    videoId &&
-      services.youtube
-        .get('/videos', {
-          params: {
-            id: videoId,
-          },
-        })
-        .then(response => {
-          setSelectedVideo(response.data.items[0]);
-        });
-  }, []);
+    async function fetchSelectedVideo() {
+      const [video] = await services.youtube({
+        endpoint: 'videos',
+        params: {
+          id: videoId,
+        },
+      });
+      setSelectedVideo(video);
+    }
+    videoId && fetchSelectedVideo();
+  }, [videoId]);
 
   React.useEffect(() => {
-    error instanceof errors.MissingVideoError && segments && segments.length > 0 && setSegments([]);
-  }, [error]);
-
-  React.useEffect(() => {
-    selectedVideo &&
-      data.Video.subscribe(selectedVideo.id.videoId || selectedVideo.id, setSegmentVideo, setError);
-  }, [selectedVideo]);
+    const fetchSegmentVideo = async () => {
+      const video = (await services.repository.video.list({
+        ytId: videoId,
+        $embed: ['segments'],
+      })).data.docs[0];
+      video ? setSegmentVideo(video) : setSegments([]);
+    };
+    selectedVideo ? fetchSegmentVideo() : setSegments([]);
+  }, [selectedVideo, currentUser]);
 
   React.useEffect(() => {
     setSegments(segmentVideo ? segmentVideo.segments : []);
   }, [segmentVideo]);
 
   React.useEffect(() => {
-    segments && setMySegments(segments.filter(s => user && s.createdBy === user.email));
+    segments &&
+      setMySegments(segments.filter(s => currentUser && s.ownerEmail === currentUser.email));
   }, [segments]);
 
   if (videos.length === 0) {
@@ -105,19 +110,16 @@ const Home = ({ videoId }: { videoId: string }) => {
     ? `https://www.youtube.com/embed/${selectedVideo.id.videoId || selectedVideo.id}`
     : '';
 
-  const searchVideos = term => {
-    services.youtube
-      .get('/search', {
-        params: {
-          q: term,
-        },
-      })
-      .then(response => {
-        const mbtVids = response.data.items.filter(
-          v => v.snippet.channelId === 'UCYwlraEwuFB4ZqASowjoM0g'
-        );
-        setVideos(mbtVids);
-      });
+  const searchVideos = async term => {
+    const response = await services.youtube({
+      endpoint: 'search',
+      params: {
+        q: term,
+      },
+    });
+
+    const mbtVids = response.filter(v => v.snippet.channelId === channelId);
+    setVideos(mbtVids);
   };
 
   const createVideo = () => {
@@ -151,7 +153,7 @@ const Home = ({ videoId }: { videoId: string }) => {
 
             <br />
 
-            {user && (
+            {currentUser && (
               <div>
                 <Divider horizontal>
                   <Header as="h2">
@@ -177,9 +179,9 @@ const Home = ({ videoId }: { videoId: string }) => {
                         </Grid.Column>
                       </Grid.Row>
                       {mySegments.map(segment => (
-                        <Grid.Row key={segment.id}>
+                        <Grid.Row key={segment.segmentId}>
                           <Grid.Column verticalAlign="middle" width={3}>
-                            <Link to={`/watch/${segment.videoId}/${segment.id}`}>
+                            <Link to={`/watch/${segment.videoYtId}/${segment.segmentId}`}>
                               {segment.title}
                             </Link>
                           </Grid.Column>
@@ -194,7 +196,9 @@ const Home = ({ videoId }: { videoId: string }) => {
                               name="edit"
                               color="blue"
                               onClick={() =>
-                                utils.history.push(`/edit/${segment.videoId}/${segment.id}`)
+                                utils.history.push(
+                                  `/edit/${segment.videoYtId}/${segment.segmentId}`
+                                )
                               }
                             />
                           </Grid.Column>
@@ -205,7 +209,9 @@ const Home = ({ videoId }: { videoId: string }) => {
                               name="video play"
                               color="green"
                               onClick={() =>
-                                utils.history.push(`/watch/${segment.videoId}/${segment.id}`)
+                                utils.history.push(
+                                  `/watch/${segment.videoYtId}/${segment.segmentId}`
+                                )
                               }
                             />
                           </Grid.Column>
@@ -245,9 +251,11 @@ const Home = ({ videoId }: { videoId: string }) => {
                     </Grid.Column>
                   </Grid.Row>
                   {segments.map(segment => (
-                    <Grid.Row key={segment.id}>
+                    <Grid.Row key={segment.segmentId}>
                       <Grid.Column verticalAlign="middle" width={3}>
-                        <Link to={`/watch/${segment.videoId}/${segment.id}`}>{segment.title}</Link>
+                        <Link to={`/watch/${segment.videoYtId}/${segment.segmentId}`}>
+                          {segment.title}
+                        </Link>
                       </Grid.Column>
                       <Grid.Column textAlign="left" width={11}>
                         {segment.description || 'No description available.'}
@@ -259,7 +267,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                           name="video play"
                           color="green"
                           onClick={() =>
-                            utils.history.push(`/watch/${segment.videoId}/${segment.id}`)
+                            utils.history.push(`/watch/${segment.videoYtId}/${segment.segmentId}`)
                           }
                         />
                       </Grid.Column>

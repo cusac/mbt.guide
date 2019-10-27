@@ -3,18 +3,19 @@
 import * as components from 'components';
 import React from 'reactn';
 import * as utils from 'utils';
+import type { VideoSegment } from 'types';
 
 const { Button, Grid, Segment } = components;
 
-const VideoSegment = ({
+const VideoSegmentItem = ({
   active,
-  data: { start, end, title, videoId, id },
+  data: { start, end, title, videoId, segmentId },
   color,
   onSelect,
   canEdit,
 }: {
   active: boolean,
-  data: db.VideoSegment,
+  data: VideoSegment,
   color: string,
   onSelect: () => void,
   canEdit: boolean,
@@ -46,7 +47,7 @@ const VideoSegment = ({
               style={{ margin: 0 }}
               circular
               icon="play"
-              onClick={event => goTo(event, `/watch/${videoId}/${id}`)}
+              onClick={event => goTo(event, `/watch/${videoId}/${segmentId}`)}
             />
           </Grid.Column>
         </Grid.Row>
@@ -55,9 +56,9 @@ const VideoSegment = ({
   );
 };
 
-VideoSegment.defaultProps = {
+VideoSegmentItem.defaultProps = {
   active: false,
   onSelect: () => {},
 };
 
-export default VideoSegment;
+export default VideoSegmentItem;
