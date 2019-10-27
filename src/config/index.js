@@ -4,7 +4,8 @@ import type { Crud, Association } from '../utils/restful-resource-utility';
 import type { Video } from '../services/video.service';
 
 export default {
-  serverURI: 'http://localhost:8080',
+  // serverURI: 'http://localhost:8080',
+  serverURI: process.env.REACT_APP_SERVER_URI,
   // websocketURI: 'ws://localhost:8080',
   // serverURI: 'http://192.168.86.42:8080',
   // websocketURI: 'ws://192.168.86.42:8080',
@@ -16,6 +17,9 @@ export default {
   fixedLayout: false,
   hideLogoOnMobile: false,
 };
+
+console.log('SERVER:', process.env.REACT_APP_SERVER_URI);
+console.log('NODE ENV:', process.env.NODE_ENV);
 
 /**
  * Adding a property to this object will create a repository for that property.
