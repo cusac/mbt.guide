@@ -14,7 +14,7 @@ const VideoSegment = ({
   canEdit,
 }: {
   active: boolean,
-  data: db.VideoSegment,
+  data: VideoSegment,
   color: string,
   onSelect: () => void,
   canEdit: boolean,
