@@ -21,7 +21,7 @@ export type VideoSegment = {|
   segmentId: string,
   owner: string,
   ownerEmail: string,
-  videoId: string,
+  video: string,
   title: string,
   start: number,
   end: number, // seconds, last segment's end is the video duration
@@ -75,10 +75,25 @@ internals.updateVideoSegments = async ({
   videoId: string,
   segments: VideoSegment[],
 }) => {
+  segments = segments.map(filterSegmentForUpdate);
   return http.post('/update-video-segments', { videoId, segments }).catch(error => {
     console.error('videoService.updateVideoSegments-error:\n', error);
     throw error;
   });
 };
+
+function filterSegmentForUpdate(segment: VideoSegment): any {
+  const { segmentId, video, start, end, title, description, tags, pristine } = segment;
+  return {
+    segmentId,
+    video,
+    start,
+    end,
+    title,
+    description,
+    tags,
+    pristine: pristine === false ? false : true,
+  };
+}
 
 export default internals;
