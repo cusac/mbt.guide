@@ -9,7 +9,7 @@ const { Button, Grid, Segment } = components;
 
 const VideoSegmentItem = ({
   active,
-  data: { start, end, title, videoId, segmentId },
+  data: { start, end, title, video, segmentId },
   color,
   onSelect,
   canEdit,
@@ -47,7 +47,7 @@ const VideoSegmentItem = ({
               style={{ margin: 0 }}
               circular
               icon="play"
-              onClick={event => goTo(event, `/watch/${videoId}/${segmentId}`)}
+              onClick={event => goTo(event, `/watch/${video}/${segmentId}`)}
             />
           </Grid.Column>
         </Grid.Row>
