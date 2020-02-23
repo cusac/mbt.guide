@@ -62,9 +62,9 @@ internals.create = async ({ videoId }: { videoId: string }) => {
     });
 
     return video;
-  } catch (error) {
-    console.error('videoService.create-error:\n', error);
-    throw error;
+  } catch (err) {
+    console.error('videoService.create-error:\n', err);
+    throw err;
   }
 };
 
