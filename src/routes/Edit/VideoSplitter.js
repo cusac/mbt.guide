@@ -11,6 +11,7 @@ import InputMask from 'react-input-mask';
 import { v4 as uuid } from 'uuid';
 import { differenceBy, uniq } from 'lodash';
 import { hasPermission } from 'utils';
+import { toast } from 'react-toastify';
 
 import type { Video, VideoSegment, Tag } from 'types';
 
@@ -129,16 +130,20 @@ const VideoSplitter = ({
       confirmButtonText: 'Yes, delete it!',
     }).then(async result => {
       if (result.value) {
-        const newSegments = segments.filter(
-          s => currentSegment && s.segmentId !== currentSegment.segmentId
-        );
-        const response = await services.video.updateVideoSegments({
-          videoId,
-          segments: newSegments,
-        });
-        setSegments(response.data);
-        Swal.fire('Deleted!', 'Your segment has been deleted.', 'success');
-        goTo(`/edit/${video.ytId}/${(newSegments[0] || {}).segmentId}`);
+        try {
+          const newSegments = segments.filter(
+            s => currentSegment && s.segmentId !== currentSegment.segmentId
+          );
+          const response = await services.video.updateVideoSegments({
+            videoId,
+            segments: newSegments,
+          });
+          setSegments(response.data);
+          Swal.fire('Deleted!', 'Your segment has been deleted.', 'success');
+          goTo(`/edit/${video.ytId}/${(newSegments[0] || {}).segmentId}`);
+        } catch (err) {
+          toast.error('There was an error deleting the segment.');
+        }
       }
     });
   };
@@ -153,8 +158,8 @@ const VideoSplitter = ({
         type: 'success',
         confirmButtonText: 'OK',
       });
-    } catch (e) {
-      alert(String(e));
+    } catch (err) {
+      toast.error('There was an error updating the segment.');
     }
   };
 
@@ -166,20 +171,24 @@ const VideoSplitter = ({
   };
 
   const getVideoData = async videoId => {
-    if (!videoLoading) {
-      setVideoLoading(true);
-      const [video] = (await services.repository.video.list({
-        ytId: videoId,
-        $embed: ['segments.tags'],
-      })).data.docs;
-      setVideoLoading(false);
+    try {
+      if (!videoLoading) {
+        setVideoLoading(true);
+        const [video] = (await services.repository.video.list({
+          ytId: videoId,
+          $embed: ['segments.tags'],
+        })).data.docs;
+        setVideoLoading(false);
 
-      if (!video) {
-        setNewVid(true);
-      } else {
-        setVideo(video);
-        setSegments(video.segments);
+        if (!video) {
+          setNewVid(true);
+        } else {
+          setVideo(video);
+          setSegments(video.segments);
+        }
       }
+    } catch (err) {
+      setError(err);
     }
   };
 
@@ -223,13 +232,29 @@ const VideoSplitter = ({
     );
   }
 
+  if (error) {
+    return (
+      <div>
+        <AppHeader />
+        <Header>There was an error loading the video. Please refresh the page.</Header>
+      </div>
+    );
+  }
+
   if (newVid) {
     !newVidCreating &&
-      services.video.create({ videoId }).then(() => {
-        setNewVid(false);
-        setnewVidCreating(false);
-        getVideoData(videoId);
-      });
+      services.video
+        .create({ videoId })
+        .then(() => {
+          setNewVid(false);
+          setnewVidCreating(false);
+          getVideoData(videoId);
+        })
+        .catch(err => {
+          setNewVid(false);
+          setnewVidCreating(false);
+          setError(err);
+        });
     !newVidCreating && setnewVidCreating(true);
     return (
       <div>
@@ -257,15 +282,6 @@ const VideoSplitter = ({
       <div>
         <AppHeader />
         <Loading>Loading player...</Loading>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div>
-        <AppHeader />
-        <Header>There was an error loading the video. Please refresh the page.</Header>
       </div>
     );
   }

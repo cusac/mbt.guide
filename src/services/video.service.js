@@ -41,20 +41,20 @@ export type Video = {|
 const internals = {};
 
 internals.create = async ({ videoId }: { videoId: string }) => {
-  const [ytVideo] = await services.youtube({
-    endpoint: 'videos',
-    params: {
-      id: videoId,
-      part: 'snippet,contentDetails',
-    },
-  });
-
-  if (!ytVideo) {
-    throw new Error(`Missing YouTube Video with id ${videoId}`);
-  }
-  const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
-
   try {
+    const [ytVideo] = await services.youtube({
+      endpoint: 'videos',
+      params: {
+        id: videoId,
+        part: 'snippet,contentDetails',
+      },
+    });
+
+    if (!ytVideo) {
+      throw new Error(`Missing YouTube Video with id ${videoId}`);
+    }
+    const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
+
     const video = await services.repository.video.create({
       youtube: ytVideo,
       duration: duration,
