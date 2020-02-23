@@ -5,6 +5,7 @@ import * as utils from 'utils';
 import React, { useGlobal } from 'reactn';
 import * as services from 'services';
 import * as errors from 'errors';
+import { toast } from 'react-toastify';
 
 import type { Video, VideoSegment } from 'types';
 
@@ -33,39 +34,7 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [currentUser] = useGlobal('user');
 
   const selectVideo = async videoId => {
-    const [video] = await services.youtube({
-      endpoint: 'videos',
-      params: {
-        id: videoId,
-      },
-    });
-    setSelectedVideo(video);
-    video && utils.history.push(`/${videoId}`);
-  };
-
-  React.useEffect(() => {
-    // We grab videos from the MBT 'uploads' playlist to save on youtube api search quota points
-    async function fetchVideos() {
-      const response = await services.youtube({
-        endpoint: 'playlistItems',
-        params: {
-          playlistId: 'UUYwlraEwuFB4ZqASowjoM0g',
-        },
-      });
-      const mbtVids = response.map(v => ({
-        snippet: v.snippet,
-        id: {
-          videoId: v.snippet.resourceId.videoId,
-        },
-      }));
-      setVideos(mbtVids);
-      !videoId && selectVideo(`_ok27SPHhwA`);
-    }
-    fetchVideos();
-  }, []);
-
-  React.useEffect(() => {
-    async function fetchSelectedVideo() {
+    try {
       const [video] = await services.youtube({
         endpoint: 'videos',
         params: {
@@ -73,17 +42,73 @@ const Home = ({ videoId }: { videoId: string }) => {
         },
       });
       setSelectedVideo(video);
+      video && utils.history.push(`/${videoId}`);
+    } catch (err) {
+      toast.error(
+        'There was an error fetching youtube data. Please refresh the page and try again.'
+      );
+    }
+  };
+
+  React.useEffect(() => {
+    // We grab videos from the MBT 'uploads' playlist to save on youtube api search quota points
+    async function fetchVideos() {
+      try {
+        const response = await services.youtube({
+          endpoint: 'playlistItems',
+          params: {
+            playlistId: 'UUYwlraEwuFB4ZqASowjoM0g',
+          },
+        });
+        const mbtVids = response.map(v => ({
+          snippet: v.snippet,
+          id: {
+            videoId: v.snippet.resourceId.videoId,
+          },
+        }));
+        setVideos(mbtVids);
+        !videoId && selectVideo(`_ok27SPHhwA`);
+      } catch (err) {
+        toast.error(
+          'There was an error fetching youtube data. Please refresh the page and try again.'
+        );
+      }
+    }
+    fetchVideos();
+  }, []);
+
+  React.useEffect(() => {
+    async function fetchSelectedVideo() {
+      try {
+        const [video] = await services.youtube({
+          endpoint: 'videos',
+          params: {
+            id: videoId,
+          },
+        });
+        setSelectedVideo(video);
+      } catch (err) {
+        toast.error(
+          'There was an error fetching youtube data. Please refresh the page and try again.'
+        );
+      }
     }
     videoId && fetchSelectedVideo();
   }, [videoId]);
 
   React.useEffect(() => {
     const fetchSegmentVideo = async () => {
-      const video = (await services.repository.video.list({
-        ytId: videoId,
-        $embed: ['segments'],
-      })).data.docs[0];
-      video ? setSegmentVideo(video) : setSegments([]);
+      try {
+        const video = (await services.repository.video.list({
+          ytId: videoId,
+          $embed: ['segments'],
+        })).data.docs[0];
+        video ? setSegmentVideo(video) : setSegments([]);
+      } catch (err) {
+        toast.error(
+          'There was an error fetching the selected video data. Please refresh the page and try again.'
+        );
+      }
     };
     selectedVideo ? fetchSegmentVideo() : setSegments([]);
   }, [selectedVideo, currentUser]);
@@ -111,15 +136,21 @@ const Home = ({ videoId }: { videoId: string }) => {
     : '';
 
   const searchVideos = async term => {
-    const response = await services.youtube({
-      endpoint: 'search',
-      params: {
-        q: term,
-      },
-    });
+    try {
+      const response = await services.youtube({
+        endpoint: 'search',
+        params: {
+          q: term,
+        },
+      });
 
-    const mbtVids = response.filter(v => v.snippet.channelId === channelId);
-    setVideos(mbtVids);
+      const mbtVids = response.filter(v => v.snippet.channelId === channelId);
+      setVideos(mbtVids);
+    } catch (err) {
+      toast.error(
+        'There was an error fetching youtube data. Please refresh the page and try again.'
+      );
+    }
   };
 
   const createVideo = () => {

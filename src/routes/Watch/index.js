@@ -4,6 +4,7 @@ import * as components from 'components';
 import * as services from 'services';
 import React, { useGlobal } from 'reactn';
 import * as utils from 'utils';
+import { toast } from 'react-toastify';
 
 import { Grid, Link, AppHeader, Label, Button, Container, Loading, List, Icon } from 'components';
 
@@ -15,11 +16,17 @@ const Watch = ({ segmentId }: { segmentId: string }) => {
 
   React.useEffect(() => {
     const fetchSegment = async () => {
-      const segment = (await services.repository.segment.list({
-        $embed: ['tags'],
-        segmentId,
-      })).data.docs[0];
-      segment ? setSegment(segment) : setSegmentMissing(true);
+      try {
+        const segment = (await services.repository.segment.list({
+          $embed: ['tags'],
+          segmentId,
+        })).data.docs[0];
+        segment ? setSegment(segment) : setSegmentMissing(true);
+      } catch (err) {
+        toast.error(
+          'There was an error fetching the segment data. Please refresh the page and try again.'
+        );
+      }
     };
     fetchSegment();
   }, []);
@@ -28,7 +35,7 @@ const Watch = ({ segmentId }: { segmentId: string }) => {
     return (
       <div>
         <AppHeader showSearchbar={true} />
-        <h2>Segment missing...</h2>
+        <h2>This segment appears to be missing. Please select a different segment.</h2>
       </div>
     );
   }
@@ -37,7 +44,7 @@ const Watch = ({ segmentId }: { segmentId: string }) => {
     return (
       <div>
         <AppHeader showSearchbar={true} />
-        <Loading>Loading video data...</Loading>
+        <Loading>Loading segment data...</Loading>
       </div>
     );
   }

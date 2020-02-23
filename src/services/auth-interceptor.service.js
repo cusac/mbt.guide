@@ -1,17 +1,18 @@
 // @flow
 
 import * as store from 'store';
+import { toast } from 'react-toastify';
 
 import { RESPONSE_MESSAGES } from '../config';
 
 const internals = {};
 
-internals.responseError = function(error: any) {
-  let response = error.response;
+internals.responseError = function(err: any) {
+  let response = err.response;
 
   if (!response) {
     console.error('NO RESPONSE IN ERROR');
-    throw error;
+    throw err;
   }
 
   // var Notification = $injector.get('Notification');
@@ -27,13 +28,11 @@ internals.responseError = function(error: any) {
     console.debug('authInterceptor.service: 401: response:', response);
 
     store.auth.clearAuth();
-
-    // vm.$router.push('/login');
   } else if (response.status === 403) {
     // The user is unauthorized
     console.debug('authInterceptor.service: 403: response:', response);
 
-    // vm.$snotify.warning('Not authorized: ' + response.data.message, 'Warning');
+    toast.warning('Not authorized: ' + response.data.message);
   }
   // If not a 401 or 403, do nothing with this error. This is necessary to make a `responseError`
   // interceptor a no-op. */

@@ -41,20 +41,20 @@ export type Video = {|
 const internals = {};
 
 internals.create = async ({ videoId }: { videoId: string }) => {
-  const [ytVideo] = await services.youtube({
-    endpoint: 'videos',
-    params: {
-      id: videoId,
-      part: 'snippet,contentDetails',
-    },
-  });
-
-  if (!ytVideo) {
-    throw new Error(`Missing YouTube Video with id ${videoId}`);
-  }
-  const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
-
   try {
+    const [ytVideo] = await services.youtube({
+      endpoint: 'videos',
+      params: {
+        id: videoId,
+        part: 'snippet,contentDetails',
+      },
+    });
+
+    if (!ytVideo) {
+      throw new Error(`Missing YouTube Video with id ${videoId}`);
+    }
+    const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
+
     const video = await services.repository.video.create({
       youtube: ytVideo,
       duration: duration,
@@ -62,9 +62,9 @@ internals.create = async ({ videoId }: { videoId: string }) => {
     });
 
     return video;
-  } catch (error) {
-    console.error('videoService.create-error:\n', error);
-    throw error;
+  } catch (err) {
+    console.error('videoService.create-error:\n', err);
+    throw err;
   }
 };
 
@@ -76,9 +76,9 @@ internals.updateVideoSegments = async ({
   segments: VideoSegment[],
 }) => {
   segments = segments.map(filterSegmentForUpdate);
-  return http.post('/update-video-segments', { videoId, segments }).catch(error => {
-    console.error('videoService.updateVideoSegments-error:\n', error);
-    throw error;
+  return http.post('/update-video-segments', { videoId, segments }).catch(err => {
+    console.error('videoService.updateVideoSegments-error:\n', err);
+    throw err;
   });
 };
 
