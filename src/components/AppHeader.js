@@ -6,6 +6,7 @@ import * as components from 'components';
 import * as services from 'services';
 import * as store from 'store';
 
+import { toast } from 'react-toastify';
 import logo from './logo-wide.png';
 
 const { Button, Grid, Searchbar, Icon, Auth, Header } = components;
@@ -21,6 +22,14 @@ const AppHeader = ({
 }) => {
   const [loading, setLoading] = React.useState(false);
   const [currentUser] = useGlobal('user');
+
+  const logout = () => {
+    try {
+      services.auth.logout();
+    } catch (err) {
+      toast.error('There was an error logging out.');
+    }
+  };
 
   return (
     <Grid className="AppHeader">
@@ -50,7 +59,7 @@ const AppHeader = ({
               <div>
                 {currentUser.email}
                 <br />
-                <Button onClick={() => services.auth.logout()} style={{ margin: 5 }}>
+                <Button onClick={() => logout()} style={{ margin: 5 }}>
                   Sign out
                 </Button>
               </div>
