@@ -26,6 +26,7 @@ const Auth = ({ setLoading }: { setLoading: boolean => void }) => {
           if (err.data.message === 'Account is inactive.') {
             emailVerified = false;
           }
+          toast.error('There was an error logging into your account.');
         }
 
         if (!emailVerified && !testUsers.includes(firebaseAuth.currentUser.email)) {
