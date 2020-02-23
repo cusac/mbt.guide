@@ -76,9 +76,9 @@ internals.updateVideoSegments = async ({
   segments: VideoSegment[],
 }) => {
   segments = segments.map(filterSegmentForUpdate);
-  return http.post('/update-video-segments', { videoId, segments }).catch(error => {
-    console.error('videoService.updateVideoSegments-error:\n', error);
-    throw error;
+  return http.post('/update-video-segments', { videoId, segments }).catch(err => {
+    console.error('videoService.updateVideoSegments-error:\n', err);
+    throw err;
   });
 };
 

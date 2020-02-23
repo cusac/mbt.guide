@@ -23,9 +23,9 @@ internals.login = ({
       console.log('LOGIN:', response);
       return store.auth.setAuth(response.data);
     })
-    .catch(error => {
-      console.error('authService.login-error:\n', error);
-      throw error;
+    .catch(err => {
+      console.error('authService.login-error:\n', err);
+      throw err;
     });
 };
 
@@ -37,9 +37,9 @@ internals.logout = () => {
       firebaseAuth.signOut();
       store.auth.clearAuth();
     })
-    .catch(error => {
-      console.error('authService.logout-error:\n', error);
-      throw error;
+    .catch(err => {
+      console.error('authService.logout-error:\n', err);
+      throw err;
     });
 };
 

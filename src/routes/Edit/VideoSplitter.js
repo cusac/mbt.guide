@@ -165,8 +165,12 @@ const VideoSplitter = ({
 
   const saveIfNeeded = async () => {
     if (saveData) {
-      await services.video.updateVideoSegments({ videoId, segments });
-      setSaveData(false);
+      try {
+        await services.video.updateVideoSegments({ videoId, segments });
+        setSaveData(false);
+      } catch (err) {
+        setSaveData(false);
+      }
     }
   };
 
