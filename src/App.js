@@ -22,6 +22,8 @@ const App = () => {
   }, []);
   store.useStore();
 
+  services.stats.postVisit();
+
   return (
     <div className="App">
       <components.ErrorBoundary onError={() => <div>Something went wrong!</div>}>
