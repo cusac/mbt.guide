@@ -1,6 +1,7 @@
 // @flow
 
 import * as store from '../store';
+import { captureAndLog } from 'utils';
 
 import { httpClient as http, firebaseAuth } from '../services';
 
@@ -20,11 +21,10 @@ internals.login = ({
   return http
     .post('/login', { idToken, email, password, displayName })
     .then(response => {
-      console.log('LOGIN:', response);
       return store.auth.setAuth(response.data);
     })
     .catch(err => {
-      console.error('authService.login-error:\n', err);
+      captureAndLog('authService', 'login', err);
       throw err;
     });
 };
@@ -38,7 +38,7 @@ internals.logout = () => {
       store.auth.clearAuth();
     })
     .catch(err => {
-      console.error('authService.logout-error:\n', err);
+      captureAndLog('authService', 'logout', err);
       throw err;
     });
 };

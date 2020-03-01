@@ -22,11 +22,12 @@ const Auth = ({ setLoading }: { setLoading: boolean => void }) => {
         try {
           emailVerified && (await auth.login({ idToken, displayName }));
         } catch (err) {
-          console.error('LOGIN ERROR:', err);
           if (err.data.message === 'Account is inactive.') {
             emailVerified = false;
+            toast.error('There was an error logging into your account.');
+          } else {
+            captureAndLog('Auth', 'sendEmailVerification', err);
           }
-          toast.error('There was an error logging into your account.');
         }
 
         if (!emailVerified && !testUsers.includes(firebaseAuth.currentUser.email)) {
@@ -39,8 +40,8 @@ const Auth = ({ setLoading }: { setLoading: boolean => void }) => {
           firebase
             .auth()
             .currentUser.sendEmailVerification()
-            .catch(function(error) {
-              console.error('EMAIL error:', error);
+            .catch(function(err) {
+              captureAndLog('Auth', 'sendEmailVerification', err);
             });
         }
 

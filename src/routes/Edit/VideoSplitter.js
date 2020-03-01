@@ -12,6 +12,7 @@ import { v4 as uuid } from 'uuid';
 import { differenceBy, uniq } from 'lodash';
 import { hasPermission } from 'utils';
 import { toast } from 'react-toastify';
+import { captureAndLog } from 'utils';
 
 import type { Video, VideoSegment, Tag } from 'types';
 
@@ -142,6 +143,7 @@ const VideoSplitter = ({
           Swal.fire('Deleted!', 'Your segment has been deleted.', 'success');
           goTo(`/edit/${video.ytId}/${(newSegments[0] || {}).segmentId}`);
         } catch (err) {
+          captureAndLog('VideoSplitter', 'removeSegment', err);
           toast.error('There was an error deleting the segment.');
         }
       }
@@ -159,6 +161,7 @@ const VideoSplitter = ({
         confirmButtonText: 'OK',
       });
     } catch (err) {
+      captureAndLog('VideoSplitter', 'saveChanges', err);
       toast.error('There was an error updating the segment.');
     }
   };
@@ -169,6 +172,7 @@ const VideoSplitter = ({
         await services.video.updateVideoSegments({ videoId, segments });
         setSaveData(false);
       } catch (err) {
+        captureAndLog('VideoSplitter', 'saveIfNeeded', err);
         setSaveData(false);
       }
     }
@@ -192,6 +196,7 @@ const VideoSplitter = ({
         }
       }
     } catch (err) {
+      captureAndLog('VideoSplitter', 'getVideoData', err);
       setError(err);
     }
   };
