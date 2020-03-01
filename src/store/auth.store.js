@@ -2,6 +2,7 @@
 
 import { useDispatch } from 'reactn';
 import axios from 'axios';
+import * as Sentry from '@sentry/browser';
 
 const initalAuthState = {
   user: undefined,
@@ -30,11 +31,24 @@ const useAuth = () => {
   internals.setAuth = useDispatch((state, dispatch, data) => {
     const { user, scope, accessToken, refreshToken } = data;
     updateAuthHeader(accessToken);
+
+    Sentry.configureScope(scope => {
+      scope.setUser({
+        id: user._id,
+        username: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+      });
+    });
+
     return { ...state, user, scope, accessToken, refreshToken };
   });
 
   internals.clearAuth = useDispatch(state => {
     axios.defaults.headers.common.Authorization = undefined;
+
+    Sentry.configureScope(scope => {
+      scope.setUser(null);
+    });
 
     console.debug('Clearing auth');
     return { ...state, ...initalAuthState };

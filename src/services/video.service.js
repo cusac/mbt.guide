@@ -3,6 +3,7 @@
 import * as store from '../store';
 import * as luxon from 'luxon';
 import * as services from 'services';
+import { captureAndLog } from 'utils';
 
 import { httpClient as http } from '../services';
 
@@ -63,7 +64,7 @@ internals.create = async ({ videoId }: { videoId: string }) => {
 
     return video;
   } catch (err) {
-    console.error('videoService.create-error:\n', err);
+    captureAndLog('videoService', 'create', err);
     throw err;
   }
 };
@@ -77,7 +78,7 @@ internals.updateVideoSegments = async ({
 }) => {
   segments = segments.map(filterSegmentForUpdate);
   return http.post('/update-video-segments', { videoId, segments }).catch(err => {
-    console.error('videoService.updateVideoSegments-error:\n', err);
+    captureAndLog('videoService', 'updateVideoSegments', err);
     throw err;
   });
 };

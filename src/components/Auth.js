@@ -4,6 +4,7 @@ import React from 'reactn';
 import { firebase, firebaseAuth, auth } from 'services';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import { toast } from 'react-toastify';
+import { captureAndLog } from 'utils';
 
 //TODO: Import test users
 const testUsers = ['test@superadmin.com', 'test@admin.com'];
@@ -22,9 +23,11 @@ const Auth = ({ setLoading }: { setLoading: boolean => void }) => {
         try {
           emailVerified && (await auth.login({ idToken, displayName }));
         } catch (err) {
-          console.error('LOGIN ERROR:', err);
           if (err.data.message === 'Account is inactive.') {
             emailVerified = false;
+            toast.error('There was an error logging into your account.');
+          } else {
+            captureAndLog('Auth', 'sendEmailVerification', err);
           }
         }
 
@@ -38,8 +41,8 @@ const Auth = ({ setLoading }: { setLoading: boolean => void }) => {
           firebase
             .auth()
             .currentUser.sendEmailVerification()
-            .catch(function(error) {
-              console.error('EMAIL error:', error);
+            .catch(function(err) {
+              captureAndLog('Auth', 'sendEmailVerification', err);
             });
         }
 

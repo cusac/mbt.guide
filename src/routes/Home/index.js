@@ -6,6 +6,7 @@ import React, { useGlobal } from 'reactn';
 import * as services from 'services';
 import * as errors from 'errors';
 import { toast } from 'react-toastify';
+import { captureAndLog } from 'utils';
 
 import type { Video, VideoSegment } from 'types';
 
@@ -44,6 +45,7 @@ const Home = ({ videoId }: { videoId: string }) => {
       setSelectedVideo(video);
       video && utils.history.push(`/${videoId}`);
     } catch (err) {
+      captureAndLog('Home', 'selectVideo', err);
       toast.error(
         'There was an error fetching youtube data. Please refresh the page and try again.'
       );
@@ -69,6 +71,7 @@ const Home = ({ videoId }: { videoId: string }) => {
         setVideos(mbtVids);
         !videoId && selectVideo(`_ok27SPHhwA`);
       } catch (err) {
+        captureAndLog('Home', 'fetchVideos', err);
         toast.error(
           'There was an error fetching youtube data. Please refresh the page and try again.'
         );
@@ -88,6 +91,7 @@ const Home = ({ videoId }: { videoId: string }) => {
         });
         setSelectedVideo(video);
       } catch (err) {
+        captureAndLog('Home', 'fetchSelectedVideo', err);
         toast.error(
           'There was an error fetching youtube data. Please refresh the page and try again.'
         );
@@ -105,6 +109,7 @@ const Home = ({ videoId }: { videoId: string }) => {
         })).data.docs[0];
         video ? setSegmentVideo(video) : setSegments([]);
       } catch (err) {
+        captureAndLog('Home', 'fetchSegmentVideo', err);
         toast.error(
           'There was an error fetching the selected video data. Please refresh the page and try again.'
         );
@@ -147,6 +152,7 @@ const Home = ({ videoId }: { videoId: string }) => {
       const mbtVids = response.filter(v => v.snippet.channelId === channelId);
       setVideos(mbtVids);
     } catch (err) {
+      captureAndLog('Home', 'searchVideos', err);
       toast.error(
         'There was an error fetching youtube data. Please refresh the page and try again.'
       );
