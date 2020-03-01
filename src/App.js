@@ -22,7 +22,9 @@ const App = () => {
   }, []);
   store.useStore();
 
-  services.stats.postVisit();
+  try {
+    services.stats.postVisit();
+  } catch (err) {}
 
   return (
     <div className="App">
