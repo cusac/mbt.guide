@@ -9,7 +9,9 @@ import App from './App';
 import * as store from 'store';
 import * as Sentry from '@sentry/browser';
 
-Sentry.init({ dsn: process.env.REACT_APP_SENTRY_DSN });
+if (process.env.NODE_ENV === 'production') {
+  Sentry.init({ dsn: process.env.REACT_APP_SENTRY_DSN });
+}
 
 store.initState();
 
