@@ -13,6 +13,7 @@ import auth from './auth.service';
 import video from './video.service';
 import repository from './repository.service';
 import authInterceptor from './auth-interceptor.service';
+import stats from './stats.service';
 
 const app = firebase.initializeApp({
   apiKey: 'AIzaSyAn6loR5s_OC4aqA-nlMfpwOH2BogTM79g',
@@ -46,6 +47,7 @@ export {
   auth,
   authInterceptor,
   video,
+  stats,
 };
 
 export default app;
