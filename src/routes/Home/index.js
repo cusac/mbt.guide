@@ -5,8 +5,7 @@ import * as utils from 'utils';
 import React, { useGlobal } from 'reactn';
 import * as services from 'services';
 import * as errors from 'errors';
-import { toast } from 'react-toastify';
-import { captureAndLog } from 'utils';
+import { captureAndLog, toastError } from 'utils';
 
 import type { Video, VideoSegment } from 'types';
 
@@ -46,8 +45,9 @@ const Home = ({ videoId }: { videoId: string }) => {
       video && utils.history.push(`/${videoId}`);
     } catch (err) {
       captureAndLog('Home', 'selectVideo', err);
-      toast.error(
-        'There was an error fetching youtube data. Please refresh the page and try again.'
+      toastError(
+        'There was an error fetching youtube data. Please refresh the page and try again.',
+        err
       );
     }
   };
@@ -72,8 +72,9 @@ const Home = ({ videoId }: { videoId: string }) => {
         !videoId && selectVideo(`_ok27SPHhwA`);
       } catch (err) {
         captureAndLog('Home', 'fetchVideos', err);
-        toast.error(
-          'There was an error fetching youtube data. Please refresh the page and try again.'
+        toastError(
+          'There was an error fetching youtube data. Please refresh the page and try again.',
+          err
         );
       }
     }
@@ -92,8 +93,9 @@ const Home = ({ videoId }: { videoId: string }) => {
         setSelectedVideo(video);
       } catch (err) {
         captureAndLog('Home', 'fetchSelectedVideo', err);
-        toast.error(
-          'There was an error fetching youtube data. Please refresh the page and try again.'
+        toastError(
+          'There was an error fetching youtube data. Please refresh the page and try again.',
+          err
         );
       }
     }
@@ -110,8 +112,9 @@ const Home = ({ videoId }: { videoId: string }) => {
         video ? setSegmentVideo(video) : setSegments([]);
       } catch (err) {
         captureAndLog('Home', 'fetchSegmentVideo', err);
-        toast.error(
-          'There was an error fetching the selected video data. Please refresh the page and try again.'
+        toastError(
+          'There was an error fetching the selected video data. Please refresh the page and try again.',
+          err
         );
       }
     };
@@ -153,8 +156,9 @@ const Home = ({ videoId }: { videoId: string }) => {
       setVideos(mbtVids);
     } catch (err) {
       captureAndLog('Home', 'searchVideos', err);
-      toast.error(
-        'There was an error fetching youtube data. Please refresh the page and try again.'
+      toastError(
+        'There was an error fetching youtube data. Please refresh the page and try again.',
+        err
       );
     }
   };

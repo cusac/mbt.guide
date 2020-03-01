@@ -10,9 +10,8 @@ import 'react-tagsinput/react-tagsinput.css';
 import InputMask from 'react-input-mask';
 import { v4 as uuid } from 'uuid';
 import { differenceBy, uniq } from 'lodash';
-import { hasPermission } from 'utils';
+import { hasPermission, captureAndLog, toastError } from 'utils';
 import { toast } from 'react-toastify';
-import { captureAndLog } from 'utils';
 
 import type { Video, VideoSegment, Tag } from 'types';
 
@@ -144,7 +143,7 @@ const VideoSplitter = ({
           goTo(`/edit/${video.ytId}/${(newSegments[0] || {}).segmentId}`);
         } catch (err) {
           captureAndLog('VideoSplitter', 'removeSegment', err);
-          toast.error('There was an error deleting the segment.');
+          toastError('There was an error deleting the segment.', err);
         }
       }
     });
@@ -162,8 +161,10 @@ const VideoSplitter = ({
       });
     } catch (err) {
       captureAndLog('VideoSplitter', 'saveChanges', err);
-      toast.error('There was an error updating the segment.');
+      toastError('There was an error updating the segment.', err);
     }
+
+    setSaveData(false);
   };
 
   const saveIfNeeded = async () => {

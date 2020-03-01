@@ -6,7 +6,7 @@ import * as components from 'components';
 import * as services from 'services';
 import * as store from 'store';
 
-import { toast } from 'react-toastify';
+import { toastError } from 'utils';
 import logo from './logo-wide.png';
 
 const { Button, Grid, Searchbar, Icon, Auth, Header } = components;
@@ -27,7 +27,7 @@ const AppHeader = ({
     try {
       services.auth.logout();
     } catch (err) {
-      toast.error('There was an error logging out.');
+      toastError('There was an error logging out.', err);
     }
   };
 
