@@ -163,6 +163,8 @@ const VideoSplitter = ({
       captureAndLog('VideoSplitter', 'saveChanges', err);
       toastError('There was an error updating the segment.', err);
     }
+
+    setSaveData(false);
   };
 
   const saveIfNeeded = async () => {
