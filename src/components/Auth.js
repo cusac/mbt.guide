@@ -4,6 +4,7 @@ import React from 'reactn';
 import { firebase, firebaseAuth, auth } from 'services';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import { toast } from 'react-toastify';
+import { captureAndLog } from 'utils';
 
 //TODO: Import test users
 const testUsers = ['test@superadmin.com', 'test@admin.com'];
