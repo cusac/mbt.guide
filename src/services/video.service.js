@@ -92,8 +92,19 @@ function filterSegmentForUpdate(segment: VideoSegment): any {
     end,
     title,
     description,
-    tags,
+    tags: tags.map(filterTagForUpdate),
     pristine: pristine === false ? false : true,
+  };
+}
+
+function filterTagForUpdate(tagEmbed: TagEmbed): any {
+  const { tag, rank } = tagEmbed;
+  const { name } = tag;
+  return {
+    tag: {
+      name,
+    },
+    rank,
   };
 }
 
