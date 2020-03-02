@@ -11,12 +11,6 @@ const internals = {};
 internals.responseError = function(err: any) {
   let response: any = err.response;
 
-  if (err.message && err.message === 'Network Error') {
-    toast.warning(
-      'There was an issue reaching the server. Please check your internet connection and try again.'
-    );
-  }
-
   if (!response) {
     console.error('NO RESPONSE IN ERROR');
     throw err;

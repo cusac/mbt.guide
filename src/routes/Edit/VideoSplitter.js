@@ -182,8 +182,11 @@ const VideoSplitter = ({
         await services.video.updateVideoSegments({ videoId, segments });
         setSaveData(false);
       } catch (err) {
+        if (err && err.message !== 'Network Error') {
+          // Continue to attempt saving if the error is due to a bad network.
+          setSaveData(false);
+        }
         captureAndLog('VideoSplitter', 'saveIfNeeded', err);
-        setSaveData(false);
       }
     }
   };
