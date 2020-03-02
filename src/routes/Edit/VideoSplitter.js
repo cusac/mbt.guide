@@ -11,7 +11,6 @@ import InputMask from 'react-input-mask';
 import { v4 as uuid } from 'uuid';
 import { differenceBy, uniq } from 'lodash';
 import { hasPermission, captureAndLog, toastError } from 'utils';
-import { toast } from 'react-toastify';
 
 import type { Video, VideoSegment, Tag } from 'types';
 
@@ -31,6 +30,7 @@ const {
   Label,
   Loading,
   Header,
+  Modal,
 } = components;
 
 //TODO: Error Handling
@@ -53,6 +53,7 @@ const VideoSplitter = ({
   const [segments, setSegments]: [VideoSegment[], any] = React.useState([]);
   const [currentSegment, setCurrentSegment]: [VideoSegment, any] = React.useState();
   const [saveData, setSaveData]: [boolean, any] = React.useState(false);
+  const [segmentsSaving, setSegmentsSaving]: [boolean, any] = React.useState(false);
   const [refresh, setRefresh]: [[boolean], any] = React.useState([true]);
   const [newVid, setNewVid]: [boolean, any] = React.useState(false);
   const [newVidCreating, setnewVidCreating]: [boolean, any] = React.useState(false);
@@ -134,14 +135,19 @@ const VideoSplitter = ({
           const newSegments = segments.filter(
             s => currentSegment && s.segmentId !== currentSegment.segmentId
           );
+
+          setSegmentsSaving(true);
           const response = await services.video.updateVideoSegments({
             videoId,
             segments: newSegments,
           });
+
+          setSegmentsSaving(false);
           setSegments(response.data);
           Swal.fire('Deleted!', 'Your segment has been deleted.', 'success');
           goTo(`/edit/${video.ytId}/${(newSegments[0] || {}).segmentId}`);
         } catch (err) {
+          setSegmentsSaving(false);
           captureAndLog('VideoSplitter', 'removeSegment', err);
           toastError('There was an error deleting the segment.', err);
         }
@@ -151,7 +157,9 @@ const VideoSplitter = ({
 
   const saveChanges = async () => {
     try {
+      setSegmentsSaving(true);
       const response = await services.video.updateVideoSegments({ videoId, segments });
+      setSegmentsSaving(false);
       setSegments(response.data);
       Swal.fire({
         title: 'Saved!',
@@ -160,6 +168,7 @@ const VideoSplitter = ({
         confirmButtonText: 'OK',
       });
     } catch (err) {
+      setSegmentsSaving(false);
       captureAndLog('VideoSplitter', 'saveChanges', err);
       toastError('There was an error updating the segment.', err);
     }
@@ -321,6 +330,12 @@ const VideoSplitter = ({
     <div>
       <AppHeader currentVideoId={videoId} />
       <Container style={{ marginTop: 20 }}>
+        <Modal open={segmentsSaving} size="mini">
+          <Container style={{ height: 150, marginTop: 50 }} textAlign="center">
+            <Loading>Saving Changes...</Loading>
+          </Container>
+        </Modal>
+
         <Grid>
           <Grid.Row>
             <Grid.Column width={11} style={{ padding: 0 }}>

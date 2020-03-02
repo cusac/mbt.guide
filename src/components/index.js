@@ -13,6 +13,7 @@ export {
   Container,
   Label,
   Divider,
+  Modal,
 } from 'semantic-ui-react';
 export { Link } from 'react-router-dom';
 
