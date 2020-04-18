@@ -14,6 +14,7 @@ export {
   Label,
   Divider,
   Modal,
+  Popup,
 } from 'semantic-ui-react';
 export { Link } from 'react-router-dom';
 

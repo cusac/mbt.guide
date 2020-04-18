@@ -3,7 +3,9 @@
 import * as components from 'components';
 import React from 'reactn';
 
-const { Button } = components;
+const { Button, Popup } = components;
+
+const playBackRates = [0.25, 0.5, 1, 1.5, 2];
 
 const YouTubePlayerWithControls = ({
   videoId,
@@ -26,12 +28,35 @@ const YouTubePlayerWithControls = ({
   // eslint-disable-next-line no-unused-vars
   const [state, setState] = React.useState(('unstarted': components.YouTubePlayerState));
   const [playing, setPlaying] = React.useState(autoplay);
+  const [playBackRate, setPlayBackRate] = React.useState(playBackRates[2]);
+  const [playBackRateIndex, setPlayBackRateIndex] = React.useState(2);
+
+  const speedUp = () => {
+    if (playBackRateIndex >= playBackRates.length - 1) {
+      return;
+    }
+
+    setPlayBackRateIndex(playBackRateIndex + 1);
+  };
+
+  const slowDown = () => {
+    if (playBackRateIndex <= 0) {
+      return;
+    }
+
+    setPlayBackRateIndex(playBackRateIndex - 1);
+  };
+
+  // allow playback rate control
+  React.useEffect(() => {
+    setPlayBackRate(playBackRates[playBackRateIndex]);
+  }, [playBackRateIndex]);
 
   return (
     <div>
       <div key={`${start}-${end}`}>
         <components.YouTubePlayer
-          {...{ videoId, seconds, autoplay, start, end, playing }}
+          {...{ videoId, seconds, autoplay, start, end, playing, playBackRate }}
           controls={false}
           onStateChange={state => {
             setState(state);
@@ -54,8 +79,62 @@ const YouTubePlayerWithControls = ({
       {controls && (
         <div>
           <Button.Group>
-            <Button icon={playing ? 'pause' : 'play'} onClick={() => setPlaying(!playing)} />
-            <Button icon="undo" onClick={() => setSeconds(start)} />
+            <Popup
+              trigger={<Button icon="fast backward" onClick={() => setSeconds(start)} />}
+              content="Skip to start"
+              mouseEnterDelay={400}
+              on="hover"
+            />
+            <Popup
+              trigger={
+                <Button
+                  icon="backward"
+                  onClick={() => slowDown()}
+                  disabled={playBackRateIndex <= 0}
+                />
+              }
+              content="Decrease playback speed"
+              mouseEnterDelay={400}
+              on="hover"
+            />
+            <Popup
+              trigger={<Button icon="undo" onClick={() => setSeconds(seconds - 10)} />}
+              content="Back 10 seconds"
+              mouseEnterDelay={400}
+              on="hover"
+            />
+            <Popup
+              trigger={
+                <Button icon={playing ? 'pause' : 'play'} onClick={() => setPlaying(!playing)} />
+              }
+              content={playing ? 'Pause' : 'Play'}
+              mouseEnterDelay={400}
+              on="hover"
+            />
+            <Popup
+              trigger={<Button icon="redo" onClick={() => setSeconds(seconds + 10)} />}
+              content="Forward 10 seconds"
+              mouseEnterDelay={400}
+              on="hover"
+            />
+            <Popup
+              trigger={
+                <Button
+                  icon="forward"
+                  onClick={() => speedUp()}
+                  disabled={playBackRateIndex >= playBackRates.length - 1}
+                />
+              }
+              content="Increase playback speed"
+              mouseEnterDelay={400}
+              on="hover"
+            />
+            <Popup
+              trigger={<Button icon="fast forward" onClick={() => setSeconds(end)} />}
+              content="Skip to end"
+              mouseEnterDelay={400}
+              on="hover"
+            />
           </Button.Group>
           <components.Slider
             start={[seconds]}
