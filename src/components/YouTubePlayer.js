@@ -7,6 +7,7 @@ import React from 'reactn';
 import nullthrows from 'nullthrows';
 
 export type State = 'unstarted' | 'ended' | 'playing' | 'paused' | 'buffering' | 'cued';
+export type PlayBackRate = 0.25 | 0.5 | 1 | 1.5 | 2;
 
 const YouTubePlayer = ({
   videoId,
@@ -19,6 +20,7 @@ const YouTubePlayer = ({
   start,
   end,
   playing,
+  playBackRate,
 }: {
   videoId: string,
   onReady: ({|
@@ -33,6 +35,7 @@ const YouTubePlayer = ({
   start: number,
   end: number,
   playing: boolean,
+  playBackRate: PlayBackRate,
 }) => {
   const [player, setPlayer] = React.useState((undefined: Object | void));
   const [state, setState] = React.useState(('unstarted': State));
@@ -137,6 +140,15 @@ const YouTubePlayer = ({
     }
   }, [player, playing]);
 
+  // allow playback rate control
+  React.useEffect(() => {
+    if (!player) {
+      return;
+    }
+
+    player.setPlaybackRate(playBackRate);
+  }, [player, playBackRate]);
+
   return <div ref={ref} />;
 };
 
@@ -146,6 +158,7 @@ YouTubePlayer.defaultProps = {
   autoplay: true,
   controls: true,
   playing: false,
+  playBackRate: 1,
 };
 
 export default YouTubePlayer;
