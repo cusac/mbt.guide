@@ -1,7 +1,7 @@
 // @flow
 
 import * as firebase from 'firebase/app';
-import firebaseui from 'firebaseui';
+import * as firebaseui from 'firebaseui';
 import 'firebase/auth';
 import 'firebase/firestore';
 import axios from 'axios';
