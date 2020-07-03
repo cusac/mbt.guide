@@ -344,10 +344,19 @@ const Home = ({ videoId }: { videoId: string }) => {
           </Grid.Column>
           <Grid.Column style={{ color: 'white' }} verticalAlign="middle" width={4}>
             {!loadingVideos ? (
-              <VideoList
-                videos={videos}
-                handleVideoSelect={video => video && selectVideo(video.id.videoId)}
-              />
+              <div>
+                {videos && videos.length > 0 ? (
+                  <VideoList
+                    videos={videos}
+                    handleVideoSelect={video => video && selectVideo(video.id.videoId)}
+                  />
+                ) : (
+                  <h2 style={{ color: 'black' }}>
+                    No videos found. Try searching searching for something less specific or if
+                    searching for a title make sure the title is exact.{' '}
+                  </h2>
+                )}
+              </div>
             ) : (
               <Loading>Loading videos...</Loading>
             )}
