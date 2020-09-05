@@ -22,6 +22,8 @@ const {
   Container,
   Divider,
   Loading,
+  Checkbox,
+  Card,
 } = components;
 
 const Home = ({ videoId }: { videoId: string }) => {
@@ -33,6 +35,8 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [mySegments, setMySegments] = React.useState((undefined: Array<VideoSegment> | void));
   const [selectedVideo, setSelectedVideo] = React.useState();
   const [videos, setVideos] = React.useState([]);
+  const [videoSegmentMap, setVideoSegmentMap] = React.useState({});
+  const [filterProcessedVideos, setFilterProcessedVideos] = React.useState(false);
   const [segmentVideo, setSegmentVideo] = React.useState();
   const [currentUser] = useGlobal('user');
 
@@ -123,6 +127,39 @@ const Home = ({ videoId }: { videoId: string }) => {
     };
     videoId ? fetchSegmentVideo() : setSegments([]);
   }, [videoId]);
+
+  // Mark videos that have segments already
+  React.useEffect(() => {
+    const fetchProcessedVideos = async () => {
+      try {
+        setLoadingVideos(true);
+        const videoIds = videos.map(v => v.id.videoId);
+        const vidsWithSegs = (
+          await services.repository.video.list({
+            ytId: videoIds,
+            $select: ['ytId'],
+            $embed: ['segments'],
+          })
+        ).data.docs;
+        const vidSegMap = {};
+        for (const vid of vidsWithSegs) {
+          if (vid.segments.length > 0) {
+            vidSegMap[vid.ytId] = true;
+          }
+        }
+        setVideoSegmentMap(vidSegMap);
+      } catch (err) {
+        captureAndLog('Home', 'fetchProcessedVideos', err);
+        toastError(
+          'There was an error fetching the processed video data. Please refresh the page and try again.',
+          err
+        );
+      } finally {
+        setLoadingVideos(false);
+      }
+    };
+    videos ? fetchProcessedVideos() : (() => {})();
+  }, [videos]);
 
   React.useEffect(() => {
     setSegments(segmentVideo ? segmentVideo.segments : []);
@@ -346,10 +383,26 @@ const Home = ({ videoId }: { videoId: string }) => {
             {!loadingVideos ? (
               <div>
                 {videos && videos.length > 0 ? (
-                  <VideoList
-                    videos={videos}
-                    handleVideoSelect={video => video && selectVideo(video.id.videoId)}
-                  />
+                  <div>
+                    <Card fluid color="blue">
+                      <Card.Content>
+                        <Card.Header>
+                          <Checkbox
+                            toggle
+                            label="Hide Processed Videos"
+                            checked={filterProcessedVideos}
+                            onChange={(event, data) => setFilterProcessedVideos(data.checked)}
+                          />
+                        </Card.Header>
+                      </Card.Content>
+                    </Card>
+                    <VideoList
+                      videos={videos}
+                      videoSegmentMap={videoSegmentMap}
+                      filterProcessedVideos={filterProcessedVideos}
+                      handleVideoSelect={video => video && selectVideo(video.id.videoId)}
+                    />
+                  </div>
                 ) : (
                   <h2 style={{ color: 'black' }}>
                     No videos found. Try searching searching for something less specific or if
