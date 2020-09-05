@@ -3,8 +3,21 @@
 import React from 'react';
 import VideoItem from './VideoItem';
 
-const VideoList = ({ videos, handleVideoSelect }: { videos: [], handleVideoSelect: () => any }) => {
-  const renderedVideos = videos.map(video => {
+const VideoList = ({
+  videos,
+  videoSegmentMap,
+  filterProcessedVideos,
+  handleVideoSelect,
+}: {
+  videos: [],
+  videoSegmentMap: {},
+  filterProcessedVideos: boolean,
+  handleVideoSelect: () => any,
+}) => {
+  const videosToShow = filterProcessedVideos
+    ? videos.filter(v => !videoSegmentMap[v.id.videoId])
+    : videos;
+  const renderedVideos = videosToShow.map(video => {
     return <VideoItem key={video.id.videoId} video={video} handleVideoSelect={handleVideoSelect} />;
   });
 

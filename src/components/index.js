@@ -15,6 +15,8 @@ export {
   Divider,
   Modal,
   Popup,
+  Checkbox,
+  Card,
 } from 'semantic-ui-react';
 export { Link } from 'react-router-dom';
 
