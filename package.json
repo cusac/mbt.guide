@@ -31,8 +31,8 @@
   "dependencies": {
     "@sentry/browser": "^5.12.4",
     "axios": "^0.18.0",
-    "firebase": "^7.14.0",
-    "firebaseui": "^4.5.0",
+    "firebase": "^7.19.1",
+    "firebaseui": "^4.6.1",
     "invariant": "^2.2.4",
     "lodash": "^4.17.15",
     "luxon": "^1.12.0",
