@@ -50,6 +50,10 @@ const Home = ({ videoId }: { videoId: string }) => {
     async function fetchVideos() {
       try {
         setLoadingVideos(true);
+
+        // We're piggybacking this view to update the stats for now
+        await services.stats.logStats();
+
         const response = await services.youtube({
           endpoint: 'playlistItems',
           params: {
