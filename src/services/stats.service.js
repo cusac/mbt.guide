@@ -14,4 +14,13 @@ internals.postVisit = () => {
   }
 };
 
+internals.logStats = () => {
+  try {
+    return http.post('/stats/video');
+  } catch (err) {
+    captureAndLog('statsService', 'logStats', err);
+    throw err;
+  }
+};
+
 export default internals;
