@@ -1,6 +1,7 @@
 import * as store from 'store';
 import { toast } from 'react-toastify';
-import * as Sentry from '@sentry/browser';import { RESPONSE_MESSAGES } from '../config';
+import * as Sentry from '@sentry/browser';
+import { RESPONSE_MESSAGES } from '../config';
 
 const internals = {};
 

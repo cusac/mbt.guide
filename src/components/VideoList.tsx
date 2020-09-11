@@ -7,10 +7,10 @@ const VideoList = ({
   filterProcessedVideos,
   handleVideoSelect,
 }: {
-  videos: [],
-  videoSegmentMap: {},
-  filterProcessedVideos: boolean,
-  handleVideoSelect: () => any,
+  videos: [];
+  videoSegmentMap: {};
+  filterProcessedVideos: boolean;
+  handleVideoSelect: () => any;
 }) => {
   const videosToShow = filterProcessedVideos
     ? videos.filter(v => !videoSegmentMap[v.id.videoId])

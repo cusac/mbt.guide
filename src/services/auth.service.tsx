@@ -1,5 +1,6 @@
 import * as store from '../store';
-import { captureAndLog } from 'utils';import { httpClient as http, firebaseAuth } from '../services';
+import { captureAndLog } from 'utils';
+import { httpClient as http, firebaseAuth } from '../services';
 
 const internals = {};
 
@@ -9,10 +10,10 @@ internals.login = ({
   password,
   displayName,
 }: {
-  idToken?: string,
-  email?: string,
-  password?: string,
-  displayName?: string,
+  idToken?: string;
+  email?: string;
+  password?: string;
+  displayName?: string;
 }) => {
   return http
     .post('/login', { idToken, email, password, displayName })

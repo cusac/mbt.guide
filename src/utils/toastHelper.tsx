@@ -1,4 +1,3 @@
-
 import { toast } from 'react-toastify';
 
 export function toastError(message: string, err: any): void {

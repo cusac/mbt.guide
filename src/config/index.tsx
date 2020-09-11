@@ -106,34 +106,34 @@ export const resources = {
 
 // This should be updated along with the resource list above
 export type Repository = {
-  install: (...args: any) => any,
-  auditLog: Crud<any>,
+  install: (...args: any) => any;
+  auditLog: Crud<any>;
   user: Crud<any> & {
-    groups: Association<any>,
-    permissions: Association<any>,
-    segments: Association<any>,
-  },
+    groups: Association<any>;
+    permissions: Association<any>;
+    segments: Association<any>;
+  };
   video: Crud<Video> & {
-    segments: Association<any>,
-  },
+    segments: Association<any>;
+  };
   segment: Crud<any> & {
-    tags: Association<any>,
-  },
-  tag: Crud<any>,
-  visitor: Crud<any>,
+    tags: Association<any>;
+  };
+  tag: Crud<any>;
+  visitor: Crud<any>;
   role: Crud<any> & {
-    users: Association<any>,
-    permissions: Association<any>,
-  },
+    users: Association<any>;
+    permissions: Association<any>;
+  };
   group: Crud<any> & {
-    users: Association<any>,
-    permissions: Association<any>,
-  },
+    users: Association<any>;
+    permissions: Association<any>;
+  };
   permissions: Crud<any> & {
-    users: Association<any>,
-    roles: Association<any>,
-    groups: Association<any>,
-  },
+    users: Association<any>;
+    roles: Association<any>;
+    groups: Association<any>;
+  };
 };
 
 export const API = {

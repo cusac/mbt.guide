@@ -3,10 +3,10 @@ import axios from 'axios';
 import { RESPONSE_MESSAGES } from '../config';
 
 export type HttpClient = {
-  get: (url: string, params: {}, options?: {}) => Promise<any>,
-  put: (url: string, payload: {}, options?: {}) => Promise<any>,
-  post: (url: string, payload: {}, options?: {}) => Promise<any>,
-  delete: (url: string, payload?: {}, options?: {}) => Promise<any>,
+  get: (url: string, params: {}, options?: {}) => Promise<any>;
+  put: (url: string, payload: {}, options?: {}) => Promise<any>;
+  post: (url: string, payload: {}, options?: {}) => Promise<any>;
+  delete: (url: string, payload?: {}, options?: {}) => Promise<any>;
 };
 
 const httpClient: HttpClient = {
@@ -107,7 +107,7 @@ const httpClient: HttpClient = {
   },
 };
 
-const updateTokens = (headers: { 'x-access-token': string, 'x-refresh-token': string }) => {
+const updateTokens = (headers: { 'x-access-token': string; 'x-refresh-token': string }) => {
   const tokens = {
     accessToken: headers['x-access-token'],
     refreshToken: headers['x-refresh-token'],

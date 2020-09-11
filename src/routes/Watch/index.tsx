@@ -2,7 +2,8 @@ import * as components from 'components';
 import * as services from 'services';
 import React, { useGlobal } from 'reactn';
 import * as utils from 'utils';
-import { captureAndLog, toastError } from 'utils';import { Grid, Link, AppHeader, Label, Button, Container, Loading, List, Icon } from 'components';
+import { captureAndLog, toastError } from 'utils';
+import { Grid, Link, AppHeader, Label, Button, Container, Loading, List, Icon } from 'components';
 
 const Watch = ({ segmentId }: { segmentId: string }) => {
   const [currentUser] = useGlobal('user');
@@ -13,10 +14,12 @@ const Watch = ({ segmentId }: { segmentId: string }) => {
   React.useEffect(() => {
     const fetchSegment = async () => {
       try {
-        const segment = (await services.repository.segment.list({
-          $embed: ['tags'],
-          segmentId,
-        })).data.docs[0];
+        const segment = (
+          await services.repository.segment.list({
+            $embed: ['tags'],
+            segmentId,
+          })
+        ).data.docs[0];
         segment ? setSegment(segment) : setSegmentMissing(true);
       } catch (err) {
         captureAndLog('Watch', 'fetchSegment', err);

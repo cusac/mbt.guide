@@ -1,5 +1,3 @@
-
-
 export default class BaseError extends Error {
   constructor(...args: Array<any>) {
     super(...args);

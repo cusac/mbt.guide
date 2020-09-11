@@ -8,7 +8,9 @@ import 'react-tagsinput/react-tagsinput.css';
 import InputMask from 'react-input-mask';
 import { v4 as uuid } from 'uuid';
 import { differenceBy, uniq } from 'lodash';
-import { hasPermission, captureAndLog, toastError } from 'utils';import { Video, VideoSegment, Tag } from 'types';import VideoSegmentItem from './VideoSegmentItem';
+import { hasPermission, captureAndLog, toastError } from 'utils';
+import { Video, VideoSegment, Tag } from 'types';
+import VideoSegmentItem from './VideoSegmentItem';
 
 const {
   Button,
@@ -35,10 +37,10 @@ const VideoSplitter = ({
   segmentColors,
   minSegmentDuration,
 }: {
-  videoId: string,
-  segmentId: string,
-  segmentColors: Array<string>,
-  minSegmentDuration: number,
+  videoId: string;
+  segmentId: string;
+  segmentColors: Array<string>;
+  minSegmentDuration: number;
 }) => {
   const [currentUser] = useGlobal('user');
   const [currentUserScope] = useGlobal('scope');
@@ -189,10 +191,12 @@ const VideoSplitter = ({
     try {
       if (!videoLoading) {
         setVideoLoading(true);
-        const [video] = (await services.repository.video.list({
-          ytId: videoId,
-          $embed: ['segments.tags'],
-        })).data.docs;
+        const [video] = (
+          await services.repository.video.list({
+            ytId: videoId,
+            $embed: ['segments.tags'],
+          })
+        ).data.docs;
         setVideoLoading(false);
 
         if (!video) {

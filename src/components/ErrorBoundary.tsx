@@ -1,12 +1,12 @@
 import React from 'reactn';
 
 type Props = {
-  children: React.Node,
-  onError: (error: any, done: () => void) => React.Node,
+  children: React.Node;
+  onError: (error: any, done: () => void) => React.Node;
 };
 
 type State = {
-  error: any,
+  error: any;
 };
 
 export default class ErrorBoundary extends React.Component<Props, State> {

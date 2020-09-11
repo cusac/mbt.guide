@@ -1,4 +1,3 @@
-
 import * as Sentry from '@sentry/browser';
 
 export default function captureAndLog(file: string, method: string, err: any): void {

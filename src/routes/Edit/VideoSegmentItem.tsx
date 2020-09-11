@@ -12,11 +12,11 @@ const VideoSegmentItem = ({
   onSelect,
   canEdit,
 }: {
-  active: boolean,
-  data: VideoSegment,
-  color: string,
-  onSelect: () => void,
-  canEdit: boolean,
+  active: boolean;
+  data: VideoSegment;
+  color: string;
+  onSelect: () => void;
+  canEdit: boolean;
 }) => {
   const goTo = (event, path) => {
     event.stopPropagation();

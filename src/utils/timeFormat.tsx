@@ -1,5 +1,3 @@
-
-
 export function to(value: number): string {
   return isNaN(value) ? String(value) : new Date(1000 * value).toISOString().substr(11, 8);
 }
