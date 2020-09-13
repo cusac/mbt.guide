@@ -9,7 +9,7 @@ const initalAuthState = {
   refreshToken: '',
 };
 
-const internals = {};
+const internals = {} as any;
 
 const useAuth = () => {
   internals.updateTokens = useDispatch((state, dispatch, { accessToken, refreshToken }) => {
@@ -20,7 +20,7 @@ const useAuth = () => {
   });
 
   internals.useRefreshToken = useDispatch(state => {
-    updateAuthHeader(state.refreshToken);
+    updateAuthHeader((state as any).refreshToken);
 
     console.debug('Using refresh token');
     return state;
@@ -53,7 +53,7 @@ const useAuth = () => {
   });
 };
 
-const updateAuthHeader = token => {
+const updateAuthHeader = (token: any) => {
   axios.defaults.headers.common.Authorization = 'Bearer ' + token;
 };
 

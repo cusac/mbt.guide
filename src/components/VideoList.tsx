@@ -10,12 +10,12 @@ const VideoList = ({
   videos: [];
   videoSegmentMap: {};
   filterProcessedVideos: boolean;
-  handleVideoSelect: () => any;
+  handleVideoSelect: (video: any) => any;
 }) => {
   const videosToShow = filterProcessedVideos
-    ? videos.filter(v => !videoSegmentMap[v.id.videoId])
+    ? videos.filter((v: any) => !(videoSegmentMap as any)[v.id.videoId])
     : videos;
-  const renderedVideos = videosToShow.map(video => {
+  const renderedVideos = videosToShow.map((video: any) => {
     return <VideoItem key={video.id.videoId} video={video} handleVideoSelect={handleVideoSelect} />;
   });
 

@@ -1,10 +1,10 @@
 import { Router, Route } from 'react-router-dom';
-import * as components from 'components';
+import * as components from './components';
 import React from 'reactn';
-import * as routes from 'routes';
-import * as services from 'services';
-import * as store from 'store';
-import * as utils from 'utils';
+import * as routes from './routes';
+import * as services from './services';
+import * as store from './store';
+import * as utils from './utils';
 import { toast } from 'react-toastify';
 
 // Import css
@@ -16,12 +16,12 @@ toast.configure();
 const App = () => {
   const [, setUser] = React.useState(undefined);
   React.useEffect(() => {
-    services.firebaseAuth.onAuthStateChanged(setUser);
+    services.firebaseAuth.onAuthStateChanged(setUser as any);
   }, []);
   store.useStore();
 
   try {
-    services.stats.postVisit();
+    (services as any).stats.postVisit();
   } catch (err) {}
 
   return (

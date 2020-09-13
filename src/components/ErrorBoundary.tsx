@@ -1,8 +1,8 @@
 import React from 'reactn';
 
 type Props = {
-  children: React.Node;
-  onError: (error: any, done: () => void) => React.Node;
+  children: any;
+  onError: (error: any, done: () => void) => any;
 };
 
 type State = {
@@ -15,7 +15,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
   }
 
   constructor(props: Props) {
-    super(props);
+    super();
     this.state = { error: undefined };
   }
 

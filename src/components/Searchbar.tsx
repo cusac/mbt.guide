@@ -1,12 +1,12 @@
 import React from 'reactn';
 
-const Searchbar = ({ onHandleSubmit }: { onHandleSubmit: (string) => void }) => {
+const Searchbar = ({ onHandleSubmit }: { onHandleSubmit: (arg0: string) => void }) => {
   const [term, setTerm] = React.useState('');
 
-  const handleChange = event => {
+  const handleChange = (event: any) => {
     setTerm(event.target.value);
   };
-  const handleSubmit = event => {
+  const handleSubmit = (event: any) => {
     event.preventDefault();
     onHandleSubmit(term);
   };

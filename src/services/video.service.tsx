@@ -1,7 +1,7 @@
 import * as store from '../store';
 import * as luxon from 'luxon';
-import * as services from 'services';
-import { captureAndLog } from 'utils';
+import * as services from '../services';
+import { captureAndLog } from '../utils';
 import { httpClient as http } from '../services';
 
 export type Tag = {
@@ -36,11 +36,11 @@ export type Video = {
   segments: [VideoSegment];
 };
 
-const internals = {};
+const internals = {} as any;
 
 internals.create = async ({ videoId }: { videoId: string }) => {
   try {
-    const [ytVideo] = await services.youtube({
+    const [ytVideo] = await (services as any).youtube({
       endpoint: 'videos',
       params: {
         id: videoId,
@@ -53,7 +53,7 @@ internals.create = async ({ videoId }: { videoId: string }) => {
     }
     const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
 
-    const video = await services.repository.video.create({
+    const video = await (services as any).repository.video.create({
       youtube: ytVideo,
       duration: duration,
       ytId: videoId,

@@ -1,5 +1,3 @@
-
-
 export {
   Button,
   Grid,
@@ -17,6 +15,9 @@ export {
   Popup,
   Checkbox,
   Card,
+  Menu,
+  Sticky,
+  Sidebar,
 } from 'semantic-ui-react';
 export { Link } from 'react-router-dom';
 
@@ -28,5 +29,4 @@ export { default as Searchbar } from './Searchbar';
 export { default as VideoList } from './VideoList';
 export { default as AppHeader } from './AppHeader';
 export { default as Loading } from './Loading';
-export type { State as YouTubePlayerState } from './YouTubePlayer';
 export { default as YouTubePlayerWithControls } from './YouTubePlayerWithControls';

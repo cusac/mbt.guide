@@ -1,7 +1,7 @@
 import { httpClient as http } from '../services';
-import { captureAndLog } from 'utils';
+import { captureAndLog } from '../utils';
 
-const internals = {};
+const internals = {} as any;
 
 internals.postVisit = () => {
   try {

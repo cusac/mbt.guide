@@ -3,14 +3,14 @@ import axios from 'axios';
 import { RESPONSE_MESSAGES } from '../config';
 
 export type HttpClient = {
-  get: (url: string, params: {}, options?: {}) => Promise<any>;
-  put: (url: string, payload: {}, options?: {}) => Promise<any>;
-  post: (url: string, payload: {}, options?: {}) => Promise<any>;
-  delete: (url: string, payload?: {}, options?: {}) => Promise<any>;
+  get: (url: string, params?: any, options?: any) => Promise<any>;
+  put: (url: string, payload?: any, options?: any) => Promise<any>;
+  post: (url: string, payload?: any, options?: any) => Promise<any>;
+  delete: (url: string, payload?: any, options?: any) => Promise<any>;
 };
 
 const httpClient: HttpClient = {
-  get: function(url: string, params: {}, options?: {}) {
+  get: function(url: string, params?: any, options?: any) {
     let config = {
       method: 'GET',
       url: url,
@@ -26,7 +26,7 @@ const httpClient: HttpClient = {
       })
       .catch(function(error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
-          store.auth.useRefreshToken();
+          (store as any).auth.useRefreshToken();
           return httpClient.get(url, params, options);
         } else {
           throw error;
@@ -34,7 +34,7 @@ const httpClient: HttpClient = {
       });
   },
 
-  put: function(url: string, payload: {}, options?: {}) {
+  put: function(url: string, payload?: any, options?: any) {
     let config = {
       method: 'PUT',
       url: url,
@@ -50,7 +50,7 @@ const httpClient: HttpClient = {
       })
       .catch(function(error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
-          store.auth.useRefreshToken();
+          (store as any).auth.useRefreshToken();
           return httpClient.put(url, payload, options);
         } else {
           throw error;
@@ -58,7 +58,7 @@ const httpClient: HttpClient = {
       });
   },
 
-  post: function(url: string, payload: {}, options?: {}) {
+  post: function(url: string, payload?: any, options?: any) {
     let config = {
       method: 'POST',
       url: url,
@@ -74,7 +74,7 @@ const httpClient: HttpClient = {
       })
       .catch(function(error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
-          store.auth.useRefreshToken();
+          (store as any).auth.useRefreshToken();
           return httpClient.post(url, payload, options);
         } else {
           throw error;
@@ -82,7 +82,7 @@ const httpClient: HttpClient = {
       });
   },
 
-  delete: function(url: string, payload?: {}, options?: {}) {
+  delete: function(url: string, payload?: any, options?: any) {
     let config = {
       method: 'DELETE',
       url: url,
@@ -98,7 +98,7 @@ const httpClient: HttpClient = {
       })
       .catch(function(error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
-          store.auth.useRefreshToken();
+          (store as any).auth.useRefreshToken();
           return httpClient.delete(url, payload, options);
         } else {
           throw error;
@@ -112,7 +112,7 @@ const updateTokens = (headers: { 'x-access-token': string; 'x-refresh-token': st
     accessToken: headers['x-access-token'],
     refreshToken: headers['x-refresh-token'],
   };
-  store.auth.updateTokens(tokens);
+  (store as any).auth.updateTokens(tokens);
 };
 
 export default httpClient;

@@ -4,7 +4,7 @@ import { HttpClient } from './http-client.service';
 import { Repository } from '../config';
 
 // For info on rest-hapi endpoints see: https://resthapi.com/
-const RestHapiRepository: $Shape<Repository> = {
+const RestHapiRepository: Partial<Repository> = {
   install({
     httpClient,
     resources,
@@ -47,7 +47,7 @@ const RestHapiRepository: $Shape<Repository> = {
       }
 
       const repoName = resourceName;
-      this[repoName] = repoCalls;
+      (this as any)[repoName] = repoCalls;
     }
   },
 };

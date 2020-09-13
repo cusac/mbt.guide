@@ -1,12 +1,12 @@
 import React from 'react';
-import { AppHeader, Menu, Icon, Sticky } from 'components';
+import { AppHeader, Menu, Icon, Sticky } from '../components';
 import logo from './logo-wide.png';
 
 const Layout = ({ children }: { children: any }) => {
   const [contextRef, setContextRef] = React.useState(undefined);
 
   return (
-    <div className="ui two grid" ref={setContextRef}>
+    <div className="ui two grid" ref={setContextRef as any}>
       <div className="column" style={{ flex: '0 0 300px', paddingRight: 0 }}>
         <Sticky context={contextRef}>
           <Menu icon="labeled" fluid pointing inverted vertical>

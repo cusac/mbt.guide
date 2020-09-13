@@ -1,7 +1,7 @@
 import React from 'react';
-import { Sidebar, Segment, Menu, Icon } from 'components';
+import { Sidebar, Segment, Menu, Icon } from '../components';
 
-const SidebarNav = ({ children, test }) => {
+const SidebarNav = ({ children, test }: any) => {
   return (
     <Sidebar.Pushable as={Segment}>
       <Sidebar

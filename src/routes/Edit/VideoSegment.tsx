@@ -1,6 +1,6 @@
-import * as components from 'components';
+import * as components from '../../components';
 import React from 'reactn';
-import * as utils from 'utils';
+import * as utils from '../../utils';
 
 const { Button, Grid, Segment } = components;
 
@@ -12,18 +12,18 @@ const VideoSegment = ({
   canEdit,
 }: {
   active: boolean;
-  data: VideoSegment;
+  data: any;
   color: string;
   onSelect: () => void;
   canEdit: boolean;
 }) => {
-  const goTo = (event, path) => {
+  const goTo = (event: any, path: any) => {
     event.stopPropagation();
     utils.history.push(path);
   };
 
   return (
-    <Segment color={color} onClick={() => onSelect()} className="video-segment">
+    <Segment color={color as any} onClick={() => onSelect()} className="video-segment">
       <Grid columns={2} divided>
         <Grid.Row>
           <Grid.Column verticalAlign="middle" width={3} style={{ padding: 0 }}>

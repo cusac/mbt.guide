@@ -1,25 +1,25 @@
 import React from 'reactn';
-import { firebase, firebaseAuth, auth } from 'services';
+import { firebase, firebaseAuth, auth } from '../services';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import { toast } from 'react-toastify';
-import { captureAndLog, toastError } from 'utils';
+import { captureAndLog, toastError } from '../utils';
 
 //TODO: Import test users
 const testUsers = ['test@superadmin.com', 'test@admin.com'];
 
-const Auth = ({ setLoading }: { setLoading: (boolean) => void }): any => {
+const Auth = ({ setLoading }: { setLoading: (arg0: boolean) => void }): any => {
   const uiConfig = {
     callbacks: {
-      signInSuccessWithAuthResult: async result => {
+      signInSuccessWithAuthResult: async (result: any) => {
         setLoading(true);
-        const idToken = await firebaseAuth.currentUser.getIdToken();
-        const { displayName } = firebaseAuth.currentUser;
+        const idToken = await (firebaseAuth as any).currentUser.getIdToken();
+        const { displayName } = firebaseAuth.currentUser as any;
 
         let { emailVerified } = result.user;
 
         // TODO: Handle login errors
         try {
-          emailVerified && (await auth.login({ idToken, displayName }));
+          emailVerified && (await (auth as any).login({ idToken, displayName }));
         } catch (err) {
           if (err.data.message === 'Account is inactive.') {
             emailVerified = false;
@@ -29,17 +29,17 @@ const Auth = ({ setLoading }: { setLoading: (boolean) => void }): any => {
           }
         }
 
-        if (!emailVerified && !testUsers.includes(firebaseAuth.currentUser.email)) {
+        if (!emailVerified && !testUsers.includes((firebaseAuth as any).currentUser.email as any)) {
           toast.info(
             'You need to activate your account. An activation email has been sent to your address.',
             {
               autoClose: false,
             }
           );
-          firebase
+          (firebase as any)
             .auth()
             .currentUser.sendEmailVerification()
-            .catch(function(err) {
+            .catch(function(err: any) {
               captureAndLog('Auth', 'sendEmailVerification', err);
             });
         }
@@ -53,10 +53,10 @@ const Auth = ({ setLoading }: { setLoading: (boolean) => void }): any => {
         const emailInput: any = document.getElementsByClassName('firebaseui-id-email')[0];
         const passwordInput: any = document.getElementsByClassName('firebaseui-id-password')[0];
         if (submitButton && passwordInput && emailInput) {
-          submitButton.onclick = async e => {
+          submitButton.onclick = async (e: any) => {
             if (testUsers.includes(emailInput.value)) {
               e.stopPropagation();
-              await auth.login({ email: emailInput.value, password: passwordInput.value });
+              await (auth as any).login({ email: emailInput.value, password: passwordInput.value });
               setLoading(false);
             }
           };
@@ -74,7 +74,7 @@ const Auth = ({ setLoading }: { setLoading: (boolean) => void }): any => {
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
     ],
   };
-  return <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()} />;
+  return <StyledFirebaseAuth uiConfig={uiConfig as any} firebaseAuth={firebase.auth()} />;
 };
 
 export default Auth;

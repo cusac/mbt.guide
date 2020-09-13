@@ -183,11 +183,11 @@ const ResourceHelper = function(httpClient: HttpClient, logger: Logger) {
       associationRoute: string,
       options: any
     ) {
-      options = options || {};
-      var resourceMethodName = associationName[0].toUpperCase() + associationName.slice(1);
-      var callers = {
+      options = options || ({} as any);
+      const resourceMethodName = associationName[0].toUpperCase() + associationName.slice(1);
+      const callers = {
         [associationName]: {},
-      };
+      } as any;
       callers[associationName]['get'] = this.generateGetAssociationsAssociationCaller(
         ownerRoute,
         associationRoute,

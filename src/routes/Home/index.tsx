@@ -1,10 +1,10 @@
-import * as components from 'components';
-import * as utils from 'utils';
+import * as components from '../../components';
+import * as utils from '../../utils';
 import React, { useGlobal } from 'reactn';
-import * as services from 'services';
-import * as errors from 'errors';
-import { captureAndLog, toastError } from 'utils';
-import { Video, VideoSegment } from 'types';
+import * as services from '../../services';
+import * as errors from '../../errors';
+import { captureAndLog, toastError } from '../../utils';
+import { Video, VideoSegment } from '../../types';
 
 const channelId = 'UCYwlraEwuFB4ZqASowjoM0g';
 
@@ -35,9 +35,9 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [videoSegmentMap, setVideoSegmentMap] = React.useState({});
   const [filterProcessedVideos, setFilterProcessedVideos] = React.useState(false);
   const [segmentVideo, setSegmentVideo] = React.useState();
-  const [currentUser] = useGlobal('user');
+  const [currentUser] = (useGlobal as any)('user');
 
-  const selectVideo = async videoId => {
+  const selectVideo = async (videoId: any) => {
     utils.history.push(`/${videoId}`);
   };
 
@@ -49,15 +49,15 @@ const Home = ({ videoId }: { videoId: string }) => {
         setLoadingVideos(true);
 
         // We're piggybacking this view to update the stats for now
-        await services.stats.logStats();
+        await (services as any).stats.logStats();
 
-        const response = await services.youtube({
+        const response = await (services as any).youtube({
           endpoint: 'playlistItems',
           params: {
             playlistId: 'UUYwlraEwuFB4ZqASowjoM0g',
           },
         });
-        const mbtVids = response.map(v => ({
+        const mbtVids = response.map((v: any) => ({
           snippet: v.snippet,
           id: {
             videoId: v.snippet.resourceId.videoId,
@@ -83,7 +83,7 @@ const Home = ({ videoId }: { videoId: string }) => {
     async function fetchSelectedVideo() {
       try {
         setLoadingSelectedVideo(true);
-        const [video] = await services.youtube({
+        const [video] = await (services as any).youtube({
           endpoint: 'videos',
           params: {
             id: videoId,
@@ -110,7 +110,7 @@ const Home = ({ videoId }: { videoId: string }) => {
       try {
         setLoadingSegments(true);
         const video = (
-          await services.repository.video.list({
+          await (services as any).repository.video.list({
             ytId: videoId,
             $embed: ['segments'],
           })
@@ -134,9 +134,9 @@ const Home = ({ videoId }: { videoId: string }) => {
     const fetchProcessedVideos = async () => {
       try {
         setLoadingVideos(true);
-        const videoIds = videos.map(v => v.id.videoId);
+        const videoIds = videos.map((v: any) => v.id.videoId);
         const vidsWithSegs = (
-          await services.repository.video.list({
+          await (services as any).repository.video.list({
             ytId: videoIds,
             $select: ['ytId'],
             $embed: ['segments'],
@@ -145,7 +145,7 @@ const Home = ({ videoId }: { videoId: string }) => {
         const vidSegMap = {};
         for (const vid of vidsWithSegs) {
           if (vid.segments.length > 0) {
-            vidSegMap[vid.ytId] = true;
+            (vidSegMap as any)[vid.ytId] = true;
           }
         }
         setVideoSegmentMap(vidSegMap);
@@ -163,7 +163,7 @@ const Home = ({ videoId }: { videoId: string }) => {
   }, [videos]);
 
   React.useEffect(() => {
-    setSegments(segmentVideo ? segmentVideo.segments : []);
+    setSegments(segmentVideo ? (segmentVideo as any).segments : []);
   }, [segmentVideo]);
 
   React.useEffect(() => {
@@ -172,14 +172,15 @@ const Home = ({ videoId }: { videoId: string }) => {
   }, [segments, currentUser]);
 
   const videoSrc = selectedVideo
-    ? `https://www.youtube.com/embed/${selectedVideo.id.videoId || selectedVideo.id}`
+    ? `https://www.youtube.com/embed/${(selectedVideo as any).id.videoId ||
+        (selectedVideo as any).id}`
     : '';
 
   // Search youtube videos from the MBT channel
-  const searchVideos = async term => {
+  const searchVideos = async (term: any) => {
     try {
       setLoadingVideos(true);
-      const response = await services.youtube({
+      const response = await (services as any).youtube({
         endpoint: 'search',
         params: {
           q: term,
@@ -187,7 +188,7 @@ const Home = ({ videoId }: { videoId: string }) => {
       });
 
       // Filter out any videos that don't belong to the MBT channel
-      const mbtVids = response.filter(v => v.snippet.channelId === channelId);
+      const mbtVids = response.filter((v: any) => v.snippet.channelId === channelId);
 
       setVideos(mbtVids);
     } catch (err) {
@@ -201,7 +202,8 @@ const Home = ({ videoId }: { videoId: string }) => {
     }
   };
 
-  const createVideo = () => {
+  const createVideo = (event: any) => {
+    event.preventDefault();
     utils.history.push(`/edit/${videoId}`);
   };
 
@@ -219,8 +221,8 @@ const Home = ({ videoId }: { videoId: string }) => {
                       <iframe src={videoSrc} allowFullScreen title="Video player" />
                     </div>
                     <div className="ui segment">
-                      <h4 className="ui header">{selectedVideo.snippet.title}</h4>
-                      <p>{selectedVideo.snippet.description}</p>
+                      <h4 className="ui header">{(selectedVideo as any).snippet.title}</h4>
+                      <p>{(selectedVideo as any).snippet.description}</p>
                     </div>
                   </div>
                 ) : (
@@ -265,14 +267,18 @@ const Home = ({ videoId }: { videoId: string }) => {
                                 </Grid.Column>
                               </Grid.Row>
                               {mySegments.map(segment => (
-                                <Grid.Row key={segment.segmentId}>
+                                <Grid.Row key={(segment as any).segmentId}>
                                   <Grid.Column verticalAlign="middle" width={3}>
-                                    <Link to={`/watch/${segment.videoYtId}/${segment.segmentId}`}>
-                                      {segment.title}
+                                    <Link
+                                      to={`/watch/${(segment as any).videoYtId}/${
+                                        (segment as any).segmentId
+                                      }`}
+                                    >
+                                      {(segment as any).title}
                                     </Link>
                                   </Grid.Column>
                                   <Grid.Column textAlign="left" width={9}>
-                                    {segment.description || 'No description available.'}
+                                    {(segment as any).description || 'No description available.'}
                                   </Grid.Column>
                                   <Grid.Column width={2}>
                                     <Icon
@@ -283,7 +289,9 @@ const Home = ({ videoId }: { videoId: string }) => {
                                       color="blue"
                                       onClick={() =>
                                         utils.history.push(
-                                          `/edit/${segment.videoYtId}/${segment.segmentId}`
+                                          `/edit/${(segment as any).videoYtId}/${
+                                            (segment as any).segmentId
+                                          }`
                                         )
                                       }
                                     />
@@ -296,7 +304,9 @@ const Home = ({ videoId }: { videoId: string }) => {
                                       color="green"
                                       onClick={() =>
                                         utils.history.push(
-                                          `/watch/${segment.videoYtId}/${segment.segmentId}`
+                                          `/watch/${(segment as any).videoYtId}/${
+                                            (segment as any).segmentId
+                                          }`
                                         )
                                       }
                                     />
@@ -309,7 +319,9 @@ const Home = ({ videoId }: { videoId: string }) => {
                           selectedVideo && (
                             <div>
                               You don't have any segments for this video.{' '}
-                              <Link onClick={createVideo}>Try adding one!</Link>
+                              <Link onClick={createVideo} to="">
+                                Try adding one!
+                              </Link>
                             </div>
                           )
                         )}
@@ -337,14 +349,18 @@ const Home = ({ videoId }: { videoId: string }) => {
                             </Grid.Column>
                           </Grid.Row>
                           {segments.map(segment => (
-                            <Grid.Row key={segment.segmentId}>
+                            <Grid.Row key={(segment as any).segmentId}>
                               <Grid.Column verticalAlign="middle" width={3}>
-                                <Link to={`/watch/${segment.videoYtId}/${segment.segmentId}`}>
-                                  {segment.title}
+                                <Link
+                                  to={`/watch/${(segment as any).videoYtId}/${
+                                    (segment as any).segmentId
+                                  }`}
+                                >
+                                  {(segment as any).title}
                                 </Link>
                               </Grid.Column>
                               <Grid.Column textAlign="left" width={11}>
-                                {segment.description || 'No description available.'}
+                                {(segment as any).description || 'No description available.'}
                               </Grid.Column>
                               <Grid.Column width={2}>
                                 <Icon
@@ -354,7 +370,9 @@ const Home = ({ videoId }: { videoId: string }) => {
                                   color="green"
                                   onClick={() =>
                                     utils.history.push(
-                                      `/watch/${segment.videoYtId}/${segment.segmentId}`
+                                      `/watch/${(segment as any).videoYtId}/${
+                                        (segment as any).segmentId
+                                      }`
                                     )
                                   }
                                 />
@@ -367,7 +385,9 @@ const Home = ({ videoId }: { videoId: string }) => {
                       selectedVideo && (
                         <div>
                           No segments for this video.{' '}
-                          <Link onClick={createVideo}>Add the first one!</Link>
+                          <Link onClick={createVideo} to="">
+                            Add the first one!
+                          </Link>
                         </div>
                       )
                     )}
@@ -392,16 +412,18 @@ const Home = ({ videoId }: { videoId: string }) => {
                             toggle
                             label="Hide Processed Videos"
                             checked={filterProcessedVideos}
-                            onChange={(event, data) => setFilterProcessedVideos(data.checked)}
+                            onChange={(event, data) =>
+                              setFilterProcessedVideos((data as any).checked)
+                            }
                           />
                         </Card.Header>
                       </Card.Content>
                     </Card>
                     <VideoList
-                      videos={videos}
+                      videos={videos as any}
                       videoSegmentMap={videoSegmentMap}
                       filterProcessedVideos={filterProcessedVideos}
-                      handleVideoSelect={video => video && selectVideo(video.id.videoId)}
+                      handleVideoSelect={(video: any) => video && selectVideo(video.id.videoId)}
                     />
                   </div>
                 ) : (

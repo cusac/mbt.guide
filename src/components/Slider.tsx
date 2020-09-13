@@ -1,9 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/rules-of-hooks */
 
-// https://refreshless.com/nouislider/import 'nouislider/distribute/nouislider.css';
+// https://refreshless.com/nouislider/
+import 'nouislider/distribute/nouislider.css';
 import React from 'reactn';
-import * as utils from 'utils';
+import * as utils from '../utils';
 import noUiSlider from 'nouislider';
 
 export type Range = { min: number; max: number };
@@ -21,9 +22,9 @@ const Slider = ({
   disabled,
   offsetTooltip,
 }: {
-  onChange: ([number]) => void;
-  onHandleUpdate: (number, number) => void;
-  onHandleSet: (number, number) => void;
+  onChange: (arg0: [number]) => void;
+  onHandleUpdate: (arg0: number, arg1: number) => void;
+  onHandleSet: (arg0: number, arg1: number) => void;
   range: Range;
   start: Array<number>;
   colors: Array<string>;
@@ -53,8 +54,8 @@ const Slider = ({
       tooltips: offsetTooltip
         ? [
             {
-              to: value => utils.timeFormat.to(value - range.min),
-              from: value => utils.timeFormat.from((parseInt(value) - range.min).toString()),
+              to: (value: any) => utils.timeFormat.to(value - range.min),
+              from: (value: any) => utils.timeFormat.from((parseInt(value) - range.min).toString()),
             },
           ]
         : true,
@@ -66,17 +67,21 @@ const Slider = ({
     return () => slider.destroy();
   }, []);
 
-  React.useEffect(() => slider && slider.updateOptions({ range }), [slider, range.min, range.max]);
+  React.useEffect(() => slider && (slider as any).updateOptions({ range }), [
+    slider,
+    range.min,
+    range.max,
+  ]);
   React.useEffect(() => {
-    slider && slider.updateOptions({ start });
+    slider && (slider as any).updateOptions({ start });
     disabled && ref
-      ? ref.current && ref.current.setAttribute('disabled', disabled)
-      : ref.current && ref.current.removeAttribute('disabled');
+      ? ref.current && (ref as any).current.setAttribute('disabled', disabled)
+      : ref.current && (ref as any).current.removeAttribute('disabled');
   }, [slider, ...start]);
   React.useEffect(
     () =>
       slider &&
-      [...slider.target.querySelectorAll('.noUi-connect')].forEach((connect, i) => {
+      [...(slider as any).target.querySelectorAll('.noUi-connect')].forEach((connect, i) => {
         connect.style.background = colors[i];
       }),
     [slider, ...colors]
@@ -95,27 +100,26 @@ const Slider = ({
       const eventName = `${name}.react`;
 
       let justBound = true;
-      slider.on(eventName, (values, handleIndex, rawValues) => {
+      (slider as any).on(eventName, (values: any, handleIndex: any, rawValues: any) => {
         if (justBound) {
           return;
         }
 
-        callback(handleIndex, rawValues[handleIndex]);
+        (callback as any)(handleIndex, rawValues[handleIndex]);
       });
       justBound = false;
 
-      return () => slider.off(eventName);
+      return () => (slider as any).off(eventName);
     }, [slider, callback])
   );
 
-  // $FlowFixMe
-  return <div ref={ref} style={{ margin: '0px auto', width }} />;
+  return <div ref={ref as any} style={{ margin: '0px auto', width }} />;
 };
 
 Slider.defaultProps = {
-  onChange: () => any,
-  onHandleUpdate: () => any,
-  onHandleSet: () => any,
+  onChange: () => {},
+  onHandleUpdate: () => {},
+  onHandleSet: () => {},
   range: {
     min: 0,
     max: 4000,

@@ -4,7 +4,13 @@
 import React from 'reactn';
 import nullthrows from 'nullthrows';
 
-export type State = 'unstarted' | 'ended' | 'playing' | 'paused' | 'buffering' | 'cued';
+export type YouTubePlayerState =
+  | 'unstarted'
+  | 'ended'
+  | 'playing'
+  | 'paused'
+  | 'buffering'
+  | 'cued';
 export type PlayBackRate = 0.25 | 0.5 | 1 | 1.5 | 2;
 
 const YouTubePlayer = ({
@@ -21,9 +27,9 @@ const YouTubePlayer = ({
   playBackRate,
 }: {
   videoId: string;
-  onReady: ({ id: string, duration: number }) => void;
-  onStateChange: (State) => void;
-  onSecondsChange: (number) => void;
+  onReady: ({ id, duration }: { id: string; duration: number }) => void;
+  onStateChange: (arg0: YouTubePlayerState) => void;
+  onSecondsChange: (arg0: number) => void;
   seconds: number;
   autoplay: boolean;
   controls: boolean;
@@ -33,11 +39,13 @@ const YouTubePlayer = ({
   playBackRate: PlayBackRate;
 }) => {
   const [player, setPlayer] = React.useState(undefined);
-  const [state, setState] = React.useState('unstarted' as State);
+  const [state, setState] = React.useState('unstarted');
 
   const ref = React.createRef();
   React.useEffect(() => {
     ytReady(() => {
+      const YT = (window as any)['YT'];
+      console.log('YT:', YT);
       const ytPlayer = new YT.Player(ref.current, {
         height: 360,
         width: 640,
@@ -59,26 +67,26 @@ const YouTubePlayer = ({
               duration: ytPlayer.getDuration(),
             });
           },
-          onStateChange: ({ data }) => {
-            const state = ({
+          onStateChange: ({ data }: any) => {
+            const state = {
               [-1]: 'unstarted',
               [YT.PlayerState.ENDED]: 'ended',
               [YT.PlayerState.PLAYING]: 'playing',
               [YT.PlayerState.PAUSED]: 'paused',
               [YT.PlayerState.BUFFERING]: 'buffering',
               [YT.PlayerState.CUED]: 'cued',
-            } as Record<number, State>)[data];
+            }[data];
             setState(state);
-            onStateChange(state);
+            onStateChange(state as any);
           },
         },
       });
     });
-    return () => ytReady(() => player && player.destroy());
+    return () => ytReady(() => player && (player as any).destroy());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId]);
 
-  const [prevTime, setPrevTime] = React.useState(undefined as number | void);
+  const [prevTime, setPrevTime] = React.useState(undefined);
 
   // synchronise player time with seconds prop
   React.useEffect(() => {
@@ -87,7 +95,7 @@ const YouTubePlayer = ({
     }
 
     // video has just loaded
-    if (player.getCurrentTime() === 0) {
+    if ((player as any).getCurrentTime() === 0) {
       return;
     }
 
@@ -96,7 +104,7 @@ const YouTubePlayer = ({
       return;
     }
 
-    player.seekTo(seconds, true);
+    (player as any).seekTo(seconds, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player, seconds]);
 
@@ -114,7 +122,7 @@ const YouTubePlayer = ({
         return;
       }
 
-      const time = player.getCurrentTime();
+      const time = (player as any).getCurrentTime();
       setPrevTime(time);
       onSecondsChange(time);
     }, 200);
@@ -129,9 +137,9 @@ const YouTubePlayer = ({
     }
 
     if (playing) {
-      player.playVideo();
+      (player as any).playVideo();
     } else {
-      player.pauseVideo();
+      (player as any).pauseVideo();
     }
   }, [player, playing]);
 
@@ -141,10 +149,10 @@ const YouTubePlayer = ({
       return;
     }
 
-    player.setPlaybackRate(playBackRate);
+    (player as any).setPlaybackRate(playBackRate);
   }, [player, playBackRate]);
 
-  return <div ref={ref} />;
+  return <div ref={ref as any} />;
 };
 
 YouTubePlayer.defaultProps = {
@@ -164,10 +172,10 @@ ytScript.src = 'https://www.youtube.com/iframe_api';
 const firstScriptTag = nullthrows(document.getElementsByTagName('script')[0]);
 nullthrows(firstScriptTag.parentNode).insertBefore(ytScript, firstScriptTag);
 
-let fnQueue: [() => void] = []; // functions to be called once YT API is ready
+let fnQueue: any = []; // functions to be called once YT API is ready
 
 // queues function until YouTube API is ready
-function ytReady(fn: () => void) {
+function ytReady(fn: any) {
   if (fnQueue) {
     fnQueue.push(fn);
   } else {
@@ -175,8 +183,8 @@ function ytReady(fn: () => void) {
   }
 }
 
-window.onYouTubeIframeAPIReady = () => {
+(window as any).onYouTubeIframeAPIReady = () => {
   // call all queued functions
-  nullthrows(fnQueue).forEach(fn => fn());
+  nullthrows(fnQueue).forEach((fn: any) => fn());
   fnQueue = null;
 };

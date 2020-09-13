@@ -1,24 +1,26 @@
 import React, { useGlobal } from 'reactn';
-import * as utils from 'utils';
-import * as components from 'components';
-import * as services from 'services';
-import * as store from 'store';
-import { toastError } from 'utils';
+import * as utils from '../utils';
+import * as components from '../components';
+import * as serv from '../services';
+import * as store from '../store';
+import { toastError } from '../utils';
 import logo from './logo-wide.png';
 
 const { Button, Grid, Searchbar, Icon, Auth, Header } = components;
+
+const services = serv as any;
 
 const AppHeader = ({
   onHandleSubmit,
   showSearchbar,
   currentVideoId,
 }: {
-  onHandleSubmit: (string) => void;
+  onHandleSubmit: (arg0: string) => void;
   showSearchbar: boolean;
   currentVideoId: string;
 }) => {
   const [loading, setLoading] = React.useState(false);
-  const [currentUser] = useGlobal('user');
+  const [currentUser] = (useGlobal as any)('user');
 
   const logout = () => {
     try {

@@ -1,6 +1,6 @@
 import { setGlobal, addCallback } from 'reactn';
 import auth, { useAuth, initalAuthState } from './auth.store';
-import { authInterceptor } from 'services';
+import { authInterceptor } from '../services';
 import axios from 'axios';
 import * as Sentry from '@sentry/browser';
 

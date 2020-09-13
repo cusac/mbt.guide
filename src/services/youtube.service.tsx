@@ -1,5 +1,5 @@
 import { httpClient as http } from '../services';
-import { captureAndLog } from 'utils';
+import { captureAndLog } from '../utils';
 
 export default async function({ endpoint, params }: { endpoint: string; params: any }) {
   try {

@@ -1,7 +1,7 @@
-import * as components from 'components';
+import * as components from '../../components';
 import React from 'reactn';
-import * as utils from 'utils';
-import { VideoSegment } from 'types';
+import * as utils from '../../utils';
+import { VideoSegment } from '../../types';
 
 const { Button, Grid, Segment } = components;
 
@@ -14,11 +14,11 @@ const VideoSegmentItem = ({
 }: {
   active: boolean;
   data: VideoSegment;
-  color: string;
+  color: any;
   onSelect: () => void;
   canEdit: boolean;
 }) => {
-  const goTo = (event, path) => {
+  const goTo = (event: any, path: any) => {
     event.stopPropagation();
     utils.history.push(path);
   };

@@ -33,7 +33,7 @@ axios.defaults.paramsSerializer = function(params) {
 };
 
 // Initialize the repository
-repository.install({ httpClient, log: true, resources });
+(repository as any).install({ httpClient, log: true, resources });
 
 export {
   firebaseAuth,

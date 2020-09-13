@@ -1,8 +1,8 @@
-import * as components from 'components';
+import { YouTubePlayer, Slider, Button, Popup } from '../components';
 import React from 'reactn';
+// import type { PlayBackRate } from './YouTubePlayer';
 
-const { Button, Popup } = components;
-
+// const playBackRates: [PlayBackRate,PlayBackRate,PlayBackRate,PlayBackRate,PlayBackRate] = [0.25, 0.5, 1, 1.5, 2];
 const playBackRates = [0.25, 0.5, 1, 1.5, 2];
 
 const YouTubePlayerWithControls = ({
@@ -24,9 +24,10 @@ const YouTubePlayerWithControls = ({
 }) => {
   const [seconds, setSeconds] = React.useState(start);
   // eslint-disable-next-line no-unused-vars
-  const [state, setState] = React.useState('unstarted' as components.YouTubePlayerState);
+  const [state, setState] = React.useState('unstarted');
   const [playing, setPlaying] = React.useState(autoplay);
-  const [playBackRate, setPlayBackRate] = React.useState(playBackRates[2]);
+  // const [playBackRate, setPlayBackRate]: [PlayBackRate, any] = React.useState(playBackRates[2]);
+  const [playBackRate, setPlayBackRate]: [any, any] = React.useState(playBackRates[2]);
   const [playBackRateIndex, setPlayBackRateIndex] = React.useState(2);
 
   const speedUp = () => {
@@ -53,10 +54,10 @@ const YouTubePlayerWithControls = ({
   return (
     <div>
       <div key={`${start}-${end}`}>
-        <components.YouTubePlayer
+        <YouTubePlayer
           {...{ videoId, seconds, autoplay, start, end, playing, playBackRate }}
           controls={false}
-          onStateChange={state => {
+          onStateChange={(state: any) => {
             setState(state);
             switch (state) {
               case 'playing':
@@ -134,11 +135,11 @@ const YouTubePlayerWithControls = ({
               on="hover"
             />
           </Button.Group>
-          <components.Slider
+          <Slider
             start={[seconds]}
             range={{ min: Math.round(start), max: Math.round(end) }}
             width={640}
-            onHandleUpdate={(i, value) => setSeconds(value)}
+            onHandleUpdate={(i: any, value: any) => setSeconds(value)}
             pips={true}
             offsetTooltip={offsetTooltip}
           />

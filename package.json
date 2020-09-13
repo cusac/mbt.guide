@@ -29,6 +29,10 @@
   ],
   "dependencies": {
     "@sentry/browser": "^5.12.4",
+    "@types/lodash": "^4.14.161",
+    "@types/luxon": "^1.24.4",
+    "@types/react-router-dom": "^5.1.5",
+    "@types/uuid": "^8.3.0",
     "axios": "^0.18.0",
     "firebase": "^7.19.1",
     "firebaseui": "^4.6.1",

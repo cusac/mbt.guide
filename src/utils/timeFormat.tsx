@@ -3,5 +3,7 @@ export function to(value: number): string {
 }
 
 export function from(value: string): number {
-  return isNaN(value) ? new Date(`1970-01-01T${value}Z`).getTime() / 1000 : parseInt(value, 10);
+  return isNaN(value as any)
+    ? new Date(`1970-01-01T${value}Z`).getTime() / 1000
+    : parseInt(value, 10);
 }
