@@ -11,6 +11,7 @@ import { differenceBy, uniq } from 'lodash';
 import { hasPermission, captureAndLog, toastError } from '../../utils';
 import { Video, VideoSegment, Tag } from '../../types';
 import VideoSegmentItem from './VideoSegmentItem';
+import AppHeader from '../../components/AppHeader';
 
 const {
   Button,
@@ -21,7 +22,6 @@ const {
   Form,
   TextArea,
   Link,
-  AppHeader,
   Container,
   Label,
   Loading,
