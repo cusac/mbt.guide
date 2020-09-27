@@ -37,7 +37,7 @@ const YouTubePlayer = ({
   end: number;
   playing: boolean;
   playBackRate: PlayBackRate;
-}) => {
+}): any => {
   const [player, setPlayer] = React.useState(undefined);
   const [state, setState] = React.useState('unstarted');
 
@@ -156,8 +156,8 @@ const YouTubePlayer = ({
 };
 
 YouTubePlayer.defaultProps = {
-  onReady: () => {},
-  onStateChange: () => {},
+  onReady: () => undefined,
+  onStateChange: () => undefined,
   autoplay: true,
   controls: true,
   playing: false,
