@@ -36,6 +36,8 @@ const AppHeader = ({
     }
   };
 
+  const defaultSegmentId = '156b09ce-7dab-417a-8295-f6f86f1f504a';
+
   const activeTab = previousView ? previousView : searchType;
 
   const backText = previousView === 'video' ? 'Back To Video Search' : 'Back To Segment Search';
@@ -105,8 +107,10 @@ const AppHeader = ({
             <Menu.Item
               name="segment"
               active={activeTab === 'segment'}
+              // TODO: Find a way to better handle the hardcoded default segment
               onClick={() =>
-                activeTab === 'video' && utils.history.push(`/search/${currentSegmentId}`)
+                activeTab === 'video' &&
+                utils.history.push(`/search/${currentSegmentId || defaultSegmentId}`)
               }
             >
               Segment Search
