@@ -118,13 +118,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
   const searchSegments = async (term: any) => {
     try {
       setLoadingSegments(true);
-      const segments = (
-        await (services as any).repository.segment.list({
-          $embed: ['video', 'tags'],
-          $text: term,
-          $limit: 50,
-        })
-      ).data.docs;
+      const segments = (await services.search.searchSegments(term)).data;
 
       setSegments(segments);
     } catch (err) {
