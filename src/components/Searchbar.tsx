@@ -1,6 +1,14 @@
-import React from 'reactn';
+import React, { useGlobal } from 'reactn';
 
-const Searchbar = ({ onHandleSubmit }: { onHandleSubmit: (arg0: string) => void }) => {
+export type SearchType = 'video' | 'segment';
+
+const Searchbar = ({
+  onHandleSubmit,
+  searchType,
+}: {
+  onHandleSubmit: (arg0: string) => void;
+  searchType: SearchType;
+}): any => {
   const [term, setTerm] = React.useState('');
 
   const handleChange = (event: any) => {
@@ -9,6 +17,12 @@ const Searchbar = ({ onHandleSubmit }: { onHandleSubmit: (arg0: string) => void 
   const handleSubmit = (event: any) => {
     event.preventDefault();
     onHandleSubmit(term);
+  };
+
+  const getPlaceHolder = () => {
+    return searchType === 'video'
+      ? 'Search for MBT youtube videos'
+      : 'Search for MBT video segments';
   };
 
   return (
@@ -20,7 +34,7 @@ const Searchbar = ({ onHandleSubmit }: { onHandleSubmit: (arg0: string) => void 
               className="prompt"
               onChange={handleChange}
               type="text"
-              placeholder="Search for MBT videos"
+              placeholder={getPlaceHolder()}
               value={term}
             />
             <i className="search icon" />

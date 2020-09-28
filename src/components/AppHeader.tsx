@@ -5,6 +5,7 @@ import * as serv from '../services';
 import * as store from '../store';
 import { toastError } from '../utils';
 import logo from './logo-wide.png';
+import { SearchType } from './Searchbar';
 
 const { Button, Grid, Searchbar, Icon, Auth, Header } = components;
 
@@ -14,11 +15,15 @@ const AppHeader = ({
   onHandleSubmit,
   showSearchbar,
   currentVideoId,
+  currentSegmentId,
+  searchType,
 }: {
   onHandleSubmit: (arg0: string) => void;
   showSearchbar: boolean;
   currentVideoId: string;
-}) => {
+  currentSegmentId: string;
+  searchType: SearchType;
+}): any => {
   const [loading, setLoading] = React.useState(false);
   const [currentUser] = (useGlobal as any)('user');
 
@@ -42,12 +47,27 @@ const AppHeader = ({
           />
         </Grid.Column>
 
-        <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={8}>
-          {showSearchbar && <Searchbar onHandleSubmit={onHandleSubmit} />}
+        <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={6}>
+          {showSearchbar && <Searchbar onHandleSubmit={onHandleSubmit} searchType={searchType} />}
           {!showSearchbar && (
             <Button onClick={() => utils.history.push(`/${currentVideoId}`)}>
               <Icon name="arrow left" />
               Back To Home
+            </Button>
+          )}
+        </Grid.Column>
+
+        <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={2}>
+          {searchType === 'video' && (
+            <Button onClick={() => utils.history.push(`/search/${currentSegmentId}`)}>
+              <Icon name="search" />
+              Search Segments
+            </Button>
+          )}
+          {searchType === 'segment' && (
+            <Button onClick={() => utils.history.push(`/${currentVideoId}`)}>
+              <Icon name="search" />
+              Search Videos
             </Button>
           )}
         </Grid.Column>
@@ -81,6 +101,8 @@ AppHeader.defaultProps = {
   showSearchbar: false,
   onHandleSubmit: () => {},
   currentVideoId: '',
+  currentSegmentId: '',
+  searchType: 'video',
 };
 
 export default AppHeader;

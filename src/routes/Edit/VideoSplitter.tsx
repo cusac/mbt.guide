@@ -56,8 +56,14 @@ const VideoSplitter = ({
   const [wait, setWait]: [boolean, any] = React.useState(true);
   const [error, setError] = React.useState();
 
+  const [lastViewedSegmentId, setLastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
+
   const startRef: any = React.createRef();
   const endRef: any = React.createRef();
+
+  React.useEffect(() => {
+    segmentId && segmentId !== lastViewedSegmentId && setLastViewedSegmentId(segmentId);
+  }, []);
 
   const updateSegmentAt = (index: any, data: any) => {
     const newSegments = (segments as any).slice();
@@ -334,7 +340,7 @@ const VideoSplitter = ({
 
   return (
     <div>
-      <AppHeader currentVideoId={videoId} />
+      <AppHeader currentVideoId={videoId} currentSegmentId={segmentId} />
       <Container style={{ marginTop: 20 }}>
         <Modal open={segmentsSaving} size="mini">
           <Container style={{ height: 150, marginTop: 50 }} textAlign="center">

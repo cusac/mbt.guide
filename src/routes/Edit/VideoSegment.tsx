@@ -44,7 +44,7 @@ const VideoSegment = ({
               style={{ margin: 0 }}
               circular
               icon="play"
-              onClick={event => goTo(event, `/watch/${videoId}/${id}`)}
+              onClick={event => goTo(event, `/search/${id}`)}
             />
           </Grid.Column>
         </Grid.Row>
