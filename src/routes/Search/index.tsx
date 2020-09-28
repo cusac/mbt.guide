@@ -36,6 +36,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
   const [segmentSegment, setSegmentSegment] = React.useState();
   const [currentUser] = (useGlobal as any)('user');
   const [lastViewedSegmentId, setLastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
+  const [previousView, setPreviousView] = (useGlobal as any)('previousView');
 
   const selectSegment = async (selectSegmentId: string) => {
     setLastViewedSegmentId(selectSegmentId);
@@ -69,12 +70,12 @@ const Search = ({ segmentId }: { segmentId: string }) => {
     // Hardcode a default segment for now
     !segmentId && selectSegment('156b09ce-7dab-417a-8295-f6f86f1f504a');
     fetchSegments();
+    setPreviousView('segment');
   }, []);
 
   // Fetch the selected segment
   React.useEffect(() => {
     async function fetchSelectedSegment() {
-      console.log('FETCHING');
       try {
         setLoadingSelectedSegment(true);
 

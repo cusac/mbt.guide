@@ -7,7 +7,7 @@ import { toastError } from '../utils';
 import logo from './logo-wide.png';
 import { SearchType } from './Searchbar';
 
-const { Button, Grid, Searchbar, Icon, Auth, Header } = components;
+const { Button, Grid, Searchbar, Icon, Auth, Header, Menu } = components;
 
 const services = serv as any;
 
@@ -26,6 +26,7 @@ const AppHeader = ({
 }): any => {
   const [loading, setLoading] = React.useState(false);
   const [currentUser] = (useGlobal as any)('user');
+  const [previousView] = (useGlobal as any)('previousView');
 
   const logout = () => {
     try {
@@ -35,9 +36,21 @@ const AppHeader = ({
     }
   };
 
+  const activeTab = previousView ? previousView : searchType;
+
+  const backText = previousView === 'video' ? 'Back To Video Search' : 'Back To Segment Search';
+
+  const backToPreviousView = () => {
+    if (previousView === 'video') {
+      utils.history.push(`/${currentVideoId}`);
+    } else {
+      utils.history.push(`/search/${currentSegmentId}`);
+    }
+  };
+
   return (
     <Grid className="AppHeader">
-      <Grid.Row>
+      <Grid.Row style={{ paddingBottom: 0 }}>
         <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
           <img
             src={logo}
@@ -47,27 +60,12 @@ const AppHeader = ({
           />
         </Grid.Column>
 
-        <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={6}>
+        <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={8}>
           {showSearchbar && <Searchbar onHandleSubmit={onHandleSubmit} searchType={searchType} />}
           {!showSearchbar && (
-            <Button onClick={() => utils.history.push(`/${currentVideoId}`)}>
+            <Button onClick={() => backToPreviousView()}>
               <Icon name="arrow left" />
-              Back To Home
-            </Button>
-          )}
-        </Grid.Column>
-
-        <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={2}>
-          {searchType === 'video' && (
-            <Button onClick={() => utils.history.push(`/search/${currentSegmentId}`)}>
-              <Icon name="search" />
-              Search Segments
-            </Button>
-          )}
-          {searchType === 'segment' && (
-            <Button onClick={() => utils.history.push(`/${currentVideoId}`)}>
-              <Icon name="search" />
-              Search Videos
+              {backText}
             </Button>
           )}
         </Grid.Column>
@@ -93,13 +91,36 @@ const AppHeader = ({
           </Header>
         )}
       </Grid.Row>
+      <Grid.Row centered columns={1} style={{ paddingTop: 0 }}>
+        <Grid.Column style={{ color: 'white' }} width={4}>
+          <Menu fluid widths={2} inverted>
+            <Menu.Item
+              name="video"
+              active={activeTab === 'video'}
+              onClick={() => activeTab === 'segment' && utils.history.push(`/${currentVideoId}`)}
+            >
+              Video Search
+            </Menu.Item>
+
+            <Menu.Item
+              name="segment"
+              active={activeTab === 'segment'}
+              onClick={() =>
+                activeTab === 'video' && utils.history.push(`/search/${currentSegmentId}`)
+              }
+            >
+              Segment Search
+            </Menu.Item>
+          </Menu>
+        </Grid.Column>
+      </Grid.Row>
     </Grid>
   );
 };
 
 AppHeader.defaultProps = {
   showSearchbar: false,
-  onHandleSubmit: () => {},
+  onHandleSubmit: () => undefined,
   currentVideoId: '',
   currentSegmentId: '',
   searchType: 'video',

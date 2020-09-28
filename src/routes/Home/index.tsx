@@ -37,6 +37,7 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [segmentVideo, setSegmentVideo] = React.useState();
   const [currentUser] = (useGlobal as any)('user');
   const [lastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
+  const [previousView, setPreviousView] = (useGlobal as any)('previousView');
 
   const selectVideo = async (videoId: any) => {
     utils.history.push(`/${videoId}`);
@@ -77,6 +78,7 @@ const Home = ({ videoId }: { videoId: string }) => {
       }
     }
     fetchVideos();
+    setPreviousView('video');
   }, []);
 
   // Fetch the selected video from youtube

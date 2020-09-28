@@ -56,7 +56,7 @@ const VideoSegmentItem = ({
 
 VideoSegmentItem.defaultProps = {
   active: false,
-  onSelect: () => {},
+  onSelect: () => undefined,
 };
 
 export default VideoSegmentItem;

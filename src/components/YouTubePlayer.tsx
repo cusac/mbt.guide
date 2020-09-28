@@ -45,7 +45,7 @@ const YouTubePlayer = ({
   React.useEffect(() => {
     ytReady(() => {
       const YT = (window as any)['YT'];
-      console.log('YT:', YT);
+
       const ytPlayer = new YT.Player(ref.current, {
         height: 360,
         width: 640,
