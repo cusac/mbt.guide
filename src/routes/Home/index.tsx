@@ -36,6 +36,8 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [filterProcessedVideos, setFilterProcessedVideos] = React.useState(false);
   const [segmentVideo, setSegmentVideo] = React.useState();
   const [currentUser] = (useGlobal as any)('user');
+  const [lastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
+  const [previousView, setPreviousView] = (useGlobal as any)('previousView');
 
   const selectVideo = async (videoId: any) => {
     utils.history.push(`/${videoId}`);
@@ -76,6 +78,7 @@ const Home = ({ videoId }: { videoId: string }) => {
       }
     }
     fetchVideos();
+    setPreviousView('video');
   }, []);
 
   // Fetch the selected video from youtube
@@ -159,7 +162,7 @@ const Home = ({ videoId }: { videoId: string }) => {
         setLoadingVideos(false);
       }
     };
-    videos ? fetchProcessedVideos() : (() => {})();
+    videos ? fetchProcessedVideos() : (() => undefined)();
   }, [videos]);
 
   React.useEffect(() => {
@@ -209,7 +212,11 @@ const Home = ({ videoId }: { videoId: string }) => {
 
   return (
     <div>
-      <AppHeader onHandleSubmit={searchVideos} showSearchbar={true} />
+      <AppHeader
+        onHandleSubmit={searchVideos}
+        showSearchbar={true}
+        currentSegmentId={lastViewedSegmentId}
+      />
       <Grid>
         <Grid.Row>
           <Grid.Column style={{ marginLeft: 30 }} width={11}>
@@ -269,11 +276,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                               {mySegments.map(segment => (
                                 <Grid.Row key={(segment as any).segmentId}>
                                   <Grid.Column verticalAlign="middle" width={3}>
-                                    <Link
-                                      to={`/watch/${(segment as any).videoYtId}/${
-                                        (segment as any).segmentId
-                                      }`}
-                                    >
+                                    <Link to={`/search/${(segment as any).segmentId}`}>
                                       {(segment as any).title}
                                     </Link>
                                   </Grid.Column>
@@ -303,11 +306,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                                       name="video play"
                                       color="green"
                                       onClick={() =>
-                                        utils.history.push(
-                                          `/watch/${(segment as any).videoYtId}/${
-                                            (segment as any).segmentId
-                                          }`
-                                        )
+                                        utils.history.push(`/search/${(segment as any).segmentId}`)
                                       }
                                     />
                                   </Grid.Column>
@@ -318,7 +317,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                         ) : (
                           selectedVideo && (
                             <div>
-                              You don't have any segments for this video.{' '}
+                              You don{"'"}t have any segments for this video.{' '}
                               <Link onClick={createVideo} to="">
                                 Try adding one!
                               </Link>
@@ -351,11 +350,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                           {segments.map(segment => (
                             <Grid.Row key={(segment as any).segmentId}>
                               <Grid.Column verticalAlign="middle" width={3}>
-                                <Link
-                                  to={`/watch/${(segment as any).videoYtId}/${
-                                    (segment as any).segmentId
-                                  }`}
-                                >
+                                <Link to={`/search/${(segment as any).segmentId}`}>
                                   {(segment as any).title}
                                 </Link>
                               </Grid.Column>
@@ -369,11 +364,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                                   name="video play"
                                   color="green"
                                   onClick={() =>
-                                    utils.history.push(
-                                      `/watch/${(segment as any).videoYtId}/${
-                                        (segment as any).segmentId
-                                      }`
-                                    )
+                                    utils.history.push(`/search/${(segment as any).segmentId}`)
                                   }
                                 />
                               </Grid.Column>

@@ -37,19 +37,19 @@ const App = () => {
             }}
           />
           <Route
+            path="/search/:segmentId"
+            exact
+            render={props => {
+              const { segmentId } = props.match.params;
+              return <routes.Search {...props} {...{ segmentId }} />;
+            }}
+          />
+          <Route
             path="/edit/:videoId/:segmentId?"
             render={props => {
               const { videoId } = props.match.params;
               const { segmentId } = props.match.params;
               return <routes.Edit {...props} {...{ videoId, segmentId }} />;
-            }}
-          />
-          <Route
-            path="/watch/:videoId/:segmentId"
-            render={props => {
-              const { videoId } = props.match.params;
-              const { segmentId } = props.match.params;
-              return <routes.Watch {...props} {...{ videoId, segmentId }} />;
             }}
           />
         </Router>

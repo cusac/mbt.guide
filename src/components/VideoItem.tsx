@@ -6,7 +6,7 @@ const VideoItem = ({
 }: {
   video: any;
   handleVideoSelect: (video: any) => any;
-}) => {
+}): any => {
   return (
     <div onClick={() => handleVideoSelect(video)} className=" video-item item">
       <img
