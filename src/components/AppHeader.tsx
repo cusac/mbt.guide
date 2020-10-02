@@ -93,7 +93,8 @@ const AppHeader = ({
           </Header>
         )}
       </Grid.Row>
-      <Grid.Row centered columns={1} style={{ paddingTop: 0 }}>
+      <Grid.Row columns={3} style={{ paddingTop: 0 }}>
+        <Grid.Column style={{ color: 'white' }} width={6}></Grid.Column>
         <Grid.Column style={{ color: 'white' }} width={4}>
           <Menu fluid widths={2} inverted>
             <Menu.Item
@@ -116,6 +117,14 @@ const AppHeader = ({
               Segment Search
             </Menu.Item>
           </Menu>
+        </Grid.Column>
+
+        <Grid.Column style={{ color: 'white' }} width={4} floated="right">
+          <a href="https://mbt-guide-admin.netlify.app/" target="_blank" rel="noopener noreferrer">
+            <Button style={{ margin: 5 }} icon labelPosition="right" color="teal">
+              View Stats App <Icon name="chart line" />
+            </Button>
+          </a>
         </Grid.Column>
       </Grid.Row>
     </Grid>
