@@ -1,11 +1,12 @@
 import React from 'react';
+import { YTVideo } from 'services/youtube.service';
 
 const VideoItem = ({
   video,
   handleVideoSelect,
 }: {
-  video: any;
-  handleVideoSelect: (video: any) => any;
+  video: YTVideo;
+  handleVideoSelect: (video: YTVideo) => any;
 }): any => {
   return (
     <div onClick={() => handleVideoSelect(video)} className=" video-item item">

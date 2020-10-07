@@ -5,7 +5,7 @@ import 'firebase/firestore';
 import axios from 'axios';
 import qs from 'querystring';
 import config, { resources } from '../config';
-import youtube from './youtube.service';
+import { youtube } from './youtube.service';
 import httpClient from './http-client.service';
 import auth from './auth.service';
 import video from './video.service';
