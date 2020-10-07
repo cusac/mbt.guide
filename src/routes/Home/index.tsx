@@ -5,6 +5,15 @@ import * as services from '../../services';
 import * as errors from '../../errors';
 import { captureAndLog, toastError } from '../../utils';
 import { Video, VideoSegment } from '../../types';
+import {
+  PlaylistYTVideo,
+  SearchYTVideo,
+  VideoListYTVideo,
+  YTResult,
+  YTVideo,
+} from 'services/youtube.service';
+import repository from '../../services/repository.service';
+import { youtube, toYTVid } from '../../services/youtube.service';
 
 const channelId = 'UCYwlraEwuFB4ZqASowjoM0g';
 
@@ -30,11 +39,13 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [loadingSegments, setLoadingSegments] = React.useState(true);
   const [segments, setSegments] = React.useState(undefined as Array<VideoSegment> | void);
   const [mySegments, setMySegments] = React.useState(undefined as Array<VideoSegment> | void);
-  const [selectedVideo, setSelectedVideo] = React.useState();
-  const [videos, setVideos] = React.useState([]);
-  const [videoSegmentMap, setVideoSegmentMap] = React.useState({});
+  const [selectedVideo, setSelectedVideo] = React.useState(undefined as YTVideo | undefined);
+  const [videos, setVideos] = React.useState([] as YTVideo[]);
   const [filterProcessedVideos, setFilterProcessedVideos] = React.useState(false);
-  const [segmentVideo, setSegmentVideo] = React.useState();
+  const [segmentVideo, setSegmentVideo] = React.useState(undefined as Video | undefined);
+  const [hasSearched, setHasSearched] = React.useState(false);
+  const [searchResults, setSearchResults] = React.useState([] as YTVideo[]);
+  const [matchedVids, setMatchedVids] = React.useState([] as Video[]);
   const [currentUser] = (useGlobal as any)('user');
   const [lastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
   const [previousView, setPreviousView] = (useGlobal as any)('previousView');
@@ -43,56 +54,124 @@ const Home = ({ videoId }: { videoId: string }) => {
     utils.history.push(`/${videoId}`);
   };
 
+  const fetchDefaultVideos = async () => {
+    try {
+      setLoadingVideos(true);
+
+      // We're piggybacking this view to update the stats for now
+      await (services as any).stats.logStats();
+
+      let defaultVids: YTVideo[] = [];
+      let pageToken = '';
+
+      while (true) {
+        const { nextPageToken, items } = await fetchPlaylistVids(pageToken);
+        if (items.length === 0) {
+          break;
+        }
+        pageToken = nextPageToken;
+
+        const matchingVids = await fetchMatchingVideos(items);
+        const filteredVids = filterProcessedVideos
+          ? filterVidsWithSegments(items, matchingVids)
+          : items;
+
+        defaultVids = defaultVids.concat(filteredVids);
+
+        if (defaultVids.length >= 10) {
+          break;
+        }
+      }
+
+      setVideos(defaultVids);
+      !videoId && selectVideo(`_ok27SPHhwA`);
+    } catch (err) {
+      captureAndLog('Home', 'fetchVideos', err);
+      toastError(
+        'There was an error fetching youtube data. Please refresh the page and try again.',
+        err
+      );
+    } finally {
+      setLoadingVideos(false);
+    }
+  };
+
+  // We grab videos from the MBT 'uploads' playlist to save on youtube api search quota points
+  const fetchPlaylistVids = async (pageToken?: string): Promise<YTResult<YTVideo>> => {
+    const params: any = {
+      playlistId: 'UUYwlraEwuFB4ZqASowjoM0g',
+    };
+    if (pageToken) {
+      params.pageToken = pageToken;
+    }
+    const result = await youtube<PlaylistYTVideo>({
+      endpoint: 'playlistItems',
+      params,
+    });
+
+    return { ...result, items: result.items.map(toYTVid) };
+  };
+
+  const filterVidsWithSegments = (ytVids: YTVideo[], matchingVids: Video[]): YTVideo[] => {
+    return ytVids.filter(ytVid => {
+      const match = matchingVids.find(v => v.ytId === ytVid.id);
+      if (!match) {
+        return true;
+      } else {
+        return !match.segments[0];
+      }
+    });
+  };
+
+  const fetchMatchingVideos = async (ytVideos: YTVideo[]): Promise<Video[]> => {
+    const videoIds = ytVideos.map(v => v.id);
+    const matchingVids = (
+      await repository.video.list({
+        ytId: videoIds,
+        $select: ['ytId'],
+        $embed: ['segments'],
+      })
+    ).data.docs;
+    return matchingVids;
+  };
+
   // Fetch the default list of videos from the MBT uploads list
   React.useEffect(() => {
-    // We grab videos from the MBT 'uploads' playlist to save on youtube api search quota points
-    async function fetchVideos() {
-      try {
-        setLoadingVideos(true);
-
-        // We're piggybacking this view to update the stats for now
-        await (services as any).stats.logStats();
-
-        const response = await (services as any).youtube({
-          endpoint: 'playlistItems',
-          params: {
-            playlistId: 'UUYwlraEwuFB4ZqASowjoM0g',
-          },
-        });
-        const mbtVids = response.map((v: any) => ({
-          snippet: v.snippet,
-          id: {
-            videoId: v.snippet.resourceId.videoId,
-          },
-        }));
-        setVideos(mbtVids);
-        !videoId && selectVideo(`_ok27SPHhwA`);
-      } catch (err) {
-        captureAndLog('Home', 'fetchVideos', err);
-        toastError(
-          'There was an error fetching youtube data. Please refresh the page and try again.',
-          err
-        );
-      } finally {
-        setLoadingVideos(false);
-      }
-    }
-    fetchVideos();
+    fetchDefaultVideos();
     setPreviousView('video');
   }, []);
+
+  // Fetch playlist videos when filter is toggled
+  React.useEffect(() => {
+    !hasSearched && fetchDefaultVideos();
+  }, [filterProcessedVideos]);
+
+  // Filter search results when filter is toggled
+  React.useEffect(() => {
+    if (hasSearched) {
+      if (filterProcessedVideos) {
+        const filteredVids = filterVidsWithSegments(searchResults, matchedVids);
+        setVideos(filteredVids);
+      } else {
+        setVideos(searchResults);
+      }
+    }
+  }, [filterProcessedVideos]);
 
   // Fetch the selected video from youtube
   React.useEffect(() => {
     async function fetchSelectedVideo() {
       try {
         setLoadingSelectedVideo(true);
-        const [video] = await (services as any).youtube({
-          endpoint: 'videos',
-          params: {
-            id: videoId,
-          },
-        });
-        setSelectedVideo(video);
+        const [video] = (
+          await youtube<VideoListYTVideo>({
+            endpoint: 'videos',
+            params: {
+              id: videoId,
+            },
+          })
+        ).items;
+        setSelectedVideo(toYTVid(video));
       } catch (err) {
         setLoadingSelectedVideo(false);
         captureAndLog('Home', 'fetchSelectedVideo', err);
@@ -113,7 +192,7 @@ const Home = ({ videoId }: { videoId: string }) => {
       try {
         setLoadingSegments(true);
         const video = (
-          await (services as any).repository.video.list({
+          await repository.video.list({
             ytId: videoId,
             $embed: ['segments'],
           })
@@ -132,41 +211,8 @@ const Home = ({ videoId }: { videoId: string }) => {
     videoId ? fetchSegmentVideo() : setSegments([]);
   }, [videoId]);
 
-  // Mark videos that have segments already
   React.useEffect(() => {
-    const fetchProcessedVideos = async () => {
-      try {
-        setLoadingVideos(true);
-        const videoIds = videos.map((v: any) => v.id.videoId);
-        const vidsWithSegs = (
-          await (services as any).repository.video.list({
-            ytId: videoIds,
-            $select: ['ytId'],
-            $embed: ['segments'],
-          })
-        ).data.docs;
-        const vidSegMap = {};
-        for (const vid of vidsWithSegs) {
-          if (vid.segments.length > 0) {
-            (vidSegMap as any)[vid.ytId] = true;
-          }
-        }
-        setVideoSegmentMap(vidSegMap);
-      } catch (err) {
-        captureAndLog('Home', 'fetchProcessedVideos', err);
-        toastError(
-          'There was an error fetching the processed video data. Please refresh the page and try again.',
-          err
-        );
-      } finally {
-        setLoadingVideos(false);
-      }
-    };
-    videos ? fetchProcessedVideos() : (() => undefined)();
-  }, [videos]);
-
-  React.useEffect(() => {
-    setSegments(segmentVideo ? (segmentVideo as any).segments : []);
+    setSegments(segmentVideo ? segmentVideo.segments : []);
   }, [segmentVideo]);
 
   React.useEffect(() => {
@@ -174,16 +220,13 @@ const Home = ({ videoId }: { videoId: string }) => {
       setMySegments(segments.filter(s => currentUser && s.ownerEmail === currentUser.email));
   }, [segments, currentUser]);
 
-  const videoSrc = selectedVideo
-    ? `https://www.youtube.com/embed/${(selectedVideo as any).id.videoId ||
-        (selectedVideo as any).id}`
-    : '';
+  const videoSrc = selectedVideo ? `https://www.youtube.com/embed/${selectedVideo.id}` : '';
 
   // Search youtube videos from the MBT channel
-  const searchVideos = async (term: any) => {
+  const searchVideos = async (term: string) => {
     try {
       setLoadingVideos(true);
-      const response = await (services as any).youtube({
+      const response = await youtube<SearchYTVideo>({
         endpoint: 'search',
         params: {
           q: term,
@@ -191,9 +234,19 @@ const Home = ({ videoId }: { videoId: string }) => {
       });
 
       // Filter out any videos that don't belong to the MBT channel
-      const mbtVids = response.filter((v: any) => v.snippet.channelId === channelId);
+      const ytVids = response.items.filter(v => v.snippet.channelId === channelId).map(toYTVid);
+      const mbtVids = await fetchMatchingVideos(ytVids);
 
-      setVideos(mbtVids);
+      setSearchResults(ytVids);
+      setMatchedVids(mbtVids);
+      setHasSearched(true);
+
+      if (filterProcessedVideos) {
+        const filteredVids = filterVidsWithSegments(ytVids, mbtVids);
+        setVideos(filteredVids);
+      } else {
+        setVideos(ytVids);
+      }
     } catch (err) {
       captureAndLog('Home', 'searchVideos', err);
       toastError(
@@ -391,7 +444,7 @@ const Home = ({ videoId }: { videoId: string }) => {
               <Loading>Loading video...</Loading>
             )}
           </Grid.Column>
-          <Grid.Column style={{ color: 'white' }} verticalAlign="middle" width={4}>
+          <Grid.Column style={{ color: 'white' }} verticalAlign="top" width={4}>
             {!loadingVideos ? (
               <div>
                 {videos && videos.length > 0 ? (
@@ -412,9 +465,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                     </Card>
                     <VideoList
                       videos={videos as any}
-                      videoSegmentMap={videoSegmentMap}
-                      filterProcessedVideos={filterProcessedVideos}
-                      handleVideoSelect={(video: any) => video && selectVideo(video.id.videoId)}
+                      handleVideoSelect={(video: YTVideo) => video && selectVideo(video.id)}
                     />
                   </div>
                 ) : (

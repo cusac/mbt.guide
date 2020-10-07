@@ -1,22 +1,16 @@
 import React from 'react';
 import VideoItem from './VideoItem';
+import { YTVideo } from 'services/youtube.service';
 
 const VideoList = ({
   videos,
-  videoSegmentMap,
-  filterProcessedVideos,
   handleVideoSelect,
 }: {
-  videos: [];
-  videoSegmentMap: {};
-  filterProcessedVideos: boolean;
-  handleVideoSelect: (video: any) => any;
-}) => {
-  const videosToShow = filterProcessedVideos
-    ? videos.filter((v: any) => !(videoSegmentMap as any)[v.id.videoId])
-    : videos;
-  const renderedVideos = videosToShow.map((video: any) => {
-    return <VideoItem key={video.id.videoId} video={video} handleVideoSelect={handleVideoSelect} />;
+  videos: YTVideo[];
+  handleVideoSelect: (video: YTVideo) => any;
+}): any => {
+  const renderedVideos = videos.map(video => {
+    return <VideoItem key={video.id} video={video} handleVideoSelect={handleVideoSelect} />;
   });
 
   return <div className="ui relaxed divided list">{renderedVideos}</div>;
