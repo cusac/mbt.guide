@@ -3,6 +3,8 @@ import * as luxon from 'luxon';
 import * as services from '../services';
 import { captureAndLog } from '../utils';
 import { httpClient as http } from '../services';
+import { VideoListYTVideo, youtube } from './youtube.service';
+import repository from './repository.service';
 
 export type Tag = {
   _id?: string;
@@ -40,20 +42,29 @@ const internals = {} as any;
 
 internals.create = async ({ videoId }: { videoId: string }) => {
   try {
-    const [ytVideo] = await (services as any).youtube({
-      endpoint: 'videos',
-      params: {
-        id: videoId,
-        part: 'snippet,contentDetails',
-      },
-    });
+    const ytVideo = (
+      await youtube<VideoListYTVideo>({
+        endpoint: 'videos',
+        params: {
+          id: videoId,
+          part: 'snippet,contentDetails',
+        },
+      })
+    ).items[0];
 
     if (!ytVideo) {
       throw new Error(`Missing YouTube Video with id ${videoId}`);
     }
-    const duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
 
-    const video = await (services as any).repository.video.create({
+    let duration;
+
+    if (!ytVideo.contentDetails) {
+      throw new Error(`Missing contentDetails for YouTube Video with id ${videoId}`);
+    } else {
+      duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
+    }
+
+    const video = await repository.video.create({
       youtube: ytVideo,
       duration: duration,
       ytId: videoId,

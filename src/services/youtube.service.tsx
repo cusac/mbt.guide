@@ -39,6 +39,15 @@ export type VideoListYTVideo = {
     liveBroadcastContent: string;
     defaultAudioLanguage: string;
   };
+  contentDetails?: {
+    duration: string;
+    dimension: string;
+    definition: string;
+    caption: boolean;
+    licensedContent: boolean;
+    contentRating: any;
+    projection: string;
+  };
 };
 
 export type PlaylistYTVideo = {
