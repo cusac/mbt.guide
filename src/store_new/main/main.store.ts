@@ -8,6 +8,7 @@ import { loggerMiddleware } from './middleware';
 import { rootReducer } from '../index';
 import * as storeBundle from '../index';
 import { initHttpClientService } from 'services/http-client.service';
+import { initAuthInterceptorService } from '../../services/auth-interceptor.service';
 
 export type RootState = ReturnType<typeof rootReducer>;
 
@@ -35,6 +36,7 @@ export const store_new = configureAppStore();
 
 // Files that require the store need the store to be injected to avoid circular dependencies.
 initHttpClientService(storeBundle);
+initAuthInterceptorService(storeBundle);
 
 export type DispatchAction = Dispatch<AnyAction | AppThunk>;
 export type GetState = typeof store_new.getState;

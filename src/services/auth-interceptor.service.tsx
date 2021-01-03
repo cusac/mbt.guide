@@ -1,9 +1,14 @@
-import * as store from '../store';
 import { toast } from 'react-toastify';
 import * as Sentry from '@sentry/browser';
 import { RESPONSE_MESSAGES } from '../config';
+import { StoreBundle } from 'store_new';
 
 const internals = {} as any;
+
+let store: StoreBundle;
+export const initAuthInterceptorService = (storeBundle: StoreBundle): void => {
+  store = storeBundle;
+};
 
 internals.responseError = function(err: any) {
   let response: any = err.response;
@@ -22,7 +27,7 @@ internals.responseError = function(err: any) {
     // If the token was invalid or the Refresh Token was expired, force user to login
     console.debug('authInterceptor.service: 401: response:', response);
 
-    (store as any).auth.clearAuth();
+    store.storeDispatch(store.clearAuth());
 
     Sentry.withScope(function(scope) {
       scope.setTag('status', response.status);
