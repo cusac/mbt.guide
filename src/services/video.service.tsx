@@ -72,7 +72,7 @@ internals.create = async ({ videoId }: { videoId: string }) => {
 
     return video;
   } catch (err) {
-    captureAndLog('videoService', 'create', err);
+    captureAndLog({ file: 'videoService', method: 'create', err });
     throw err;
   }
 };
@@ -86,7 +86,7 @@ internals.updateVideoSegments = async ({
 }) => {
   segments = segments.map(filterSegmentForUpdate);
   return http.post('/update-video-segments', { videoId, segments }).catch(err => {
-    captureAndLog('videoService', 'updateVideoSegments', err);
+    captureAndLog({ file: 'videoService', method: 'updateVideoSegments', err });
     throw err;
   });
 };

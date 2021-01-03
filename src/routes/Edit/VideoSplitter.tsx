@@ -1,17 +1,19 @@
-import * as components from '../../components';
-import React, { useGlobal } from 'reactn';
-import * as utils from '../../utils';
-import * as services from '../../services';
-import Swal from 'sweetalert2';
+import { differenceBy, uniq } from 'lodash';
+import InputMask from 'react-input-mask';
+import { useSelector } from 'react-redux';
 import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
-import InputMask from 'react-input-mask';
+import React, { useGlobal } from 'reactn';
+import { RootState } from 'store_new';
+import Swal from 'sweetalert2';
 import { v4 as uuid } from 'uuid';
-import { differenceBy, uniq } from 'lodash';
-import { hasPermission, captureAndLog, toastError } from '../../utils';
-import { Video, VideoSegment, Tag } from '../../types';
-import VideoSegmentItem from './VideoSegmentItem';
+import * as components from '../../components';
 import AppHeader from '../../components/AppHeader';
+import * as services from '../../services';
+import { Video, VideoSegment } from '../../types';
+import * as utils from '../../utils';
+import { captureAndLog, hasPermission, toastError } from '../../utils';
+import VideoSegmentItem from './VideoSegmentItem';
 
 const {
   Button,
@@ -42,8 +44,6 @@ const VideoSplitter = ({
   segmentColors: Array<string>;
   minSegmentDuration: number;
 }) => {
-  const [currentUser] = (useGlobal as any)('user');
-  const [currentUserScope] = (useGlobal as any)('scope');
   const [video, setVideo]: [Video | undefined, any] = React.useState();
   const [videoLoading, setVideoLoading]: [boolean, any] = React.useState(false);
   const [segments, setSegments]: [VideoSegment[], any] = React.useState([]);
@@ -57,6 +57,9 @@ const VideoSplitter = ({
   const [error, setError] = React.useState();
 
   const [lastViewedSegmentId, setLastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
+
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const currentUserScope = useSelector((state: RootState) => state.auth.scope);
 
   const startRef: any = React.createRef();
   const endRef: any = React.createRef();
@@ -116,7 +119,7 @@ const VideoSplitter = ({
       start: duration * 0.25,
       end: duration * 0.75,
       title: 'New segment title',
-      ownerEmail: currentUser.email,
+      ownerEmail: currentUser ? currentUser.email : '',
       tags: [],
       description: '',
       pristine: true,
@@ -153,7 +156,7 @@ const VideoSplitter = ({
           goTo(`/edit/${(video as any).ytId}/${(newSegments[0] || {}).segmentId}`);
         } catch (err) {
           setSegmentsSaving(false);
-          captureAndLog('VideoSplitter', 'removeSegment', err);
+          captureAndLog({ file: 'VideoSplitter', method: 'removeSegment', err });
           toastError('There was an error deleting the segment.', err);
         }
       }
@@ -174,7 +177,7 @@ const VideoSplitter = ({
       });
     } catch (err) {
       setSegmentsSaving(false);
-      captureAndLog('VideoSplitter', 'saveChanges', err);
+      captureAndLog({ file: 'VideoSplitter', method: 'saveChanges', err });
       toastError('There was an error updating the segment.', err);
     }
 
@@ -191,7 +194,7 @@ const VideoSplitter = ({
           // Continue to attempt saving if the error is due to a bad network.
           setSaveData(false);
         }
-        captureAndLog('VideoSplitter', 'saveIfNeeded', err);
+        captureAndLog({ file: 'VideoSplitter', method: 'saveIfNeeded', err });
       }
     }
   };
@@ -216,7 +219,7 @@ const VideoSplitter = ({
         }
       }
     } catch (err) {
-      captureAndLog('VideoSplitter', 'getVideoData', err);
+      captureAndLog({ file: 'VideoSplitter', method: 'getVideoData', err });
       setError(err);
     }
   };

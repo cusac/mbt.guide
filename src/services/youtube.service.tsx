@@ -154,7 +154,7 @@ export async function youtube<T>({ endpoint, params }: { endpoint: string; param
     const response: { data: YTResult<T> } = await http.post('/youtube', { endpoint, params });
     return response.data;
   } catch (err) {
-    captureAndLog('youtubeService', '', err);
+    captureAndLog({ file: 'youtubeService', method: '', err });
     throw err;
   }
 }

@@ -7,7 +7,7 @@ import qs from 'querystring';
 import config, { resources } from '../config';
 import { youtube } from './youtube.service';
 import httpClient from './http-client.service';
-import auth from './auth.service';
+// import * as auth from './auth.service';
 import video from './video.service';
 import repository from './repository.service';
 import authInterceptor from './auth-interceptor.service';
@@ -43,7 +43,7 @@ export {
   youtube,
   httpClient,
   repository,
-  auth,
+  // auth,
   authInterceptor,
   video,
   stats,

@@ -7,7 +7,7 @@ internals.postVisit = () => {
   try {
     return http.post('/visitor');
   } catch (err) {
-    captureAndLog('statsService', 'postVisit', err);
+    captureAndLog({ file: 'statsService', method: 'postVisit', err });
     throw err;
   }
 };
@@ -16,7 +16,7 @@ internals.logStats = () => {
   try {
     return http.post('/stats/video');
   } catch (err) {
-    captureAndLog('statsService', 'logStats', err);
+    captureAndLog({ file: 'statsService', method: 'logStats', err });
     throw err;
   }
 };

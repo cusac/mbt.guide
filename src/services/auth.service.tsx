@@ -1,10 +1,8 @@
-import * as store from '../store';
-import { captureAndLog } from '../utils';
-import { httpClient as http, firebaseAuth } from '../services';
+import { AxiosPromise, AxiosResponseGeneric } from 'axios';
+import { httpClient as http } from '../services';
+import { LoginResponse } from '../store_new';
 
-const internals = {} as any;
-
-internals.login = ({
+export const loginCall = ({
   idToken,
   email,
   password,
@@ -14,30 +12,10 @@ internals.login = ({
   email?: string;
   password?: string;
   displayName?: string;
-}) => {
-  return http
-    .post('/login', { idToken, email, password, displayName })
-    .then(response => {
-      return (store as any).auth.setAuth(response.data);
-    })
-    .catch(err => {
-      captureAndLog('authService', 'login', err);
-      throw err;
-    });
+}): Promise<AxiosResponseGeneric<LoginResponse>> => {
+  return http.post<LoginResponse>('/login', { idToken, email, password, displayName });
 };
 
-internals.logout = () => {
-  (store as any).auth.useRefreshToken();
-  return http
-    .delete('/logout')
-    .then(response => {
-      firebaseAuth.signOut();
-      (store as any).auth.clearAuth();
-    })
-    .catch(err => {
-      captureAndLog('authService', 'logout', err);
-      throw err;
-    });
+export const logoutCall = (): AxiosPromise<void> => {
+  return http.delete<void>('/logout');
 };
-
-export default internals;

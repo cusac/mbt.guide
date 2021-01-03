@@ -7,7 +7,7 @@ internals.searchSegments = (term: string) => {
   try {
     return http.get('/search/segments', { term });
   } catch (err) {
-    captureAndLog('searchService', ' searchSegments', err);
+    captureAndLog({ file: 'searchService', method: 'searchSegments', err });
     throw err;
   }
 };

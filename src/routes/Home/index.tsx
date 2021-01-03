@@ -1,10 +1,5 @@
-import * as components from '../../components';
-import * as utils from '../../utils';
+import { useSelector } from 'react-redux';
 import React, { useGlobal } from 'reactn';
-import * as services from '../../services';
-import * as errors from '../../errors';
-import { captureAndLog, toastError } from '../../utils';
-import { Video, VideoSegment } from '../../types';
 import {
   PlaylistYTVideo,
   SearchYTVideo,
@@ -12,8 +7,14 @@ import {
   YTResult,
   YTVideo,
 } from 'services/youtube.service';
+import { RootState } from 'store_new';
+import * as components from '../../components';
+import * as services from '../../services';
 import repository from '../../services/repository.service';
-import { youtube, toYTVid } from '../../services/youtube.service';
+import { toYTVid, youtube } from '../../services/youtube.service';
+import { Video, VideoSegment } from '../../types';
+import * as utils from '../../utils';
+import { captureAndLog, toastError } from '../../utils';
 
 const channelId = 'UCYwlraEwuFB4ZqASowjoM0g';
 
@@ -46,9 +47,11 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [hasSearched, setHasSearched] = React.useState(false);
   const [searchResults, setSearchResults] = React.useState([] as YTVideo[]);
   const [matchedVids, setMatchedVids] = React.useState([] as Video[]);
-  const [currentUser] = (useGlobal as any)('user');
+
   const [lastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
   const [previousView, setPreviousView] = (useGlobal as any)('previousView');
+
+  const currentUser = useSelector((state: RootState) => state.auth.user);
 
   const selectVideo = async (videoId: any) => {
     utils.history.push(`/${videoId}`);
@@ -86,7 +89,7 @@ const Home = ({ videoId }: { videoId: string }) => {
       setVideos(defaultVids);
       !videoId && selectVideo(`_ok27SPHhwA`);
     } catch (err) {
-      captureAndLog('Home', 'fetchVideos', err);
+      captureAndLog({ file: 'Home', method: 'fetchVideos', err });
       toastError(
         'There was an error fetching youtube data. Please refresh the page and try again.',
         err
@@ -174,7 +177,7 @@ const Home = ({ videoId }: { videoId: string }) => {
         setSelectedVideo(toYTVid(video));
       } catch (err) {
         setLoadingSelectedVideo(false);
-        captureAndLog('Home', 'fetchSelectedVideo', err);
+        captureAndLog({ file: 'Home', method: 'fetchSelectedVideo', err });
         toastError(
           'There was an error fetching youtube data. Please refresh the page and try again.',
           err
@@ -199,7 +202,7 @@ const Home = ({ videoId }: { videoId: string }) => {
         ).data.docs[0];
         video ? setSegmentVideo(video) : setSegments([]);
       } catch (err) {
-        captureAndLog('Home', 'fetchSegmentVideo', err);
+        captureAndLog({ file: 'Home', method: 'fetchSegmentVideo', err });
         toastError(
           'There was an error fetching the selected video data. Please refresh the page and try again.',
           err
@@ -248,7 +251,7 @@ const Home = ({ videoId }: { videoId: string }) => {
         setVideos(ytVids);
       }
     } catch (err) {
-      captureAndLog('Home', 'searchVideos', err);
+      captureAndLog({ file: 'Home', method: 'searchVideos', err });
       toastError(
         'There was an error fetching youtube data. Please refresh the page and try again.',
         err

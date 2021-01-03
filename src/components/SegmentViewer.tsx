@@ -1,12 +1,15 @@
-import * as components from '../components';
+import { useSelector } from 'react-redux';
 import React, { useGlobal } from 'reactn';
+import * as components from '../components';
+import { Button, Container, Grid, Icon, Label, Link, List } from '../components';
 import * as utils from '../utils';
-import { Grid, Link, Label, Button, Container, List, Icon } from '../components';
+import { RootState } from 'store_new';
 
 const SegmentViewer = ({ segment }: { segment: any }) => {
-  const [currentUser] = (useGlobal as any)('user');
-  const [currentUserScope] = (useGlobal as any)('scope');
   const [lastViewedSegmentId, setLastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
+
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const currentUserScope = useSelector((state: RootState) => state.auth.scope);
 
   React.useEffect(() => {
     segment &&

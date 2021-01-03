@@ -1,11 +1,12 @@
-import * as components from '../../components';
-import * as utils from '../../utils';
+import { useSelector } from 'react-redux';
 import React, { useGlobal } from 'reactn';
-import * as services from '../../services';
-import * as errors from '../../errors';
-import { captureAndLog, toastError } from '../../utils';
+import { RootState } from 'store_new';
+import * as components from '../../components';
 // import { Segment, VideoSegment } from '../../types';
 import SegmentViewer from '../../components/SegmentViewer';
+import * as services from '../../services';
+import * as utils from '../../utils';
+import { captureAndLog, toastError } from '../../utils';
 
 const channelId = 'UCYwlraEwuFB4ZqASowjoM0g';
 
@@ -34,9 +35,11 @@ const Search = ({ segmentId }: { segmentId: string }) => {
   const [segmentSegmentMap, setSegmentSegmentMap] = React.useState({});
   const [filterProcessedSegments, setFilterProcessedSegments] = React.useState(false);
   const [segmentSegment, setSegmentSegment] = React.useState();
-  const [currentUser] = (useGlobal as any)('user');
+
   const [lastViewedSegmentId, setLastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
   const [previousView, setPreviousView] = (useGlobal as any)('previousView');
+
+  const currentUser = useSelector((state: RootState) => state.auth.user);
 
   const selectSegment = async (selectSegmentId: string) => {
     setLastViewedSegmentId(selectSegmentId);
@@ -58,7 +61,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
 
         setSegments(segments);
       } catch (err) {
-        captureAndLog('Search', 'fetchSegments', err);
+        captureAndLog({ file: 'Search', method: 'fetchSegments', err });
         toastError(
           'There was an error fetching segment data. Please refresh the page and try again.',
           err
@@ -88,7 +91,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
         setSelectedSegment(segment);
       } catch (err) {
         setLoadingSelectedSegment(false);
-        captureAndLog('Search', 'fetchSelectedSegment', err);
+        captureAndLog({ file: 'Search', method: 'fetchSelectedSegment', err });
         toastError(
           'There was an error fetching the selected segment. Please refresh the page and try again.',
           err
@@ -122,7 +125,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
 
       setSegments(segments);
     } catch (err) {
-      captureAndLog('Search', 'searchSegments', err);
+      captureAndLog({ file: 'Search', method: 'searchSegments', err });
       toastError(
         'There was an error fetching segment data. Please refresh the page and try again.',
         err

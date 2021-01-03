@@ -1,6 +1,14 @@
 import * as Sentry from '@sentry/browser';
 
-export default function captureAndLog(file: string, method: string, err: any): void {
+export default function captureAndLog({
+  file,
+  method,
+  err,
+}: {
+  file: string;
+  method: string;
+  err: any;
+}): void {
   console.error(`${file}.${method}-error:\n`, err);
 
   Sentry.withScope(function(scope) {
