@@ -1,6 +1,7 @@
-import axios, { AxiosPromise, AxiosRequestConfig, AxiosResponseGeneric } from 'axios';
+import axios, { AxiosPromise, AxiosRequestConfig } from 'axios';
 import { StoreBundle } from 'store_new';
 import { RESPONSE_MESSAGES } from '../config';
+import { AxiosResponseGeneric } from '../types/model.type';
 
 export type HttpClient = {
   get: <T = any>(url: string, params?: any, options?: any) => AxiosPromise<T>;

@@ -9,6 +9,12 @@
 import { v4 as uuid } from 'uuid';
 import { isArray } from 'lodash';
 import captureAndLog from '../utils/captureAndLog';
+import { AxiosResponse } from 'axios';
+
+//TODO: move to a better location
+export interface AxiosResponseGeneric<T = any> extends AxiosResponse {
+  data: T;
+}
 
 export type ModelType =
   | 'User'
