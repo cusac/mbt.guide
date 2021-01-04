@@ -1,11 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import * as Sentry from '@sentry/browser';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { firebaseAuth } from 'services';
 import { loginCall, logoutCall } from '../../services/auth.service';
 import { User, verifyModelType } from '../../types/model.type';
 import captureAndLog from '../../utils/captureAndLog';
 import { AppThunk, DispatchAction, GetState } from '../index';
+import { parseError } from '../utils';
 
 //#region Types
 
@@ -19,7 +20,7 @@ export interface LoginResponse {
 }
 
 export type AuthState = LoginResponse & {
-  errors: Record<AuthStoreAction, Error | undefined>;
+  errors: Record<AuthStoreAction, Error | AxiosResponse['data'] | undefined>;
 };
 
 //#endregion
@@ -65,7 +66,10 @@ export const authStore = createSlice({
       state.accessToken = accessToken;
       state.refreshToken = refreshToken;
     },
-    setError(state, { payload }: PayloadAction<{ action: AuthStoreAction; err: Error }>) {
+    setError(
+      state,
+      { payload }: PayloadAction<{ action: AuthStoreAction; err: Error | AxiosResponse['data'] }>
+    ) {
       const { action, err } = payload;
       state.errors[action] = err;
     },
@@ -137,12 +141,12 @@ export const loginSuccess = (response: LoginResponse): AppThunk => async (
   }
 };
 
-export const loginFailure = (err: Error): AppThunk => async (
+export const loginFailure = (err: Error | AxiosResponse): AppThunk => async (
   dispatch: DispatchAction,
   getState: GetState
 ) => {
-  dispatch(setError({ action: 'login', err }));
   captureAndLog({ file: 'authStore', method: 'login', err });
+  dispatch(setError({ action: 'login', err: parseError(err) }));
 };
 //#endregion
 
@@ -176,8 +180,8 @@ export const logoutFailure = (err: Error): AppThunk => async (
   dispatch: DispatchAction,
   getState: GetState
 ) => {
-  dispatch(setError({ action: 'logout', err }));
   captureAndLog({ file: 'authStore', method: 'logout', err });
+  dispatch(setError({ action: 'logout', err: parseError(err) }));
 };
 //#endregion
 
