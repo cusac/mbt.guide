@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/browser';
 import axios, { AxiosResponse } from 'axios';
 import { firebaseAuth } from 'services';
 import { loginCall, logoutCall } from '../../services/auth.service';
-import { User, verifyModelType } from '../../types/model.type';
+import { AxiosErrorData, User, verifyModelType } from '../../types/model.type';
 import captureAndLog from '../../utils/captureAndLog';
 import { AppThunk, DispatchAction, GetState } from '../index';
 import { parseError } from '../utils';
@@ -20,7 +20,7 @@ export interface LoginResponse {
 }
 
 export type AuthState = LoginResponse & {
-  errors: Record<AuthStoreAction, Error | AxiosResponse['data'] | undefined>;
+  errors: Record<AuthStoreAction, Error | AxiosErrorData | undefined>;
 };
 
 //#endregion
@@ -68,7 +68,7 @@ export const authStore = createSlice({
     },
     setError(
       state,
-      { payload }: PayloadAction<{ action: AuthStoreAction; err: Error | AxiosResponse['data'] }>
+      { payload }: PayloadAction<{ action: AuthStoreAction; err: Error | AxiosErrorData }>
     ) {
       const { action, err } = payload;
       state.errors[action] = err;
