@@ -1,10 +1,6 @@
 import { useSelector } from 'react-redux';
-import React, { useGlobal } from 'reactn';
-import { RootState } from 'store_new';
-import * as components from '../../components';
-import * as services from '../../services';
-import repository from '../../services/repository.service';
-import { toYTVid, youtubeCall } from '../../services/youtube.service';
+import React from 'reactn';
+import { RootState, setPreviousView, useAppDispatch } from 'store_new';
 import {
   PlaylistYTVideo,
   SearchYTVideo,
@@ -13,7 +9,11 @@ import {
   VideoListYTVideo,
   YTResult,
   YTVideo,
-} from '../../types';
+} from 'types';
+import * as components from '../../components';
+import * as services from '../../services';
+import repository from '../../services/repository.service';
+import { toYTVid, youtubeCall } from '../../services/youtube.service';
 import { assertModelArrayType } from '../../types/model.type';
 import * as utils from '../../utils';
 import { captureAndLog, toastError } from '../../utils';
@@ -50,10 +50,10 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [searchResults, setSearchResults] = React.useState([] as YTVideo[]);
   const [matchedVids, setMatchedVids] = React.useState([] as Video[]);
 
-  const [previousView, setPreviousView] = (useGlobal as any)('previousView');
-
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
+
+  const dispatch = useAppDispatch();
 
   const selectVideo = async (videoId: any) => {
     utils.history.push(`/${videoId}`);
@@ -148,7 +148,7 @@ const Home = ({ videoId }: { videoId: string }) => {
   // Fetch the default list of videos from the MBT uploads list
   React.useEffect(() => {
     fetchDefaultVideos();
-    setPreviousView('video');
+    dispatch(setPreviousView({ previousView: 'video' }));
   }, []);
 
   // Fetch playlist videos when filter is toggled

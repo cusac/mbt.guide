@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import * as Sentry from '@sentry/browser';
 import axios, { AxiosResponse } from 'axios';
 import { firebaseAuth } from 'services';
-import { AsyncAppThunk } from 'store_new/main/main.store';
+import { AsyncAppThunk } from 'store_new';
 import { loginCall, logoutCall } from '../../services/auth.service';
 import { AxiosErrorData, User, verifyModelType } from '../../types';
 import captureAndLog from '../../utils/captureAndLog';

@@ -1,5 +1,5 @@
-import React, { useGlobal } from 'reactn';
-import { setLastViewedSegmentId, useAppDispatch } from 'store_new';
+import React from 'reactn';
+import { setLastViewedSegmentId, setPreviousView, useAppDispatch } from 'store_new';
 import * as components from '../../components';
 import SegmentViewer from '../../components/SegmentViewer';
 import * as services from '../../services';
@@ -33,8 +33,6 @@ const Search = ({ segmentId }: { segmentId: string }) => {
   const [segmentSegmentMap, setSegmentSegmentMap] = React.useState({});
   const [filterProcessedSegments, setFilterProcessedSegments] = React.useState(false);
   const [segmentSegment, setSegmentSegment] = React.useState();
-
-  const [previousView, setPreviousView] = (useGlobal as any)('previousView');
 
   const dispatch = useAppDispatch();
 
@@ -70,7 +68,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
     // Hardcode a default segment for now
     !segmentId && selectSegment('156b09ce-7dab-417a-8295-f6f86f1f504a');
     fetchSegments();
-    setPreviousView('segment');
+    dispatch(setPreviousView({ previousView: 'segment' }));
   }, []);
 
   // Fetch the selected segment

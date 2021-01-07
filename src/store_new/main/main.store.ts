@@ -1,54 +1,75 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
-import { Action, AnyAction, Dispatch } from 'redux';
-import { ThunkAction } from 'redux-thunk';
-import { monitorReducerEnhancer } from './enhancers';
-import { loggerMiddleware } from './middleware';
-import { rootReducer } from '../index';
-import * as storeBundle from '../index';
-import { initHttpClientService } from 'services/http-client.service';
-import { initAuthInterceptorService } from '../../services/auth-interceptor.service';
-import { useDispatch } from 'react-redux';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { AxiosErrorData } from '../../types';
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-function configureAppStore(preloadedState?: any) {
-  const store = configureStore({
-    reducer: rootReducer,
-    middleware: getDefaultMiddleware =>
-      getDefaultMiddleware().prepend(
-        // correctly typed middlewares can just be used
-        loggerMiddleware
-        // middleware: [loggerMiddleware, ...getDefaultMiddleware()],
-      ),
-    preloadedState,
-    enhancers: [monitorReducerEnhancer as any],
-  });
+//#region Types
 
-  //@ts-ignore
-  if (process.env.NODE_ENV !== 'production' && module.hot) {
-    //@ts-ignore
-    module.hot.accept('./root-reducer', () => store.replaceReducer(rootReducer));
-  }
+export type MainStoreAction = '';
 
-  return store;
-}
+export type MainState = {
+  previousView: 'video' | 'segment';
+  errors: Record<MainStoreAction, Error | AxiosErrorData | undefined>;
+};
 
-export const store_new = configureAppStore();
+//#endregion
 
-// Files that require the store need the store to be injected to avoid circular dependencies.
-initHttpClientService(storeBundle);
-initAuthInterceptorService(storeBundle);
+//#region Reducers
+/**
+ * Reducers should only contain logic to update state. All other store logic should be moved to the actions/thunks.
+ */
 
-export type RootState = ReturnType<typeof rootReducer>;
+const initalVideoState: MainState = {
+  errors: {} as any,
+  previousView: 'video',
+};
 
-export type AsyncAppThunk<T = void> = ThunkAction<Promise<T>, RootState, unknown, Action<string>>;
-export type AppThunk<T = void> = ThunkAction<T, RootState, unknown, Action<string>>;
+export const mainStore = createSlice({
+  name: 'main',
+  initialState: initalVideoState,
+  reducers: {
+    setPreviousView(state, { payload }: PayloadAction<{ previousView: 'video' | 'segment' }>) {
+      const { previousView } = payload;
+      state.previousView = previousView;
+    },
+    setError(
+      state,
+      { payload }: PayloadAction<{ action: MainStoreAction; err: Error | AxiosErrorData }>
+    ) {
+      const { action, err } = payload;
+      state.errors[action] = err;
+    },
+    clearError(state, { payload }: PayloadAction<{ action: MainStoreAction }>) {
+      const { action } = payload;
+      state.errors[action] = undefined;
+    },
+  },
+});
 
-export type AppDispatch = typeof store_new.dispatch;
-export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const { setPreviousView } = mainStore.actions;
 
-export type GetState = typeof store_new.getState;
-export type StoreBundle = typeof storeBundle;
+//#region Async Actions (Thunks)
+/**
+ * These actions contain the main logic to process and fetch state.
+ *
+ * Most async actions will be split into three parts: the call action, a success action, and a failure action.
+ */
 
-export const storeDispatch: AppDispatch = (action: any) => store_new.dispatch(action as any);
-export const storeGetState: GetState = () => store_new.getState();
+//#region createVideo
+
+//#endregion
+
+//#region updateSegments
+
+//#endregion
+
+//#endregion
+
+//#region Synchronous Actions (Thunks)
+/**
+ * These actions contain only synchronous logic
+ */
+
+//#endregion
+
+//#region Utilities
+
+//#endregion

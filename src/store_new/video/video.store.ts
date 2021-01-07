@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import * as luxon from 'luxon';
-import { AsyncAppThunk } from 'store_new/main/main.store';
+import { AsyncAppThunk } from 'store_new';
 import { createVideoCall, updateSegmentsCall, youtubeCall } from '../../services';
 import {
   assertModelArrayType,

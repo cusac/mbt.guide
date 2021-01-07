@@ -1,4 +1,4 @@
-import React, { useGlobal } from 'reactn';
+import React from 'reactn';
 
 export type SearchType = 'video' | 'segment';
 

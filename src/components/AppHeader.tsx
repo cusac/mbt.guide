@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useGlobal } from 'reactn';
+import React from 'reactn';
 import { logout, RootState } from 'store_new';
 import * as components from '../components';
 import * as serv from '../services';
@@ -26,9 +26,9 @@ const AppHeader = ({
   searchType: SearchType;
 }): any => {
   const [loading, setLoading] = React.useState(false);
-  const [previousView] = (useGlobal as any)('previousView');
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
+  const previousView = useSelector((state: RootState) => state.main.previousView);
 
   const dispatch = useDispatch();
 
