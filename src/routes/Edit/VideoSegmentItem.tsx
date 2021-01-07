@@ -1,9 +1,9 @@
-import * as components from '../../components';
 import React from 'reactn';
+import * as components from '../../components';
+import { Segment } from '../../types';
 import * as utils from '../../utils';
-import { VideoSegment } from '../../types';
 
-const { Button, Grid, Segment } = components;
+const { Button, Grid, SegmentUI } = components;
 
 const VideoSegmentItem = ({
   active,
@@ -13,7 +13,7 @@ const VideoSegmentItem = ({
   canEdit,
 }: {
   active: boolean;
-  data: VideoSegment;
+  data: Segment;
   color: any;
   onSelect: () => void;
   canEdit: boolean;
@@ -24,7 +24,7 @@ const VideoSegmentItem = ({
   };
 
   return (
-    <Segment color={color} onClick={() => onSelect()} className="video-segment">
+    <SegmentUI color={color} onClick={() => onSelect()} className="video-segment">
       <Grid columns={2} divided>
         <Grid.Row>
           <Grid.Column verticalAlign="middle" width={3} style={{ padding: 0 }}>
@@ -50,7 +50,7 @@ const VideoSegmentItem = ({
           </Grid.Column>
         </Grid.Row>
       </Grid>
-    </Segment>
+    </SegmentUI>
   );
 };
 

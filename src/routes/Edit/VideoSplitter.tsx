@@ -3,14 +3,20 @@ import InputMask from 'react-input-mask';
 import { useSelector } from 'react-redux';
 import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
-import React, { useGlobal } from 'reactn';
-import { RootState } from 'store_new';
+import React from 'reactn';
+import {
+  createVideo,
+  RootState,
+  setLastViewedSegmentId,
+  updateSegments,
+  useAppDispatch,
+} from 'store_new';
 import Swal from 'sweetalert2';
+import { Segment, Video } from 'types';
 import { v4 as uuid } from 'uuid';
 import * as components from '../../components';
 import AppHeader from '../../components/AppHeader';
 import * as services from '../../services';
-import { Video, VideoSegment } from '../../types';
 import * as utils from '../../utils';
 import { captureAndLog, hasPermission, toastError } from '../../utils';
 import VideoSegmentItem from './VideoSegmentItem';
@@ -20,7 +26,7 @@ const {
   Grid,
   Icon,
   Input,
-  Segment,
+  SegmentUI,
   Form,
   TextArea,
   Link,
@@ -46,8 +52,8 @@ const VideoSplitter = ({
 }) => {
   const [video, setVideo]: [Video | undefined, any] = React.useState();
   const [videoLoading, setVideoLoading]: [boolean, any] = React.useState(false);
-  const [segments, setSegments]: [VideoSegment[], any] = React.useState([]);
-  const [currentSegment, setCurrentSegment]: [VideoSegment | undefined, any] = React.useState();
+  const [segments, setSegments]: [Segment[], any] = React.useState([]);
+  const [currentSegment, setCurrentSegment]: [Segment | undefined, any] = React.useState();
   const [saveData, setSaveData]: [boolean, any] = React.useState(false);
   const [segmentsSaving, setSegmentsSaving]: [boolean, any] = React.useState(false);
   const [refresh, setRefresh]: [[boolean], any] = React.useState([true]);
@@ -56,16 +62,21 @@ const VideoSplitter = ({
   const [wait, setWait]: [boolean, any] = React.useState(true);
   const [error, setError] = React.useState();
 
-  const [lastViewedSegmentId, setLastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
+  // TODO: REPLACE WITH STORE AND CHECK "PROCESSED VIDEO" FILTER AND TEST STORE CALLS THROW eRRORS
+
+  const dispatch = useAppDispatch();
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const currentUserScope = useSelector((state: RootState) => state.auth.scope);
+  const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
 
   const startRef: any = React.createRef();
   const endRef: any = React.createRef();
 
   React.useEffect(() => {
-    segmentId && segmentId !== lastViewedSegmentId && setLastViewedSegmentId(segmentId);
+    segmentId &&
+      segmentId !== lastViewedSegmentId &&
+      dispatch(setLastViewedSegmentId({ lastViewedSegmentId: segmentId }));
   }, []);
 
   const updateSegmentAt = (index: any, data: any) => {
@@ -145,16 +156,19 @@ const VideoSplitter = ({
           );
 
           setSegmentsSaving(true);
-          const response = await (services as any).video.updateVideoSegments({
-            videoId,
-            segments: newSegments,
-          });
+          const updatedSegments = await dispatch(
+            updateSegments({
+              videoId,
+              segments: newSegments,
+            })
+          );
 
           setSegmentsSaving(false);
-          setSegments(response.data);
+          setSegments(updatedSegments);
           Swal.fire('Deleted!', 'Your segment has been deleted.', 'success');
           goTo(`/edit/${(video as any).ytId}/${(newSegments[0] || {}).segmentId}`);
         } catch (err) {
+          //TODO: make sure toast shows
           setSegmentsSaving(false);
           captureAndLog({ file: 'VideoSplitter', method: 'removeSegment', err });
           toastError('There was an error deleting the segment.', err);
@@ -166,9 +180,14 @@ const VideoSplitter = ({
   const saveChanges = async () => {
     try {
       setSegmentsSaving(true);
-      const response = await (services as any).video.updateVideoSegments({ videoId, segments });
+      const updatedSegments = await dispatch(
+        updateSegments({
+          videoId,
+          segments,
+        })
+      );
       setSegmentsSaving(false);
-      setSegments(response.data);
+      setSegments(updatedSegments);
       Swal.fire({
         title: 'Saved!',
         text: 'Your changes have been saved.',
@@ -176,6 +195,7 @@ const VideoSplitter = ({
         confirmButtonText: 'OK',
       });
     } catch (err) {
+      //TODO: make sure toast shows
       setSegmentsSaving(false);
       captureAndLog({ file: 'VideoSplitter', method: 'saveChanges', err });
       toastError('There was an error updating the segment.', err);
@@ -187,9 +207,16 @@ const VideoSplitter = ({
   const saveIfNeeded = async () => {
     if (saveData) {
       try {
-        await (services as any).video.updateVideoSegments({ videoId, segments });
+        //TODO: make sure segments are updated in the local state so they change in the UI
+        await dispatch(
+          updateSegments({
+            videoId,
+            segments,
+          })
+        );
         setSaveData(false);
       } catch (err) {
+        //TODO: make sure error is thrown above
         if (err && err.message !== 'Network Error') {
           // Continue to attempt saving if the error is due to a bad network.
           setSaveData(false);
@@ -275,9 +302,8 @@ const VideoSplitter = ({
 
   if (newVid) {
     !newVidCreating &&
-      (services as any).video
-        .create({ videoId })
-        .then(() => {
+      dispatch(createVideo({ videoId }))
+        .then(result => {
           setNewVid(false);
           setnewVidCreating(false);
           getVideoData(videoId);
@@ -364,8 +390,8 @@ const VideoSplitter = ({
               )}
             </Grid.Column>
             <Grid.Column width={5}>
-              <Segment attached style={{ height: '385px', overflowY: 'auto' }}>
-                <Segment.Group>
+              <SegmentUI attached style={{ height: '385px', overflowY: 'auto' }}>
+                <SegmentUI.Group>
                   {(segments as any).map((data: any, i: any) => (
                     <VideoSegmentItem
                       key={data.segmentId}
@@ -376,8 +402,8 @@ const VideoSplitter = ({
                       canEdit={currentUser.email === data.ownerEmail}
                     />
                   ))}
-                </Segment.Group>
-              </Segment>
+                </SegmentUI.Group>
+              </SegmentUI>
               <Button.Group attached="bottom">
                 <Button onClick={addSegment}>
                   <Icon name="add" /> Add
@@ -404,9 +430,9 @@ const VideoSplitter = ({
               {!canEdit && (
                 <Grid.Row>
                   <Grid.Column>
-                    <Segment color="red" style={{ color: 'red' }}>
+                    <SegmentUI color="red" style={{ color: 'red' }}>
                       Only the creator of a segment can edit it.
-                    </Segment>
+                    </SegmentUI>
                   </Grid.Column>
                 </Grid.Row>
               )}
@@ -565,12 +591,12 @@ const VideoSplitter = ({
           <Grid>
             <Grid.Row>
               <Grid.Column verticalAlign="middle" width={16}>
-                <Segment style={{ padding: 10, marginTop: 20 }}>
+                <SegmentUI style={{ padding: 10, marginTop: 20 }}>
                   No segments yet.{' '}
                   <Link onClick={addSegment} to="">
                     Add the first one!
                   </Link>
-                </Segment>
+                </SegmentUI>
               </Grid.Column>
             </Grid.Row>
           </Grid>

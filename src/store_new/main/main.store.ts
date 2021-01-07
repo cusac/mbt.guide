@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
-import { Dispatch } from 'react';
-import { Action, AnyAction } from 'redux';
+import { Action, AnyAction, Dispatch } from 'redux';
 import { ThunkAction } from 'redux-thunk';
 import { monitorReducerEnhancer } from './enhancers';
 import { loggerMiddleware } from './middleware';
@@ -9,16 +8,18 @@ import { rootReducer } from '../index';
 import * as storeBundle from '../index';
 import { initHttpClientService } from 'services/http-client.service';
 import { initAuthInterceptorService } from '../../services/auth-interceptor.service';
-
-export type RootState = ReturnType<typeof rootReducer>;
-
-export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>;
+import { useDispatch } from 'react-redux';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 function configureAppStore(preloadedState?: any) {
   const store = configureStore({
     reducer: rootReducer,
-    middleware: [loggerMiddleware, ...getDefaultMiddleware()],
+    middleware: getDefaultMiddleware =>
+      getDefaultMiddleware().prepend(
+        // correctly typed middlewares can just be used
+        loggerMiddleware
+        // middleware: [loggerMiddleware, ...getDefaultMiddleware()],
+      ),
     preloadedState,
     enhancers: [monitorReducerEnhancer as any],
   });
@@ -38,11 +39,16 @@ export const store_new = configureAppStore();
 initHttpClientService(storeBundle);
 initAuthInterceptorService(storeBundle);
 
-export type DispatchAction = Dispatch<AnyAction | AppThunk>;
+export type RootState = ReturnType<typeof rootReducer>;
+
+export type AsyncAppThunk<T = void> = ThunkAction<Promise<T>, RootState, unknown, Action<string>>;
+export type AppThunk<T = void> = ThunkAction<T, RootState, unknown, Action<string>>;
+
+export type AppDispatch = typeof store_new.dispatch;
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+
 export type GetState = typeof store_new.getState;
 export type StoreBundle = typeof storeBundle;
 
-// export default store_new;
-
-export const storeDispatch: DispatchAction = action => store_new.dispatch(action as any);
+export const storeDispatch: AppDispatch = (action: any) => store_new.dispatch(action as any);
 export const storeGetState: GetState = () => store_new.getState();

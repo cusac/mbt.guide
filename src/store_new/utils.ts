@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios';
-import { AxiosErrorData } from 'types/model.type';
+import { AxiosErrorData } from 'types';
 
 /**
  * This is a utility function that handles errors passed to redux actions.

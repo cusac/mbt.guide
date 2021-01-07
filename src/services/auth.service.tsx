@@ -1,7 +1,7 @@
 import { AxiosPromise } from 'axios';
 import { httpClient as http } from '../services';
 import { LoginResponse } from '../store_new';
-import { AxiosResponseGeneric } from '../types/model.type';
+import { AxiosResponseGeneric } from '../types';
 
 export const loginCall = ({
   idToken,

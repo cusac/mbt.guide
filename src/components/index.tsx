@@ -3,7 +3,7 @@ export {
   Grid,
   Icon,
   Input,
-  Segment,
+  Segment as SegmentUI,
   Form,
   TextArea,
   List,

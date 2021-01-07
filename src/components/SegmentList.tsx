@@ -1,14 +1,15 @@
 import React from 'react';
 import SegmentItem from './SegmentItem';
+import { Segment } from 'types';
 
 const SegmentList = ({
   segments,
   handleSegmentSelect,
 }: {
-  segments: [];
-  handleSegmentSelect: (segment: any) => any;
+  segments: Segment[];
+  handleSegmentSelect: (segment: Segment) => any;
 }) => {
-  const renderedSegments = segments.map((segment: any) => {
+  const renderedSegments = segments.map(segment => {
     return (
       <SegmentItem
         key={segment.segmentId}

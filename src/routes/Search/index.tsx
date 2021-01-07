@@ -1,8 +1,6 @@
-import { useSelector } from 'react-redux';
 import React, { useGlobal } from 'reactn';
-import { RootState } from 'store_new';
+import { setLastViewedSegmentId, useAppDispatch } from 'store_new';
 import * as components from '../../components';
-// import { Segment, VideoSegment } from '../../types';
 import SegmentViewer from '../../components/SegmentViewer';
 import * as services from '../../services';
 import * as utils from '../../utils';
@@ -36,13 +34,12 @@ const Search = ({ segmentId }: { segmentId: string }) => {
   const [filterProcessedSegments, setFilterProcessedSegments] = React.useState(false);
   const [segmentSegment, setSegmentSegment] = React.useState();
 
-  const [lastViewedSegmentId, setLastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
   const [previousView, setPreviousView] = (useGlobal as any)('previousView');
 
-  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const dispatch = useAppDispatch();
 
   const selectSegment = async (selectSegmentId: string) => {
-    setLastViewedSegmentId(selectSegmentId);
+    dispatch(setLastViewedSegmentId({ lastViewedSegmentId: selectSegmentId }));
     utils.history.push(`/search/${selectSegmentId}`);
   };
 

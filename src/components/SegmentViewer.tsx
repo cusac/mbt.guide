@@ -1,20 +1,21 @@
 import { useSelector } from 'react-redux';
-import React, { useGlobal } from 'reactn';
+import React from 'reactn';
+import { RootState, setLastViewedSegmentId, useAppDispatch } from 'store_new';
 import * as components from '../components';
 import { Button, Container, Grid, Icon, Label, Link, List } from '../components';
 import * as utils from '../utils';
-import { RootState } from 'store_new';
 
 const SegmentViewer = ({ segment }: { segment: any }) => {
-  const [lastViewedSegmentId, setLastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
+  const dispatch = useAppDispatch();
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const currentUserScope = useSelector((state: RootState) => state.auth.scope);
+  const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
 
   React.useEffect(() => {
     segment &&
       segment.segmentId !== lastViewedSegmentId &&
-      setLastViewedSegmentId(segment.segmentId);
+      dispatch(setLastViewedSegmentId({ lastViewedSegmentId: segment.segmentId }));
   }, []);
 
   const canEdit =

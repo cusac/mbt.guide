@@ -2,10 +2,11 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import * as Sentry from '@sentry/browser';
 import axios, { AxiosResponse } from 'axios';
 import { firebaseAuth } from 'services';
+import { AsyncAppThunk } from 'store_new/main/main.store';
 import { loginCall, logoutCall } from '../../services/auth.service';
-import { AxiosErrorData, User, verifyModelType } from '../../types/model.type';
+import { AxiosErrorData, User, verifyModelType } from '../../types';
 import captureAndLog from '../../utils/captureAndLog';
-import { AppThunk, DispatchAction, GetState } from '../index';
+import { AppThunk } from '../index';
 import { parseError } from '../utils';
 
 //#region Types
@@ -80,14 +81,8 @@ export const authStore = createSlice({
   },
 });
 
-export const {
-  setAccessToken,
-  setRefreshToken,
-  setAuth,
-  clearAuth,
-  setError,
-  clearError,
-} = authStore.actions;
+export const { setAccessToken, setRefreshToken, setAuth, clearAuth } = authStore.actions;
+const { setError, clearError } = authStore.actions;
 
 //#region Async Actions (Thunks)
 /**
@@ -107,7 +102,7 @@ export const login = ({
   email?: string;
   password?: string;
   displayName?: string;
-}): AppThunk => async (dispatch: DispatchAction, getState: GetState) => {
+}): AsyncAppThunk => async (dispatch, getState) => {
   let response;
   try {
     const { data } = await loginCall({ idToken, email, password, displayName });
@@ -120,11 +115,12 @@ export const login = ({
   }
 };
 
-export const loginSuccess = (response: LoginResponse): AppThunk => async (
-  dispatch: DispatchAction,
-  getState: GetState
+export const loginSuccess = (response: LoginResponse): AsyncAppThunk => async (
+  dispatch,
+  getState
 ) => {
   dispatch(setAuth({ response }));
+  dispatch(clearError({ action: 'login' }));
 
   const { user, accessToken } = response;
 
@@ -141,9 +137,9 @@ export const loginSuccess = (response: LoginResponse): AppThunk => async (
   }
 };
 
-export const loginFailure = (err: Error | AxiosResponse): AppThunk => async (
-  dispatch: DispatchAction,
-  getState: GetState
+export const loginFailure = (err: Error | AxiosResponse): AsyncAppThunk => async (
+  dispatch,
+  getState
 ) => {
   captureAndLog({ file: 'authStore', method: 'login', err });
   dispatch(setError({ action: 'login', err: parseError(err) }));
@@ -151,7 +147,7 @@ export const loginFailure = (err: Error | AxiosResponse): AppThunk => async (
 //#endregion
 
 //#region logout
-export const logout = (): AppThunk => async (dispatch: DispatchAction, getState: GetState) => {
+export const logout = (): AsyncAppThunk => async (dispatch, getState) => {
   try {
     dispatch(useRefreshToken());
     await logoutCall();
@@ -161,11 +157,9 @@ export const logout = (): AppThunk => async (dispatch: DispatchAction, getState:
   dispatch(logoutSuccess());
 };
 
-export const logoutSuccess = (): AppThunk => async (
-  dispatch: DispatchAction,
-  getState: GetState
-) => {
+export const logoutSuccess = (): AsyncAppThunk => async (dispatch, getState) => {
   dispatch(clearAuth());
+  dispatch(clearError({ action: 'logout' }));
 
   firebaseAuth.signOut();
 
@@ -176,10 +170,7 @@ export const logoutSuccess = (): AppThunk => async (
   });
 };
 
-export const logoutFailure = (err: Error): AppThunk => async (
-  dispatch: DispatchAction,
-  getState: GetState
-) => {
+export const logoutFailure = (err: Error): AsyncAppThunk => async (dispatch, getState) => {
   captureAndLog({ file: 'authStore', method: 'logout', err });
   dispatch(setError({ action: 'logout', err: parseError(err) }));
 };
@@ -198,16 +189,13 @@ export const updateTokens = ({
 }: {
   accessToken: string;
   refreshToken: string;
-}): AppThunk => (dispatch: DispatchAction, getState: GetState) => {
+}): AppThunk => (dispatch, getState) => {
   updateAuthHeader(accessToken);
   dispatch(setAccessToken({ accessToken }));
   dispatch(setRefreshToken({ refreshToken }));
 };
 
-export const useRefreshToken = (): AppThunk => async (
-  dispatch: DispatchAction,
-  getState: GetState
-) => {
+export const useRefreshToken = (): AppThunk => async (dispatch, getState) => {
   const {
     auth: { refreshToken },
   } = getState();

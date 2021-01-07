@@ -1,18 +1,20 @@
 import { useSelector } from 'react-redux';
 import React, { useGlobal } from 'reactn';
-import {
-  PlaylistYTVideo,
-  SearchYTVideo,
-  VideoListYTVideo,
-  YTResult,
-  YTVideo,
-} from 'services/youtube.service';
 import { RootState } from 'store_new';
 import * as components from '../../components';
 import * as services from '../../services';
 import repository from '../../services/repository.service';
-import { toYTVid, youtube } from '../../services/youtube.service';
-import { Video, VideoSegment } from '../../types';
+import { toYTVid, youtubeCall } from '../../services/youtube.service';
+import {
+  PlaylistYTVideo,
+  SearchYTVideo,
+  Segment,
+  Video,
+  VideoListYTVideo,
+  YTResult,
+  YTVideo,
+} from '../../types';
+import { assertModelArrayType } from '../../types/model.type';
 import * as utils from '../../utils';
 import { captureAndLog, toastError } from '../../utils';
 
@@ -38,8 +40,8 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [loadingVideos, setLoadingVideos] = React.useState(true);
   const [loadingSelectedVideo, setLoadingSelectedVideo] = React.useState(true);
   const [loadingSegments, setLoadingSegments] = React.useState(true);
-  const [segments, setSegments] = React.useState(undefined as Array<VideoSegment> | void);
-  const [mySegments, setMySegments] = React.useState(undefined as Array<VideoSegment> | void);
+  const [segments, setSegments] = React.useState(undefined as Segment[] | void);
+  const [mySegments, setMySegments] = React.useState(undefined as Array<Segment> | void);
   const [selectedVideo, setSelectedVideo] = React.useState(undefined as YTVideo | undefined);
   const [videos, setVideos] = React.useState([] as YTVideo[]);
   const [filterProcessedVideos, setFilterProcessedVideos] = React.useState(false);
@@ -48,10 +50,10 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [searchResults, setSearchResults] = React.useState([] as YTVideo[]);
   const [matchedVids, setMatchedVids] = React.useState([] as Video[]);
 
-  const [lastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
   const [previousView, setPreviousView] = (useGlobal as any)('previousView');
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
+  const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
 
   const selectVideo = async (videoId: any) => {
     utils.history.push(`/${videoId}`);
@@ -107,21 +109,26 @@ const Home = ({ videoId }: { videoId: string }) => {
     if (pageToken) {
       params.pageToken = pageToken;
     }
-    const result = await youtube<PlaylistYTVideo>({
+    const { data } = await youtubeCall<PlaylistYTVideo>({
       endpoint: 'playlistItems',
       params,
     });
 
-    return { ...result, items: result.items.map(toYTVid) };
+    return { ...data, items: data.items.map(toYTVid) };
   };
 
+  //TODO: TEST THIS
   const filterVidsWithSegments = (ytVids: YTVideo[], matchingVids: Video[]): YTVideo[] => {
     return ytVids.filter(ytVid => {
       const match = matchingVids.find(v => v.ytId === ytVid.id);
       if (!match) {
         return true;
       } else {
-        return !match.segments[0];
+        if (match !== undefined && match.segments !== undefined) {
+          return !match.segments[0];
+        } else {
+          return true;
+        }
       }
     });
   };
@@ -167,13 +174,13 @@ const Home = ({ videoId }: { videoId: string }) => {
       try {
         setLoadingSelectedVideo(true);
         const [video] = (
-          await youtube<VideoListYTVideo>({
+          await youtubeCall<VideoListYTVideo>({
             endpoint: 'videos',
             params: {
               id: videoId,
             },
           })
-        ).items;
+        ).data.items;
         setSelectedVideo(toYTVid(video));
       } catch (err) {
         setLoadingSelectedVideo(false);
@@ -214,9 +221,23 @@ const Home = ({ videoId }: { videoId: string }) => {
     videoId ? fetchSegmentVideo() : setSegments([]);
   }, [videoId]);
 
-  React.useEffect(() => {
-    setSegments(segmentVideo ? segmentVideo.segments : []);
-  }, [segmentVideo]);
+  React.useEffect(
+    function extractSegmentsFromVideo() {
+      try {
+        const videoSegments = segmentVideo ? segmentVideo.segments : [];
+        if (
+          videoSegments !== undefined &&
+          assertModelArrayType<Segment>(videoSegments, 'Segment')
+        ) {
+          setSegments(videoSegments);
+        }
+      } catch (err) {
+        captureAndLog({ file: 'Home', method: 'extractSegmentsFromVideo', err });
+        //TODO: THROW A TOAST
+      }
+    },
+    [segmentVideo]
+  );
 
   React.useEffect(() => {
     segments &&
@@ -229,7 +250,7 @@ const Home = ({ videoId }: { videoId: string }) => {
   const searchVideos = async (term: string) => {
     try {
       setLoadingVideos(true);
-      const response = await youtube<SearchYTVideo>({
+      const { data } = await youtubeCall<SearchYTVideo>({
         endpoint: 'search',
         params: {
           q: term,
@@ -237,7 +258,7 @@ const Home = ({ videoId }: { videoId: string }) => {
       });
 
       // Filter out any videos that don't belong to the MBT channel
-      const ytVids = response.items.filter(v => v.snippet.channelId === channelId).map(toYTVid);
+      const ytVids = data.items.filter(v => v.snippet.channelId === channelId).map(toYTVid);
       const mbtVids = await fetchMatchingVideos(ytVids);
 
       setSearchResults(ytVids);

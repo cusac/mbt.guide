@@ -2,7 +2,7 @@ import * as components from '../../components';
 import React from 'reactn';
 import * as utils from '../../utils';
 
-const { Button, Grid, Segment } = components;
+const { Button, Grid, SegmentUI } = components;
 
 const VideoSegment = ({
   active,
@@ -23,7 +23,7 @@ const VideoSegment = ({
   };
 
   return (
-    <Segment color={color as any} onClick={() => onSelect()} className="video-segment">
+    <SegmentUI color={color as any} onClick={() => onSelect()} className="video-segment">
       <Grid columns={2} divided>
         <Grid.Row>
           <Grid.Column verticalAlign="middle" width={3} style={{ padding: 0 }}>
@@ -49,7 +49,7 @@ const VideoSegment = ({
           </Grid.Column>
         </Grid.Row>
       </Grid>
-    </Segment>
+    </SegmentUI>
   );
 };
 
