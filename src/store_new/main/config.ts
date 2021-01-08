@@ -1,21 +1,48 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
-import { Action, AnyAction, Dispatch } from 'redux';
+import { configureStore } from '@reduxjs/toolkit';
+import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { Action } from 'redux';
+import {
+  FLUSH,
+  PAUSE,
+  PERSIST,
+  persistReducer,
+  persistStore,
+  PURGE,
+  REGISTER,
+  REHYDRATE,
+} from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 import { ThunkAction } from 'redux-thunk';
-import { monitorReducerEnhancer } from './enhancers';
-import { loggerMiddleware } from './middleware';
-import { rootReducer } from '../index';
-import * as storeBundle from '../index';
+import { authInterceptor } from 'services';
 import { initHttpClientService } from 'services/http-client.service';
 import { initAuthInterceptorService } from '../../services/auth-interceptor.service';
-import { useDispatch } from 'react-redux';
+import * as storeBundle from '../index';
+import { rootReducer } from '../index';
+import { monitorReducerEnhancer } from './enhancers';
+import { loggerMiddleware } from './middleware';
+import SetTransform from './transform';
+
+const persistConfig = {
+  key: 'root',
+  version: 1,
+  storage,
+  transforms: [SetTransform],
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 function configureAppStore(preloadedState?: any) {
   const store = configureStore({
-    reducer: rootReducer,
+    reducer: persistedReducer,
     middleware: getDefaultMiddleware =>
-      getDefaultMiddleware().prepend(
+      getDefaultMiddleware({
+        serializableCheck: {
+          ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        },
+      }).prepend(
         // correctly typed middlewares can just be used
         loggerMiddleware
         // middleware: [loggerMiddleware, ...getDefaultMiddleware()],
@@ -35,6 +62,8 @@ function configureAppStore(preloadedState?: any) {
 
 export const store_new = configureAppStore();
 
+export const persistor = persistStore(store_new);
+
 // Files that require the store need the store to be injected to avoid circular dependencies.
 initHttpClientService(storeBundle);
 initAuthInterceptorService(storeBundle);
@@ -52,3 +81,13 @@ export type StoreBundle = typeof storeBundle;
 
 export const storeDispatch: AppDispatch = (action: any) => store_new.dispatch(action as any);
 export const storeGetState: GetState = () => store_new.getState();
+
+/**
+ * Any code that needs to be run before the app is rendered can be added here.
+ */
+export const initApp = () => {
+  // Add a response interceptor
+  axios.interceptors.response.use(function(response) {
+    return Promise.resolve(response);
+  }, authInterceptor.responseError);
+};

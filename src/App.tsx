@@ -3,13 +3,13 @@ import * as components from './components';
 import React from 'reactn';
 import * as routes from './routes';
 import * as services from './services';
-import * as store from './store';
 import * as utils from './utils';
 import { toast } from 'react-toastify';
 
 // Import css
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+import { initApp } from 'store_new';
 
 toast.configure();
 
@@ -18,7 +18,8 @@ const App = () => {
   React.useEffect(() => {
     services.firebaseAuth.onAuthStateChanged(setUser as any);
   }, []);
-  store.useStore();
+
+  initApp();
 
   try {
     (services as any).stats.postVisit();
