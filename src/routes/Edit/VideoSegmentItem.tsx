@@ -1,7 +1,7 @@
 import React from 'react';
-import * as components from '../../components';
-import { Segment } from '../../types';
-import * as utils from '../../utils';
+import * as components from 'components';
+import { Segment } from 'types';
+import * as utils from 'utils';
 
 const { Button, Grid, SegmentUI } = components;
 

@@ -1,9 +1,28 @@
+import {
+  AppHeader,
+  Button,
+  Container,
+  Form,
+  Grid,
+  Header,
+  Icon,
+  Input,
+  Label,
+  Link,
+  Loading,
+  Modal,
+  SegmentUI,
+  Slider,
+  TextArea,
+  YouTubePlayerWithControls,
+} from 'components';
 import { differenceBy, uniq } from 'lodash';
+import React from 'react';
 import InputMask from 'react-input-mask';
 import { useSelector } from 'react-redux';
 import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
-import React from 'react';
+import { repository } from 'services';
 import {
   createVideo,
   RootState,
@@ -13,31 +32,13 @@ import {
 } from 'store';
 import Swal from 'sweetalert2';
 import { Segment, Video } from 'types';
+import { captureAndLog, hasPermission, history, timeFormat, toastError } from 'utils';
 import { v4 as uuid } from 'uuid';
-import * as components from '../../components';
-import AppHeader from '../../components/AppHeader';
-import * as services from '../../services';
-import * as utils from '../../utils';
-import { captureAndLog, hasPermission, toastError } from '../../utils';
 import VideoSegmentItem from './VideoSegmentItem';
 
-const {
-  Button,
-  Grid,
-  Icon,
-  Input,
-  SegmentUI,
-  Form,
-  TextArea,
-  Link,
-  Container,
-  Label,
-  Loading,
-  Header,
-  Modal,
-} = components;
-
 //TODO: Error Handling
+
+// TODO: Split into multiple components to fix typescript errors?
 
 const VideoSplitter = ({
   videoId,
@@ -84,10 +85,10 @@ const VideoSplitter = ({
     Object.assign(newSegments[index], { ...data, pristine: false });
     startRef.current &&
       startRef.current.value &&
-      (startRef.current.value = utils.timeFormat.to(data.start as any));
+      (startRef.current.value = timeFormat.to(data.start as any));
     endRef.current &&
       endRef.current.value &&
-      (endRef.current.value = utils.timeFormat.to(data.end as any));
+      (endRef.current.value = timeFormat.to(data.end as any));
     setSegments(newSegments);
     setSaveData(true);
   };
@@ -112,12 +113,12 @@ const VideoSplitter = ({
   };
 
   const updateStart = (index: any, value: any) => {
-    const start = utils.timeFormat.from(value);
+    const start = timeFormat.from(value);
     start && updateSegmentAt(index, { start });
   };
 
   const updateEnd = (index: any, value: any) => {
-    const end = utils.timeFormat.from(value);
+    const end = timeFormat.from(value);
     end && updateSegmentAt(index, { end });
   };
 
@@ -231,7 +232,7 @@ const VideoSplitter = ({
       if (!videoLoading) {
         setVideoLoading(true);
         const [video] = (
-          await (services as any).repository.video.list({
+          await repository.video.list({
             ytId: videoId,
             $embed: ['segments.tags'],
           })
@@ -252,17 +253,17 @@ const VideoSplitter = ({
   };
 
   const goTo = (path: any) => {
-    utils.history.push(path);
+    history.push(path);
   };
 
   // Keep start/end input fields in sync
   React.useEffect(() => {
     currentSegment &&
       startRef.current &&
-      (startRef.current.value = utils.timeFormat.to((currentSegment as any).start));
+      (startRef.current.value = timeFormat.to((currentSegment as any).start));
     currentSegment &&
       endRef.current &&
-      (endRef.current.value = utils.timeFormat.to((currentSegment as any).end));
+      (endRef.current.value = timeFormat.to((currentSegment as any).end));
     // Update the state to make sure things are rendered properly
     setRefresh(refresh.slice());
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -381,7 +382,7 @@ const VideoSplitter = ({
           <Grid.Row>
             <Grid.Column width={11} style={{ padding: 0 }}>
               {video && (
-                <components.YouTubePlayerWithControls
+                <YouTubePlayerWithControls
                   duration={(video as any).duration}
                   end={currentSegment ? (currentSegment as any).end : (video as any).duration}
                   start={currentSegment ? (currentSegment as any).start : 0}
@@ -447,7 +448,7 @@ const VideoSplitter = ({
                       paddingTop: 50,
                     }}
                   >
-                    <components.Slider
+                    <Slider
                       disabled={!currentUser || !canEdit}
                       key={(segments as any).length} // causes slider recreation on segments count change
                       range={{ min: 0, max: duration }}
@@ -515,7 +516,7 @@ const VideoSplitter = ({
                     ref={startRef}
                     className="segment-time-field"
                     mask="99:99:99"
-                    defaultValue={utils.timeFormat.to((currentSegment as any).start)}
+                    defaultValue={timeFormat.to((currentSegment as any).start)}
                     onChange={(event: any) => updateStart(index, event.target.value)}
                   />{' '}
                   -{' '}
@@ -524,7 +525,7 @@ const VideoSplitter = ({
                     ref={endRef}
                     className="segment-time-field"
                     mask="99:99:99"
-                    defaultValue={utils.timeFormat.to((currentSegment as any).end)}
+                    defaultValue={timeFormat.to((currentSegment as any).end)}
                     onChange={(event: any) => updateEnd(index, event.target.value)}
                   />
                 </Grid.Column>
