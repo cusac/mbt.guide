@@ -60,9 +60,9 @@ function configureAppStore(preloadedState?: any) {
   return store;
 }
 
-export const store_new = configureAppStore();
+export const store = configureAppStore();
 
-export const persistor = persistStore(store_new);
+export const persistor = persistStore(store);
 
 // Files that require the store need the store to be injected to avoid circular dependencies.
 initHttpClientService(storeBundle);
@@ -73,14 +73,14 @@ export type RootState = ReturnType<typeof rootReducer>;
 export type AsyncAppThunk<T = void> = ThunkAction<Promise<T>, RootState, unknown, Action<string>>;
 export type AppThunk<T = void> = ThunkAction<T, RootState, unknown, Action<string>>;
 
-export type AppDispatch = typeof store_new.dispatch;
+export type AppDispatch = typeof store.dispatch;
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 
-export type GetState = typeof store_new.getState;
+export type GetState = typeof store.getState;
 export type StoreBundle = typeof storeBundle;
 
-export const storeDispatch: AppDispatch = (action: any) => store_new.dispatch(action as any);
-export const storeGetState: GetState = () => store_new.getState();
+export const storeDispatch: AppDispatch = (action: any) => store.dispatch(action as any);
+export const storeGetState: GetState = () => store.getState();
 
 /**
  * Any code that needs to be run before the app is rendered can be added here.

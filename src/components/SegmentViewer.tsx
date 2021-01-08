@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
-import React from 'reactn';
-import { RootState, setLastViewedSegmentId, useAppDispatch } from 'store_new';
+import React from 'react';
+import { RootState, setLastViewedSegmentId, useAppDispatch } from 'store';
 import * as components from '../components';
 import { Button, Container, Grid, Icon, Label, Link, List } from '../components';
 import * as utils from '../utils';

@@ -1,4 +1,4 @@
-import React from 'reactn';
+import React from 'react';
 import * as components from '../../components';
 import { Segment } from '../../types';
 import * as utils from '../../utils';

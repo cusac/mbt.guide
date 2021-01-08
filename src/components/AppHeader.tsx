@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
-import React from 'reactn';
-import { logout, RootState } from 'store_new';
+import React from 'react';
+import { logout, RootState } from 'store';
 import * as components from '../components';
 import * as serv from '../services';
 import * as utils from '../utils';

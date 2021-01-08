@@ -1,5 +1,5 @@
 import * as components from '../../components';
-import React from 'reactn';
+import React from 'react';
 import * as utils from '../../utils';
 
 const { Button, Grid, SegmentUI } = components;

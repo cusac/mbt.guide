@@ -1,5 +1,5 @@
 import * as errors from '../../errors';
-import React from 'reactn';
+import React from 'react';
 import Editor from './Editor';
 
 const Edit = ({ videoId, segmentId }: { videoId: string; segmentId: string }) => (

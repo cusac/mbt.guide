@@ -1,5 +1,5 @@
-import React from 'reactn';
-import { setLastViewedSegmentId, setPreviousView, useAppDispatch } from 'store_new';
+import React from 'react';
+import { setLastViewedSegmentId, setPreviousView, useAppDispatch } from 'store';
 import * as components from '../../components';
 import SegmentViewer from '../../components/SegmentViewer';
 import * as services from '../../services';

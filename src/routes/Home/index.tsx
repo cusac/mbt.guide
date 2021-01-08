@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
-import React from 'reactn';
-import { RootState, setPreviousView, useAppDispatch } from 'store_new';
+import React from 'react';
+import { RootState, setPreviousView, useAppDispatch } from 'store';
 import {
   PlaylistYTVideo,
   SearchYTVideo,

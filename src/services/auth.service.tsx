@@ -1,6 +1,6 @@
 import { AxiosPromise } from 'axios';
 import { httpClient as http } from '../services';
-import { LoginResponse } from '../store_new';
+import { LoginResponse } from '../store';
 import { AxiosResponseGeneric } from '../types';
 
 export const loginCall = ({

@@ -1,8 +1,8 @@
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import React from 'reactn';
-import { login } from 'store_new';
+import React from 'react';
+import { login } from 'store';
 import { firebase, firebaseAuth } from '../services';
 import { captureAndLog, toastError } from '../utils';
 

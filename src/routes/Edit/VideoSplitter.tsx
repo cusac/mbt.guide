@@ -3,14 +3,14 @@ import InputMask from 'react-input-mask';
 import { useSelector } from 'react-redux';
 import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
-import React from 'reactn';
+import React from 'react';
 import {
   createVideo,
   RootState,
   setLastViewedSegmentId,
   updateSegments,
   useAppDispatch,
-} from 'store_new';
+} from 'store';
 import Swal from 'sweetalert2';
 import { Segment, Video } from 'types';
 import { v4 as uuid } from 'uuid';
