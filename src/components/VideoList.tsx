@@ -1,6 +1,6 @@
 import React from 'react';
 import VideoItem from './VideoItem';
-import { YTVideo } from 'services/youtube.service';
+import { YTVideo } from 'types';
 
 const VideoList = ({
   videos,

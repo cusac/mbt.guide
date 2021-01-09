@@ -1,4 +1,4 @@
-import React from 'reactn';
+import React from 'react';
 
 type Props = {
   children: any;
@@ -15,7 +15,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
   }
 
   constructor(props: Props) {
-    super();
+    super(props);
     this.state = { error: undefined };
   }
 

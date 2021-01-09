@@ -1,17 +1,23 @@
-import * as store from '../store';
-import axios from 'axios';
+import axios, { AxiosPromise, AxiosRequestConfig } from 'axios';
+import { StoreBundle } from 'store';
 import { RESPONSE_MESSAGES } from '../config';
+import { AxiosResponseGeneric } from 'types';
 
 export type HttpClient = {
-  get: (url: string, params?: any, options?: any) => Promise<any>;
-  put: (url: string, payload?: any, options?: any) => Promise<any>;
-  post: (url: string, payload?: any, options?: any) => Promise<any>;
-  delete: (url: string, payload?: any, options?: any) => Promise<any>;
+  get: <T = any>(url: string, params?: any, options?: any) => AxiosPromise<T>;
+  put: <T = any>(url: string, payload?: any, options?: any) => AxiosPromise<T>;
+  post: <T = any>(url: string, payload?: any, options?: any) => Promise<AxiosResponseGeneric<T>>;
+  delete: <T = any>(url: string, payload?: any, options?: any) => AxiosPromise<T>;
 };
 
-const httpClient: HttpClient = {
+let store: StoreBundle;
+export const initHttpClientService = (storeBundle: StoreBundle): void => {
+  store = storeBundle;
+};
+
+export const httpClient: HttpClient = {
   get: function(url: string, params?: any, options?: any) {
-    let config = {
+    let config: AxiosRequestConfig = {
       method: 'GET',
       url: url,
       params: params,
@@ -20,13 +26,13 @@ const httpClient: HttpClient = {
     return axios(config)
       .then(function(response) {
         if (response.headers['x-access-token']) {
-          updateTokens(response.headers);
+          updateTokensFromHeaders(response.headers);
         }
         return response;
       })
       .catch(function(error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
-          (store as any).auth.useRefreshToken();
+          store.storeDispatch(store.useRefreshToken());
           return httpClient.get(url, params, options);
         } else {
           throw error;
@@ -44,13 +50,13 @@ const httpClient: HttpClient = {
     return axios(config)
       .then(function(response) {
         if (response.headers['x-access-token']) {
-          updateTokens(response.headers);
+          updateTokensFromHeaders(response.headers);
         }
         return response;
       })
       .catch(function(error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
-          (store as any).auth.useRefreshToken();
+          store.storeDispatch(store.useRefreshToken());
           return httpClient.put(url, payload, options);
         } else {
           throw error;
@@ -59,7 +65,7 @@ const httpClient: HttpClient = {
   },
 
   post: function(url: string, payload?: any, options?: any) {
-    let config = {
+    let config: AxiosRequestConfig = {
       method: 'POST',
       url: url,
       data: payload,
@@ -68,13 +74,13 @@ const httpClient: HttpClient = {
     return axios(config)
       .then(function(response) {
         if (response.headers['x-access-token']) {
-          updateTokens(response.headers);
+          updateTokensFromHeaders(response.headers);
         }
         return response;
       })
       .catch(function(error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
-          (store as any).auth.useRefreshToken();
+          store.storeDispatch(store.useRefreshToken());
           return httpClient.post(url, payload, options);
         } else {
           throw error;
@@ -92,13 +98,13 @@ const httpClient: HttpClient = {
     return axios(config)
       .then(function(response) {
         if (response.headers['x-access-token']) {
-          updateTokens(response.headers);
+          updateTokensFromHeaders(response.headers);
         }
         return response;
       })
       .catch(function(error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
-          (store as any).auth.useRefreshToken();
+          store.storeDispatch(store.useRefreshToken());
           return httpClient.delete(url, payload, options);
         } else {
           throw error;
@@ -107,12 +113,15 @@ const httpClient: HttpClient = {
   },
 };
 
-const updateTokens = (headers: { 'x-access-token': string; 'x-refresh-token': string }) => {
+const updateTokensFromHeaders = (headers: {
+  'x-access-token': string;
+  'x-refresh-token': string;
+}) => {
   const tokens = {
     accessToken: headers['x-access-token'],
     refreshToken: headers['x-refresh-token'],
   };
-  (store as any).auth.updateTokens(tokens);
+  store.storeDispatch(store.updateTokens(tokens));
 };
 
 export default httpClient;

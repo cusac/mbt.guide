@@ -1,5 +1,5 @@
 import React from 'react';
-import { YTVideo } from 'services/youtube.service';
+import { YTVideo } from 'types';
 
 const VideoItem = ({
   video,

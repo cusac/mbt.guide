@@ -1,5 +1,5 @@
 import { YouTubePlayer, Slider, Button, Popup } from '../components';
-import React from 'reactn';
+import React from 'react';
 // import type { PlayBackRate } from './YouTubePlayer';
 
 // const playBackRates: [PlayBackRate,PlayBackRate,PlayBackRate,PlayBackRate,PlayBackRate] = [0.25, 0.5, 1, 1.5, 2];

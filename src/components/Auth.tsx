@@ -1,13 +1,17 @@
-import React from 'reactn';
-import { firebase, firebaseAuth, auth } from '../services';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
+import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import React from 'react';
+import { login } from 'store';
+import { firebase, firebaseAuth } from '../services';
 import { captureAndLog, toastError } from '../utils';
 
 //TODO: Import test users
 const testUsers = ['test@superadmin.com', 'test@admin.com'];
 
 const Auth = ({ setLoading }: { setLoading: (arg0: boolean) => void }): any => {
+  const dispatch = useDispatch();
+
   const uiConfig = {
     callbacks: {
       signInSuccessWithAuthResult: async (result: any) => {
@@ -19,13 +23,13 @@ const Auth = ({ setLoading }: { setLoading: (arg0: boolean) => void }): any => {
 
         // TODO: Handle login errors
         try {
-          emailVerified && (await (auth as any).login({ idToken, displayName }));
+          emailVerified && (await dispatch(login({ idToken, displayName })));
         } catch (err) {
           if (err.data.message === 'Account is inactive.') {
             emailVerified = false;
             toastError('There was an error logging into your account.', err);
           } else {
-            captureAndLog('Auth', 'sendEmailVerification', err);
+            captureAndLog({ file: 'Auth', method: 'sendEmailVerification', err });
           }
         }
 
@@ -40,7 +44,7 @@ const Auth = ({ setLoading }: { setLoading: (arg0: boolean) => void }): any => {
             .auth()
             .currentUser.sendEmailVerification()
             .catch(function(err: any) {
-              captureAndLog('Auth', 'sendEmailVerification', err);
+              captureAndLog({ file: 'Auth', method: 'sendEmailVerification', err });
             });
         }
 
@@ -56,7 +60,7 @@ const Auth = ({ setLoading }: { setLoading: (arg0: boolean) => void }): any => {
           submitButton.onclick = async (e: any) => {
             if (testUsers.includes(emailInput.value)) {
               e.stopPropagation();
-              await (auth as any).login({ email: emailInput.value, password: passwordInput.value });
+              await dispatch(login({ email: emailInput.value, password: passwordInput.value }));
               setLoading(false);
             }
           };

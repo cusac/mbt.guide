@@ -1,5 +1,5 @@
 // https://refreshless.com/nouislider/import 'nouislider/distribute/nouislider.css';
-import React from 'reactn';
+import React from 'react';
 import * as components from '../components';
 
 const { Container, Header, Icon } = components;

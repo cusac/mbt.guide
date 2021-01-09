@@ -1,4 +1,4 @@
-import React from 'reactn';
+import React from 'react';
 import VideoSplitter from './VideoSplitter';
 
 const segmentColors = ['orange', 'green', 'yellow', 'blue', 'red', 'purple'];

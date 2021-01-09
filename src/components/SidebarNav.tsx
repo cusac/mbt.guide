@@ -1,9 +1,9 @@
 import React from 'react';
-import { Sidebar, Segment, Menu, Icon } from '../components';
+import { Sidebar, SegmentUI, Menu, Icon } from '../components';
 
 const SidebarNav = ({ children, test }: any) => {
   return (
-    <Sidebar.Pushable as={Segment}>
+    <Sidebar.Pushable as={SegmentUI}>
       <Sidebar
         // as={Segment}
         style={{ overflow: 'hidden' }}

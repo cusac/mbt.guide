@@ -5,14 +5,15 @@ import 'firebase/firestore';
 import axios from 'axios';
 import qs from 'querystring';
 import config, { resources } from '../config';
-import { youtube } from './youtube.service';
 import httpClient from './http-client.service';
-import auth from './auth.service';
-import video from './video.service';
+// import * as auth from './auth.service';
 import repository from './repository.service';
 import authInterceptor from './auth-interceptor.service';
 import stats from './stats.service';
 import search from './search.service';
+
+export * from './video.service';
+export * from './youtube.service';
 
 const app = firebase.initializeApp({
   apiKey: 'AIzaSyAn6loR5s_OC4aqA-nlMfpwOH2BogTM79g',
@@ -40,12 +41,10 @@ export {
   firebaseAuth,
   firebase,
   firebaseui,
-  youtube,
   httpClient,
   repository,
-  auth,
+  // auth,
   authInterceptor,
-  video,
   stats,
   search,
 };

@@ -1,8 +1,9 @@
-import React, { useGlobal } from 'reactn';
-import * as utils from '../utils';
+import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { logout, RootState } from 'store';
 import * as components from '../components';
 import * as serv from '../services';
-import * as store from '../store';
+import * as utils from '../utils';
 import { toastError } from '../utils';
 import logo from './logo-wide.png';
 import { SearchType } from './Searchbar';
@@ -25,12 +26,15 @@ const AppHeader = ({
   searchType: SearchType;
 }): any => {
   const [loading, setLoading] = React.useState(false);
-  const [currentUser] = (useGlobal as any)('user');
-  const [previousView] = (useGlobal as any)('previousView');
 
-  const logout = () => {
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const previousView = useSelector((state: RootState) => state.main.previousView);
+
+  const dispatch = useDispatch();
+
+  const logoutClick = async () => {
     try {
-      services.auth.logout();
+      await dispatch(logout());
     } catch (err) {
       toastError('There was an error logging out.', err);
     }
@@ -78,7 +82,7 @@ const AppHeader = ({
               <div>
                 {currentUser.email}
                 <br />
-                <Button onClick={() => logout()} style={{ margin: 5 }}>
+                <Button onClick={() => logoutClick()} style={{ margin: 5 }}>
                   Sign out
                 </Button>
               </div>

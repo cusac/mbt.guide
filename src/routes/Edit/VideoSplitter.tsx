@@ -1,35 +1,44 @@
-import * as components from '../../components';
-import React, { useGlobal } from 'reactn';
-import * as utils from '../../utils';
-import * as services from '../../services';
-import Swal from 'sweetalert2';
-import TagsInput from 'react-tagsinput';
-import 'react-tagsinput/react-tagsinput.css';
-import InputMask from 'react-input-mask';
-import { v4 as uuid } from 'uuid';
-import { differenceBy, uniq } from 'lodash';
-import { hasPermission, captureAndLog, toastError } from '../../utils';
-import { Video, VideoSegment, Tag } from '../../types';
-import VideoSegmentItem from './VideoSegmentItem';
-import AppHeader from '../../components/AppHeader';
-
-const {
+import {
+  AppHeader,
   Button,
+  Container,
+  Form,
   Grid,
+  Header,
   Icon,
   Input,
-  Segment,
-  Form,
-  TextArea,
-  Link,
-  Container,
   Label,
+  Link,
   Loading,
-  Header,
   Modal,
-} = components;
+  SegmentUI,
+  Slider,
+  TextArea,
+  YouTubePlayerWithControls,
+} from 'components';
+import { differenceBy, uniq } from 'lodash';
+import React from 'react';
+import InputMask from 'react-input-mask';
+import { useSelector } from 'react-redux';
+import TagsInput from 'react-tagsinput';
+import 'react-tagsinput/react-tagsinput.css';
+import { repository } from 'services';
+import {
+  createVideo,
+  RootState,
+  setLastViewedSegmentId,
+  updateSegments,
+  useAppDispatch,
+} from 'store';
+import Swal from 'sweetalert2';
+import { Segment, Video } from 'types';
+import { captureAndLog, hasPermission, history, timeFormat, toastError } from 'utils';
+import { v4 as uuid } from 'uuid';
+import VideoSegmentItem from './VideoSegmentItem';
 
 //TODO: Error Handling
+
+// TODO: Split into multiple components to fix typescript errors?
 
 const VideoSplitter = ({
   videoId,
@@ -42,12 +51,10 @@ const VideoSplitter = ({
   segmentColors: Array<string>;
   minSegmentDuration: number;
 }) => {
-  const [currentUser] = (useGlobal as any)('user');
-  const [currentUserScope] = (useGlobal as any)('scope');
   const [video, setVideo]: [Video | undefined, any] = React.useState();
   const [videoLoading, setVideoLoading]: [boolean, any] = React.useState(false);
-  const [segments, setSegments]: [VideoSegment[], any] = React.useState([]);
-  const [currentSegment, setCurrentSegment]: [VideoSegment | undefined, any] = React.useState();
+  const [segments, setSegments]: [Segment[], any] = React.useState([]);
+  const [currentSegment, setCurrentSegment]: [Segment | undefined, any] = React.useState();
   const [saveData, setSaveData]: [boolean, any] = React.useState(false);
   const [segmentsSaving, setSegmentsSaving]: [boolean, any] = React.useState(false);
   const [refresh, setRefresh]: [[boolean], any] = React.useState([true]);
@@ -56,13 +63,21 @@ const VideoSplitter = ({
   const [wait, setWait]: [boolean, any] = React.useState(true);
   const [error, setError] = React.useState();
 
-  const [lastViewedSegmentId, setLastViewedSegmentId] = (useGlobal as any)('lastViewedSegmentId');
+  // TODO: REPLACE WITH STORE AND CHECK "PROCESSED VIDEO" FILTER AND TEST STORE CALLS THROW eRRORS
+
+  const dispatch = useAppDispatch();
+
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const currentUserScope = useSelector((state: RootState) => state.auth.scope);
+  const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
 
   const startRef: any = React.createRef();
   const endRef: any = React.createRef();
 
   React.useEffect(() => {
-    segmentId && segmentId !== lastViewedSegmentId && setLastViewedSegmentId(segmentId);
+    segmentId &&
+      segmentId !== lastViewedSegmentId &&
+      dispatch(setLastViewedSegmentId({ lastViewedSegmentId: segmentId }));
   }, []);
 
   const updateSegmentAt = (index: any, data: any) => {
@@ -70,10 +85,10 @@ const VideoSplitter = ({
     Object.assign(newSegments[index], { ...data, pristine: false });
     startRef.current &&
       startRef.current.value &&
-      (startRef.current.value = utils.timeFormat.to(data.start as any));
+      (startRef.current.value = timeFormat.to(data.start as any));
     endRef.current &&
       endRef.current.value &&
-      (endRef.current.value = utils.timeFormat.to(data.end as any));
+      (endRef.current.value = timeFormat.to(data.end as any));
     setSegments(newSegments);
     setSaveData(true);
   };
@@ -98,12 +113,12 @@ const VideoSplitter = ({
   };
 
   const updateStart = (index: any, value: any) => {
-    const start = utils.timeFormat.from(value);
+    const start = timeFormat.from(value);
     start && updateSegmentAt(index, { start });
   };
 
   const updateEnd = (index: any, value: any) => {
-    const end = utils.timeFormat.from(value);
+    const end = timeFormat.from(value);
     end && updateSegmentAt(index, { end });
   };
 
@@ -116,7 +131,7 @@ const VideoSplitter = ({
       start: duration * 0.25,
       end: duration * 0.75,
       title: 'New segment title',
-      ownerEmail: currentUser.email,
+      ownerEmail: currentUser ? currentUser.email : '',
       tags: [],
       description: '',
       pristine: true,
@@ -142,18 +157,20 @@ const VideoSplitter = ({
           );
 
           setSegmentsSaving(true);
-          const response = await (services as any).video.updateVideoSegments({
-            videoId,
-            segments: newSegments,
-          });
+          const updatedSegments = await dispatch(
+            updateSegments({
+              videoId,
+              segments: newSegments,
+            })
+          );
 
           setSegmentsSaving(false);
-          setSegments(response.data);
+          setSegments(updatedSegments);
           Swal.fire('Deleted!', 'Your segment has been deleted.', 'success');
           goTo(`/edit/${(video as any).ytId}/${(newSegments[0] || {}).segmentId}`);
         } catch (err) {
           setSegmentsSaving(false);
-          captureAndLog('VideoSplitter', 'removeSegment', err);
+          captureAndLog({ file: 'VideoSplitter', method: 'removeSegment', err });
           toastError('There was an error deleting the segment.', err);
         }
       }
@@ -163,9 +180,14 @@ const VideoSplitter = ({
   const saveChanges = async () => {
     try {
       setSegmentsSaving(true);
-      const response = await (services as any).video.updateVideoSegments({ videoId, segments });
+      const updatedSegments = await dispatch(
+        updateSegments({
+          videoId,
+          segments,
+        })
+      );
       setSegmentsSaving(false);
-      setSegments(response.data);
+      setSegments(updatedSegments);
       Swal.fire({
         title: 'Saved!',
         text: 'Your changes have been saved.',
@@ -174,7 +196,7 @@ const VideoSplitter = ({
       });
     } catch (err) {
       setSegmentsSaving(false);
-      captureAndLog('VideoSplitter', 'saveChanges', err);
+      captureAndLog({ file: 'VideoSplitter', method: 'saveChanges', err });
       toastError('There was an error updating the segment.', err);
     }
 
@@ -184,14 +206,21 @@ const VideoSplitter = ({
   const saveIfNeeded = async () => {
     if (saveData) {
       try {
-        await (services as any).video.updateVideoSegments({ videoId, segments });
+        //TODO: make sure segments are updated in the local state so they change in the UI
+        await dispatch(
+          updateSegments({
+            videoId,
+            segments,
+          })
+        );
         setSaveData(false);
       } catch (err) {
+        //TODO: make sure error is thrown above
         if (err && err.message !== 'Network Error') {
           // Continue to attempt saving if the error is due to a bad network.
           setSaveData(false);
         }
-        captureAndLog('VideoSplitter', 'saveIfNeeded', err);
+        captureAndLog({ file: 'VideoSplitter', method: 'saveIfNeeded', err });
       }
     }
   };
@@ -201,7 +230,7 @@ const VideoSplitter = ({
       if (!videoLoading) {
         setVideoLoading(true);
         const [video] = (
-          await (services as any).repository.video.list({
+          await repository.video.list({
             ytId: videoId,
             $embed: ['segments.tags'],
           })
@@ -216,23 +245,23 @@ const VideoSplitter = ({
         }
       }
     } catch (err) {
-      captureAndLog('VideoSplitter', 'getVideoData', err);
+      captureAndLog({ file: 'VideoSplitter', method: 'getVideoData', err });
       setError(err);
     }
   };
 
   const goTo = (path: any) => {
-    utils.history.push(path);
+    history.push(path);
   };
 
   // Keep start/end input fields in sync
   React.useEffect(() => {
     currentSegment &&
       startRef.current &&
-      (startRef.current.value = utils.timeFormat.to((currentSegment as any).start));
+      (startRef.current.value = timeFormat.to((currentSegment as any).start));
     currentSegment &&
       endRef.current &&
-      (endRef.current.value = utils.timeFormat.to((currentSegment as any).end));
+      (endRef.current.value = timeFormat.to((currentSegment as any).end));
     // Update the state to make sure things are rendered properly
     setRefresh(refresh.slice());
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -272,9 +301,8 @@ const VideoSplitter = ({
 
   if (newVid) {
     !newVidCreating &&
-      (services as any).video
-        .create({ videoId })
-        .then(() => {
+      dispatch(createVideo({ videoId }))
+        .then(result => {
           setNewVid(false);
           setnewVidCreating(false);
           getVideoData(videoId);
@@ -352,7 +380,7 @@ const VideoSplitter = ({
           <Grid.Row>
             <Grid.Column width={11} style={{ padding: 0 }}>
               {video && (
-                <components.YouTubePlayerWithControls
+                <YouTubePlayerWithControls
                   duration={(video as any).duration}
                   end={currentSegment ? (currentSegment as any).end : (video as any).duration}
                   start={currentSegment ? (currentSegment as any).start : 0}
@@ -361,8 +389,8 @@ const VideoSplitter = ({
               )}
             </Grid.Column>
             <Grid.Column width={5}>
-              <Segment attached style={{ height: '385px', overflowY: 'auto' }}>
-                <Segment.Group>
+              <SegmentUI attached style={{ height: '385px', overflowY: 'auto' }}>
+                <SegmentUI.Group>
                   {(segments as any).map((data: any, i: any) => (
                     <VideoSegmentItem
                       key={data.segmentId}
@@ -373,8 +401,8 @@ const VideoSplitter = ({
                       canEdit={currentUser.email === data.ownerEmail}
                     />
                   ))}
-                </Segment.Group>
-              </Segment>
+                </SegmentUI.Group>
+              </SegmentUI>
               <Button.Group attached="bottom">
                 <Button onClick={addSegment}>
                   <Icon name="add" /> Add
@@ -401,9 +429,9 @@ const VideoSplitter = ({
               {!canEdit && (
                 <Grid.Row>
                   <Grid.Column>
-                    <Segment color="red" style={{ color: 'red' }}>
+                    <SegmentUI color="red" style={{ color: 'red' }}>
                       Only the creator of a segment can edit it.
-                    </Segment>
+                    </SegmentUI>
                   </Grid.Column>
                 </Grid.Row>
               )}
@@ -418,7 +446,7 @@ const VideoSplitter = ({
                       paddingTop: 50,
                     }}
                   >
-                    <components.Slider
+                    <Slider
                       disabled={!currentUser || !canEdit}
                       key={(segments as any).length} // causes slider recreation on segments count change
                       range={{ min: 0, max: duration }}
@@ -486,7 +514,7 @@ const VideoSplitter = ({
                     ref={startRef}
                     className="segment-time-field"
                     mask="99:99:99"
-                    defaultValue={utils.timeFormat.to((currentSegment as any).start)}
+                    defaultValue={timeFormat.to((currentSegment as any).start)}
                     onChange={(event: any) => updateStart(index, event.target.value)}
                   />{' '}
                   -{' '}
@@ -495,7 +523,7 @@ const VideoSplitter = ({
                     ref={endRef}
                     className="segment-time-field"
                     mask="99:99:99"
-                    defaultValue={utils.timeFormat.to((currentSegment as any).end)}
+                    defaultValue={timeFormat.to((currentSegment as any).end)}
                     onChange={(event: any) => updateEnd(index, event.target.value)}
                   />
                 </Grid.Column>
@@ -562,12 +590,12 @@ const VideoSplitter = ({
           <Grid>
             <Grid.Row>
               <Grid.Column verticalAlign="middle" width={16}>
-                <Segment style={{ padding: 10, marginTop: 20 }}>
+                <SegmentUI style={{ padding: 10, marginTop: 20 }}>
                   No segments yet.{' '}
                   <Link onClick={addSegment} to="">
                     Add the first one!
                   </Link>
-                </Segment>
+                </SegmentUI>
               </Grid.Column>
             </Grid.Row>
           </Grid>

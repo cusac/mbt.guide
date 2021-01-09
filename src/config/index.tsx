@@ -1,5 +1,5 @@
 import { Crud, Association } from '../utils/restful-resource-utility';
-import { Video } from '../services/video.service';
+import { Video, Segment } from '../types';
 
 export default {
   // serverURI: 'http://localhost:8080',
@@ -114,7 +114,7 @@ export type Repository = {
     segments: Association<any>;
   };
   video: Crud<Video> & {
-    segments: Association<any>;
+    segments: Association<Segment>;
   };
   segment: Crud<any> & {
     tags: Association<any>;
