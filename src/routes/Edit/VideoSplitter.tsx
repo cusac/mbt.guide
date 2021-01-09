@@ -169,7 +169,6 @@ const VideoSplitter = ({
           Swal.fire('Deleted!', 'Your segment has been deleted.', 'success');
           goTo(`/edit/${(video as any).ytId}/${(newSegments[0] || {}).segmentId}`);
         } catch (err) {
-          //TODO: make sure toast shows
           setSegmentsSaving(false);
           captureAndLog({ file: 'VideoSplitter', method: 'removeSegment', err });
           toastError('There was an error deleting the segment.', err);
@@ -196,7 +195,6 @@ const VideoSplitter = ({
         confirmButtonText: 'OK',
       });
     } catch (err) {
-      //TODO: make sure toast shows
       setSegmentsSaving(false);
       captureAndLog({ file: 'VideoSplitter', method: 'saveChanges', err });
       toastError('There was an error updating the segment.', err);
