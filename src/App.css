@@ -75,3 +75,8 @@
 .noUi-pips {
   height: 40px;
 }
+
+.search-bar.ui.segment{
+  margin: 20px;
+}
+

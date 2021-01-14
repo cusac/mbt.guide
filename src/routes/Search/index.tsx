@@ -1,5 +1,13 @@
 import React from 'react';
-import { setLastViewedSegmentId, setPreviousView, useAppDispatch } from 'store';
+import { useSelector } from 'react-redux';
+import {
+  RootState,
+  setLastViewedSegmentId,
+  setPreviousView,
+  setSearchType,
+  setShowSearchbar,
+  useAppDispatch,
+} from 'store';
 import * as components from '../../components';
 import SegmentViewer from '../../components/SegmentViewer';
 import * as services from '../../services';
@@ -12,7 +20,6 @@ const {
   Button,
   Link,
   Grid,
-  AppHeader,
   SegmentList,
   Header,
   Icon,
@@ -33,6 +40,8 @@ const Search = ({ segmentId }: { segmentId: string }) => {
   const [segmentSegmentMap, setSegmentSegmentMap] = React.useState({});
   const [filterProcessedSegments, setFilterProcessedSegments] = React.useState(false);
   const [segmentSegment, setSegmentSegment] = React.useState();
+
+  const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
 
   const dispatch = useAppDispatch();
 
@@ -66,9 +75,13 @@ const Search = ({ segmentId }: { segmentId: string }) => {
       }
     }
     // Hardcode a default segment for now
-    !segmentId && selectSegment('156b09ce-7dab-417a-8295-f6f86f1f504a');
-    fetchSegments();
+    const currentSegmentId = segmentId ? segmentId : lastViewedSegmentId;
+    !segmentId && selectSegment(currentSegmentId);
     dispatch(setPreviousView({ previousView: 'segment' }));
+    dispatch(setSearchType({ searchType: 'segment' }));
+    dispatch(setShowSearchbar({ showSearchbar: true }));
+    dispatch(setLastViewedSegmentId({ lastViewedSegmentId: currentSegmentId }));
+    fetchSegments();
   }, []);
 
   // Fetch the selected segment
@@ -132,10 +145,9 @@ const Search = ({ segmentId }: { segmentId: string }) => {
 
   return (
     <div>
-      <AppHeader onHandleSubmit={searchSegments} showSearchbar={true} searchType="segment" />
       <Grid>
         <Grid.Row>
-          <Grid.Column style={{ marginLeft: 30 }} width={11}>
+          <Grid.Column width={11}>
             {!loadingSelectedSegment ? (
               selectedSegment ? (
                 <SegmentViewer segment={selectedSegment} />

@@ -7,6 +7,7 @@ export type MainStoreAction = '';
 
 export type MainState = {
   previousView: 'video' | 'segment';
+  showSearchbar: boolean;
   errors: Record<MainStoreAction, Error | AxiosErrorData | undefined>;
 };
 
@@ -20,6 +21,7 @@ export type MainState = {
 const initalVideoState: MainState = {
   errors: {} as any,
   previousView: 'video',
+  showSearchbar: true,
 };
 
 export const mainStore = createSlice({
@@ -29,6 +31,10 @@ export const mainStore = createSlice({
     setPreviousView(state, { payload }: PayloadAction<{ previousView: 'video' | 'segment' }>) {
       const { previousView } = payload;
       state.previousView = previousView;
+    },
+    setShowSearchbar(state, { payload }: PayloadAction<{ showSearchbar: boolean }>) {
+      const { showSearchbar } = payload;
+      state.showSearchbar = showSearchbar;
     },
     setError(
       state,
@@ -44,7 +50,7 @@ export const mainStore = createSlice({
   },
 });
 
-export const { setPreviousView } = mainStore.actions;
+export const { setPreviousView, setShowSearchbar } = mainStore.actions;
 
 //#region Async Actions (Thunks)
 /**
