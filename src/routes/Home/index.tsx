@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import ResizeObserver from 'resize-observer-polyfill';
 import {
   RootState,
   setHasSearched,
@@ -46,6 +47,10 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [segmentVideo, setSegmentVideo] = React.useState(undefined as Video | undefined);
   // const [hasSearched, setHasSearched] = React.useState(false);
   const [matchedVids, setMatchedVids] = React.useState([] as Video[]);
+  const [videoColumnRef, setVideoColumnRef] = React.useState(
+    undefined as HTMLDivElement | undefined
+  );
+  const [columnHeight, setColumnHeight] = React.useState(1024);
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
@@ -146,6 +151,10 @@ const Home = ({ videoId }: { videoId: string }) => {
     return matchingVids;
   };
 
+  const videoColumnResizeObserver = new ResizeObserver(entries => {
+    setColumnHeight(entries[0].target.clientHeight);
+  });
+
   // Fetch the default list of videos from the MBT uploads list
   React.useEffect(() => {
     fetchDefaultVideos();
@@ -155,6 +164,12 @@ const Home = ({ videoId }: { videoId: string }) => {
     dispatch(setShowSearchbar({ showSearchbar: true }));
     dispatch(setLastViewedVideoId({ lastViewedVideoId: videoId }));
   }, []);
+
+  React.useEffect(() => {
+    if (videoColumnRef && videoColumnRef.clientHeight) {
+      videoColumnResizeObserver.observe(videoColumnRef);
+    }
+  }, [videoColumnRef]);
 
   // Fetch playlist videos when filter is toggled
   React.useEffect(() => {
@@ -316,7 +331,7 @@ const Home = ({ videoId }: { videoId: string }) => {
         <Grid.Row>
           <Grid.Column style={{ marginLeft: 5 }} width={11}>
             {!loadingSelectedVideo ? (
-              <div>
+              <div ref={setVideoColumnRef as any}>
                 {selectedVideo ? (
                   <div>
                     <div className="ui embed">
@@ -505,10 +520,12 @@ const Home = ({ videoId }: { videoId: string }) => {
                         </Card.Header>
                       </Card.Content>
                     </Card>
-                    <VideoList
-                      videos={videos as any}
-                      handleVideoSelect={(video: YTVideo) => video && selectVideo(video.id)}
-                    />
+                    <div style={{ overflow: 'auto', maxHeight: columnHeight }}>
+                      <VideoList
+                        videos={videos as any}
+                        handleVideoSelect={(video: YTVideo) => video && selectVideo(video.id)}
+                      />
+                    </div>
                   </div>
                 ) : (
                   <h2 style={{ color: 'black' }}>
