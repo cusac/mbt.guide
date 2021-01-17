@@ -57,7 +57,7 @@ const Layout = ({ children }: { children: any }) => {
       </div>
       <div className="column" style={{ flex: 1 }}>
         <AppHeader />
-        {children}
+        <div className="layout-content">{children}</div>
       </div>
     </div>
   );

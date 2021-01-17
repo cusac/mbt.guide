@@ -144,7 +144,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
   };
 
   return (
-    <div style={{ height: 135 }}>
+    <div>
       <Grid>
         <Grid.Row>
           <Grid.Column width={11}>
