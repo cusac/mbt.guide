@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import ResizeObserver from 'resize-observer-polyfill';
 import {
   RootState,
   setLastViewedSegmentId,
@@ -32,7 +33,6 @@ const {
 
 const Search = ({ segmentId }: { segmentId: string }) => {
   const [error, setError] = React.useState();
-  const [loadingSegments, setLoadingSegments] = React.useState(true);
   const [loadingSelectedSegment, setLoadingSelectedSegment] = React.useState(true);
   const [segments, setSegments] = React.useState(undefined as Array<any> | void);
   const [mySegments, setMySegments] = React.useState(undefined as Array<any> | void);
@@ -40,8 +40,14 @@ const Search = ({ segmentId }: { segmentId: string }) => {
   const [segmentSegmentMap, setSegmentSegmentMap] = React.useState({});
   const [filterProcessedSegments, setFilterProcessedSegments] = React.useState(false);
   const [segmentSegment, setSegmentSegment] = React.useState();
+  const [videoColumnRef, setVideoColumnRef] = React.useState(
+    undefined as HTMLDivElement | undefined
+  );
+  const [columnHeight, setColumnHeight] = React.useState(1024);
 
   const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
+  const loadingSegments = useSelector((state: RootState) => state.video.loadingSegments);
+  const searchSegmentsResult = useSelector((state: RootState) => state.video.searchSegmentsResult);
 
   const dispatch = useAppDispatch();
 
@@ -50,11 +56,15 @@ const Search = ({ segmentId }: { segmentId: string }) => {
     utils.history.push(`/search/${selectSegmentId}`);
   };
 
+  const videoColumnResizeObserver = new ResizeObserver(entries => {
+    setColumnHeight(entries[0].target.clientHeight);
+  });
+
   // Fetch the default list of segments from the most recent segments
   React.useEffect(() => {
     async function fetchSegments() {
       try {
-        setLoadingSegments(true);
+        // setLoadingSegments(true);
 
         const segments = (
           await (services as any).repository.segment.list({
@@ -71,7 +81,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
           err
         );
       } finally {
-        setLoadingSegments(false);
+        // setLoadingSegments(false);
       }
     }
     // Hardcode a default segment for now
@@ -83,6 +93,16 @@ const Search = ({ segmentId }: { segmentId: string }) => {
     dispatch(setLastViewedSegmentId({ lastViewedSegmentId: currentSegmentId }));
     fetchSegments();
   }, []);
+
+  React.useEffect(() => {
+    if (videoColumnRef && videoColumnRef.clientHeight) {
+      videoColumnResizeObserver.observe(videoColumnRef);
+    }
+  }, [videoColumnRef]);
+
+  React.useEffect(() => {
+    searchSegmentsResult && setSegments(searchSegmentsResult);
+  }, [searchSegmentsResult]);
 
   // Fetch the selected segment
   React.useEffect(() => {
@@ -126,22 +146,22 @@ const Search = ({ segmentId }: { segmentId: string }) => {
   //   : '';
 
   // Search segments
-  const searchSegments = async (term: any) => {
-    try {
-      setLoadingSegments(true);
-      const segments = (await services.search.searchSegments(term)).data;
+  // const searchSegments = async (term: any) => {
+  //   try {
+  //     setLoadingSegments(true);
+  //     const segments = (await services.search.searchSegments(term)).data;
 
-      setSegments(segments);
-    } catch (err) {
-      captureAndLog({ file: 'Search', method: 'searchSegments', err });
-      toastError(
-        'There was an error fetching segment data. Please refresh the page and try again.',
-        err
-      );
-    } finally {
-      setLoadingSegments(false);
-    }
-  };
+  //     setSegments(segments);
+  //   } catch (err) {
+  //     captureAndLog({ file: 'Search', method: 'searchSegments', err });
+  //     toastError(
+  //       'There was an error fetching segment data. Please refresh the page and try again.',
+  //       err
+  //     );
+  //   } finally {
+  //     setLoadingSegments(false);
+  //   }
+  // };
 
   return (
     <div>
@@ -150,7 +170,9 @@ const Search = ({ segmentId }: { segmentId: string }) => {
           <Grid.Column width={11}>
             {!loadingSelectedSegment ? (
               selectedSegment ? (
-                <SegmentViewer segment={selectedSegment} />
+                <div ref={setVideoColumnRef as any}>
+                  <SegmentViewer segment={selectedSegment} />
+                </div>
               ) : (
                 <h2 style={{ color: 'black' }}>Segment not found. </h2>
               )
@@ -162,7 +184,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
             {!loadingSegments ? (
               <div>
                 {segments && segments.length > 0 ? (
-                  <div>
+                  <div style={{ overflow: 'auto', maxHeight: columnHeight }}>
                     <SegmentList
                       segments={segments as any}
                       handleSegmentSelect={(segment: any) =>

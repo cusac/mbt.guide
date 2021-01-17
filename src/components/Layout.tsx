@@ -36,7 +36,12 @@ const Layout = ({ children }: { children: any }) => {
               <Icon name="film" />
               Videos
             </Menu.Item>
-            <Menu.Item as="a">
+            <Menu.Item
+              as="a"
+              href="https://mbt-guide-admin.netlify.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Grid>
                 <Grid.Row>
                   <Grid.Column width={8} floated="right">
