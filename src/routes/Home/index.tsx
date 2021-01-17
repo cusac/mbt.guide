@@ -36,7 +36,6 @@ const {
 
 const Home = ({ videoId }: { videoId: string }) => {
   const [error, setError] = React.useState();
-  // const [loadingVideos, setLoadingVideos] = React.useState(true);
   const [loadingSelectedVideo, setLoadingSelectedVideo] = React.useState(true);
   const [loadingSegments, setLoadingSegments] = React.useState(true);
   const [segments, setSegments] = React.useState(undefined as Segment[] | void);
@@ -45,7 +44,6 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [videos, setVideos] = React.useState([] as YTVideo[]);
   const [filterProcessedVideos, setFilterProcessedVideos] = React.useState(false);
   const [segmentVideo, setSegmentVideo] = React.useState(undefined as Video | undefined);
-  // const [hasSearched, setHasSearched] = React.useState(false);
   const [matchedVids, setMatchedVids] = React.useState([] as Video[]);
   const [videoColumnRef, setVideoColumnRef] = React.useState(
     undefined as HTMLDivElement | undefined
@@ -53,7 +51,6 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [columnHeight, setColumnHeight] = React.useState(1024);
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
-  const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
   const searchYTVideosResult = useSelector((state: RootState) => state.video.searchYTVideosResult);
   const hasSearched = useSelector((state: RootState) => state.video.hasSearched);
   const loadingVideos = useSelector((state: RootState) => state.video.loadingVideos);
@@ -70,7 +67,7 @@ const Home = ({ videoId }: { videoId: string }) => {
       dispatch(setLoadingVideos({ loadingVideos: true }));
 
       // We're piggybacking this view to update the stats for now
-      await (services as any).stats.logStats();
+      await services.stats.logStats();
 
       let defaultVids: YTVideo[] = [];
       let pageToken = '';
@@ -278,47 +275,10 @@ const Home = ({ videoId }: { videoId: string }) => {
       }
     };
 
-    console.log('HAS SEARCHED:', hasSearched, searchYTVideosResult);
     hasSearched && processSearchResults();
   }, [searchYTVideosResult]);
 
   const videoSrc = selectedVideo ? `https://www.youtube.com/embed/${selectedVideo.id}` : '';
-
-  // Search youtube videos from the MBT channel
-  // const searchVideos = async (term: string) => {
-  //   try {
-  //     setLoadingVideos(true);
-  //     const { data } = await youtubeCall<SearchYTVideo>({
-  //       endpoint: 'search',
-  //       params: {
-  //         q: term,
-  //       },
-  //     });
-
-  //     // Filter out any videos that don't belong to the MBT channel
-  //     const ytVids = data.items.filter(v => v.snippet.channelId === channelId).map(toYTVid);
-  //     const mbtVids = await fetchMatchingVideos(ytVids);
-
-  //     // setSearchResults(ytVids);
-  //     setMatchedVids(mbtVids);
-  //     setHasSearched(true);
-
-  //     if (filterProcessedVideos) {
-  //       const filteredVids = filterVidsWithSegments(ytVids, mbtVids);
-  //       setVideos(filteredVids);
-  //     } else {
-  //       setVideos(ytVids);
-  //     }
-  //   } catch (err) {
-  //     captureAndLog({ file: 'Home', method: 'searchVideos', err });
-  //     toastError(
-  //       'There was an error fetching youtube data. Please refresh the page and try again.',
-  //       err
-  //     );
-  //   } finally {
-  //     setLoadingVideos(false);
-  //   }
-  // };
 
   const createVideo = (event: any) => {
     event.preventDefault();
