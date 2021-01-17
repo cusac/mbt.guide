@@ -4,6 +4,7 @@ import ResizeObserver from 'resize-observer-polyfill';
 import {
   RootState,
   setLastViewedSegmentId,
+  setLoadingSegments,
   setPreviousView,
   setSearchType,
   setShowSearchbar,
@@ -15,31 +16,13 @@ import * as services from '../../services';
 import * as utils from '../../utils';
 import { captureAndLog, toastError } from '../../utils';
 
-const channelId = 'UCYwlraEwuFB4ZqASowjoM0g';
-
-const {
-  Button,
-  Link,
-  Grid,
-  SegmentList,
-  Header,
-  Icon,
-  Container,
-  Divider,
-  Loading,
-  Checkbox,
-  Card,
-} = components;
+const { Grid, SegmentList, Loading } = components;
 
 const Search = ({ segmentId }: { segmentId: string }) => {
   const [error, setError] = React.useState();
   const [loadingSelectedSegment, setLoadingSelectedSegment] = React.useState(true);
   const [segments, setSegments] = React.useState(undefined as Array<any> | void);
-  const [mySegments, setMySegments] = React.useState(undefined as Array<any> | void);
   const [selectedSegment, setSelectedSegment] = React.useState();
-  const [segmentSegmentMap, setSegmentSegmentMap] = React.useState({});
-  const [filterProcessedSegments, setFilterProcessedSegments] = React.useState(false);
-  const [segmentSegment, setSegmentSegment] = React.useState();
   const [videoColumnRef, setVideoColumnRef] = React.useState(
     undefined as HTMLDivElement | undefined
   );
@@ -64,7 +47,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
   React.useEffect(() => {
     async function fetchSegments() {
       try {
-        // setLoadingSegments(true);
+        dispatch(setLoadingSegments({ loadingSegments: true }));
 
         const segments = (
           await (services as any).repository.segment.list({
@@ -81,7 +64,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
           err
         );
       } finally {
-        // setLoadingSegments(false);
+        dispatch(setLoadingSegments({ loadingSegments: false }));
       }
     }
     // Hardcode a default segment for now
@@ -130,38 +113,6 @@ const Search = ({ segmentId }: { segmentId: string }) => {
     }
     segmentId && fetchSelectedSegment();
   }, [segmentId]);
-
-  // React.useEffect(() => {
-  //   setSegments(segmentSegment ? (segmentSegment as any).segments : []);
-  // }, [segmentSegment]);
-
-  // React.useEffect(() => {
-  //   segments &&
-  //     setMySegments(segments.filter(s => currentUser && s.ownerEmail === currentUser.email));
-  // }, [segments, currentUser]);
-
-  // const segmentSrc = selectedSegment
-  //   ? `https://www.youtube.com/embed/${(selectedSegment as any).id.segmentId ||
-  //       (selectedSegment as any).id}`
-  //   : '';
-
-  // Search segments
-  // const searchSegments = async (term: any) => {
-  //   try {
-  //     setLoadingSegments(true);
-  //     const segments = (await services.search.searchSegments(term)).data;
-
-  //     setSegments(segments);
-  //   } catch (err) {
-  //     captureAndLog({ file: 'Search', method: 'searchSegments', err });
-  //     toastError(
-  //       'There was an error fetching segment data. Please refresh the page and try again.',
-  //       err
-  //     );
-  //   } finally {
-  //     setLoadingSegments(false);
-  //   }
-  // };
 
   return (
     <div>
