@@ -44,7 +44,7 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [mySegments, setMySegments] = React.useState(undefined as Array<Segment> | void);
   const [selectedVideo, setSelectedVideo] = React.useState(undefined as YTVideo | undefined);
   const [videos, setVideos] = React.useState([] as YTVideo[]);
-  const [filterProcessedVideos, setFilterProcessedVideos] = React.useState(false);
+  const [filterProcessedVideos, setFilterProcessedVideos] = React.useState(true);
   const [segmentVideo, setSegmentVideo] = React.useState(undefined as Video | undefined);
   const [hasSearched, setHasSearched] = React.useState(false);
   const [searchResults, setSearchResults] = React.useState([] as YTVideo[]);

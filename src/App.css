@@ -75,3 +75,31 @@
 .noUi-pips {
   height: 40px;
 }
+
+.react-tagsinput-input {
+  background: transparent;
+  border: 0;
+  color: #444;
+  font-family: sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 6px;
+  margin-top: 1px;
+  padding: 5px;
+  width: 300px;
+}
+
+.noUi-target {
+  margin-top: 5px !important;
+}
+
+.noUi-handle {
+  background: #aaa;
+}
+
+.noUi-horizontal .noUi-tooltip {
+  -webkit-transform: translate(-50%, 0);
+  transform: translate(-50%, 0);
+  left: 50%;
+  bottom: -130%;
+}

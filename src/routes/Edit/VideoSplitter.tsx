@@ -128,8 +128,8 @@ const VideoSplitter = ({
     newSegments.push({
       segmentId: newId,
       video: (video as any)._id,
-      start: duration * 0.25,
-      end: duration * 0.75,
+      start: 0, //duration * 0.25,
+      end: duration, // * 0.75,
       title: 'New segment title',
       ownerEmail: currentUser ? currentUser.email : '',
       tags: [],
@@ -404,7 +404,7 @@ const VideoSplitter = ({
                 </SegmentUI.Group>
               </SegmentUI>
               <Button.Group attached="bottom">
-                <Button onClick={addSegment}>
+                <Button onClick={addSegment} color="blue">
                   <Icon name="add" /> Add
                 </Button>
                 <Button

@@ -1,0 +1,34 @@
+Changelog
+==================================================
+Sanjeev
+==================================================
+
+mbt.guide
+https://github.com/cusac/mbt.guide
+
+===================================================
+16-Jan-2021
+===================================================
+
+Default for Hide processed video checkbox is checked.
+File: src/routes/Home/index.tsx Line:47
+
+Add button is now blue
+File: src/routes/Edit/VideoSplitter.tsx Line:407
+
+Icon for a segment changes to green when active
+File: src/routes/Edit/VideoSegmentItem.tsx Line:36
+
+Tag input width is now 200px
+File : src/App.css Line:79
+
+===================================================
+18-Jan-2021
+===================================================
+
+On add segment, slider is set to full range
+File: src/routes/Edit/VideoSplitter.tsx Line:131-132
+
+Slider time will not cover the control buttons
+File : src/App.css Line:92-105
+
