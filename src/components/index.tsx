@@ -31,3 +31,4 @@ export { default as SegmentList } from './SegmentList';
 export { default as AppHeader } from './AppHeader';
 export { default as Loading } from './Loading';
 export { default as YouTubePlayerWithControls } from './YouTubePlayerWithControls';
+export { default as LandingPage } from './LandingPage';

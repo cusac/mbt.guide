@@ -125,10 +125,13 @@ const VideoSplitter = ({
   const addSegment = async () => {
     const newSegments: any = (segments as any).slice();
     const newId = uuid();
+    const hasNoCurSeg = currentSegment === undefined;
+    const lastSegEnd = hasNoCurSeg ? '0' : (currentSegment as any).end;
+
     newSegments.push({
       segmentId: newId,
       video: (video as any)._id,
-      start: 0, //duration * 0.25,
+      start: Number(lastSegEnd), //duration * 0.25,
       end: duration, // * 0.75,
       title: 'New segment title',
       ownerEmail: currentUser ? currentUser.email : '',
@@ -344,7 +347,6 @@ const VideoSplitter = ({
   }
 
   const { duration } = video;
-
   const canEdit =
     currentSegment && currentUser
       ? currentUser.email === (currentSegment as any).ownerEmail ||
@@ -527,6 +529,14 @@ const VideoSplitter = ({
                     onChange={(event: any) => updateEnd(index, event.target.value)}
                   />
                 </Grid.Column>
+                <Grid.Column
+                  verticalAlign="middle"
+                  style={{ textAlign: 'right', color: 'grey' }}
+                  width={6}
+                >
+                  <Icon name="help circle" />
+                  Tip : Type e.g. 012030 without : or spaces to enter 01:20:30.
+                </Grid.Column>
               </Grid.Row>
               <Grid.Row>
                 <Grid.Column verticalAlign="top" style={{ textAlign: 'right' }} width={2}>
@@ -582,6 +592,12 @@ const VideoSplitter = ({
                       onChange={(tags: any) => updateTags(index, tags, 1)}
                     />
                   </div>
+                  <p>
+                    <br />
+                    <Icon name="help circle" />
+                    Tip : Type a phrase and press Tab key to commit.
+                    <br />
+                  </p>
                 </Grid.Column>
               </Grid.Row>
             </Grid>

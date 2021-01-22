@@ -17,6 +17,8 @@ import { toYTVid, youtubeCall } from '../../services/youtube.service';
 import { assertModelArrayType } from '../../types/model.type';
 import * as utils from '../../utils';
 import { captureAndLog, toastError } from '../../utils';
+import { useState } from 'react';
+import LandingPage from '../../components/LandingPage';
 
 const channelId = 'UCYwlraEwuFB4ZqASowjoM0g';
 
@@ -52,6 +54,7 @@ const Home = ({ videoId }: { videoId: string }) => {
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
+  const [readMore, setReadMore] = useState(false);
 
   const dispatch = useAppDispatch();
 
@@ -287,6 +290,17 @@ const Home = ({ videoId }: { videoId: string }) => {
     utils.history.push(`/edit/${videoId}`);
   };
 
+  const descText = selectedVideo ? (selectedVideo as any).snippet.description : 'None';
+  const descPreview = descText.substring(0, 150) + ' ...';
+  const extraContent = (
+    <div>
+      <p className="extra-content">{descText}</p>
+    </div>
+  );
+
+  const moreButtonName = readMore ? 'Collapse' : 'Read More';
+  const isLandingPage = selectedVideo ? selectedVideo.id === '_ok27SPHhwA' : false;
+
   return (
     <div>
       <AppHeader
@@ -300,30 +314,52 @@ const Home = ({ videoId }: { videoId: string }) => {
             {!loadingSelectedVideo ? (
               <div>
                 {selectedVideo ? (
-                  <div>
-                    <div className="ui embed">
-                      <iframe src={videoSrc} allowFullScreen title="Video player" />
+                  isLandingPage ? (
+                    <LandingPage user={currentUser ? (currentUser as any).firstName : 'Guest'} />
+                  ) : (
+                    <div>
+                      <div className="ui embed">
+                        <iframe src={videoSrc} allowFullScreen title="Video player" />
+                      </div>
+                      <div className="videodesc">
+                        <h3>{(selectedVideo as any).snippet.title}</h3>
+
+                        <p>{'Date Published : ' + (selectedVideo as any).snippet.publishedAt}</p>
+                        <p>
+                          {!readMore && descPreview}
+                          {readMore && extraContent}
+                          <Button
+                            icon
+                            labelPosition={readMore ? 'left' : 'right'}
+                            color="teal"
+                            floated="right"
+                            size="mini"
+                            onClick={() => {
+                              setReadMore(!readMore);
+                            }}
+                          >
+                            {moreButtonName}
+                            <Icon className={readMore ? 'left arrow' : 'right arrow'} />
+                          </Button>
+                        </p>
+                      </div>
                     </div>
-                    <div className="ui segment">
-                      <h4 className="ui header">{(selectedVideo as any).snippet.title}</h4>
-                      <p>{(selectedVideo as any).snippet.description}</p>
-                    </div>
-                  </div>
+                  )
                 ) : (
                   <div>Select a video</div>
                 )}
                 <br />
-
-                <Button
-                  color="teal"
-                  size="big"
-                  onClick={() => utils.history.push(`/edit/${videoId}`)}
-                >
-                  <Icon name="plus" /> New Segment
-                </Button>
-
+                {!isLandingPage && (
+                  <Button
+                    color="teal"
+                    size="big"
+                    onClick={() => utils.history.push(`/edit/${videoId}`)}
+                  >
+                    <Icon name="plus" /> New Segment
+                  </Button>
+                )}
                 <br />
-                {!loadingSegments ? (
+                {!loadingSegments && !isLandingPage ? (
                   <div>
                     {currentUser && (
                       <div>
@@ -461,7 +497,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                     )}
                   </div>
                 ) : (
-                  <Loading>Loading segments...</Loading>
+                  !isLandingPage && <Loading>Loading segments...</Loading>
                 )}
               </div>
             ) : (
@@ -493,10 +529,13 @@ const Home = ({ videoId }: { videoId: string }) => {
                     />
                   </div>
                 ) : (
-                  <h2 style={{ color: 'black' }}>
-                    No videos found. Try searching searching for something less specific or if
-                    searching for a title make sure the title is exact.{' '}
-                  </h2>
+                  <div>
+                    <h2 style={{ color: 'black' }}>No videos found. </h2>
+                    <h3 style={{ color: 'grey' }}>
+                      Try searching for something less specific or if searching for a title make
+                      sure the title is exact. Try unchecking the Hide Processed Videos checkbox.{' '}
+                    </h3>
+                  </div>
                 )}
               </div>
             ) : (

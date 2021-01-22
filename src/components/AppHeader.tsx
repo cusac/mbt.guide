@@ -5,8 +5,9 @@ import * as components from '../components';
 import * as serv from '../services';
 import * as utils from '../utils';
 import { toastError } from '../utils';
-import logo from './logo-wide.png';
+import logo from '../images/logo-wide.png';
 import { SearchType } from './Searchbar';
+import { Image } from 'semantic-ui-react';
 
 const { Button, Grid, Searchbar, Icon, Auth, Header, Menu } = components;
 
@@ -58,15 +59,16 @@ const AppHeader = ({
     <Grid className="AppHeader">
       <Grid.Row style={{ paddingBottom: 0 }}>
         <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
-          <img
+          <Image
             src={logo}
             className="logo"
             alt="My Big TOE guide"
-            onClick={() => utils.history.push(`/`)}
+            //onClick={() => utils.history.push(`/`)}
+            href="https://mbt-guide.netlify.app/"
           />
         </Grid.Column>
 
-        <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={8}>
+        <Grid.Column style={{ color: 'black ' }} verticalAlign="middle" width={8}>
           {showSearchbar && <Searchbar onHandleSubmit={onHandleSubmit} searchType={searchType} />}
           {!showSearchbar && (
             <Button onClick={() => backToPreviousView()}>
@@ -80,9 +82,11 @@ const AppHeader = ({
           <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
             {currentUser ? (
               <div>
+                {'Welcome ' + currentUser.firstName + ' ' + currentUser.lastName + ' !'}
+                <br />
                 {currentUser.email}
                 <br />
-                <Button onClick={() => logoutClick()} style={{ margin: 5 }}>
+                <Button onClick={() => logoutClick()} style={{ margin: 10 }}>
                   Sign out
                 </Button>
               </div>
