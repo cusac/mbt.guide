@@ -31,6 +31,16 @@
 
 .AppHeader {
   background-color: #282c34;
+  height: 135px;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 300px; /* this is the size of the side nav */
+  z-index: 100;
+}
+
+.layout-content {
+  padding-top: 135px;
 }
 
 .video-item {
@@ -75,3 +85,8 @@
 .noUi-pips {
   height: 40px;
 }
+
+.search-bar.ui.segment{
+  margin: 20px;
+}
+
