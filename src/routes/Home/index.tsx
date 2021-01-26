@@ -290,7 +290,7 @@ const Home = ({ videoId }: { videoId: string }) => {
     utils.history.push(`/edit/${videoId}`);
   };
 
-  const descText = selectedVideo ? (selectedVideo as any).snippet.description : 'None';
+  const descText = selectedVideo ? selectedVideo.snippet.description : 'None';
   const descPreview = descText.substring(0, 150) + ' ...';
   const extraContent = (
     <div>
@@ -300,6 +300,8 @@ const Home = ({ videoId }: { videoId: string }) => {
 
   const moreButtonName = readMore ? 'Collapse' : 'Read More';
   const isLandingPage = selectedVideo ? selectedVideo.id === '_ok27SPHhwA' : false;
+  let datePublished = selectedVideo ? selectedVideo.snippet.publishedAt.toString() : 'NA';
+  datePublished = datePublished.replace('T', ' Time: ').replace('Z', '');
 
   return (
     <div>
@@ -324,7 +326,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                       <div className="videodesc">
                         <h3>{(selectedVideo as any).snippet.title}</h3>
 
-                        <p>{'Date Published : ' + (selectedVideo as any).snippet.publishedAt}</p>
+                        <p>{'Date Published : ' + datePublished}</p>
                         <p>
                           {!readMore && descPreview}
                           {readMore && extraContent}

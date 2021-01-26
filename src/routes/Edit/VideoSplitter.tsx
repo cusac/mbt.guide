@@ -531,7 +531,7 @@ const VideoSplitter = ({
                 </Grid.Column>
                 <Grid.Column
                   verticalAlign="middle"
-                  style={{ textAlign: 'right', color: 'grey' }}
+                  style={{ textAlign: 'right', color: 'black' }}
                   width={6}
                 >
                   <Icon name="help circle" />
