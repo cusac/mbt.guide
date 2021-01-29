@@ -127,7 +127,9 @@ const VideoSplitter = ({
     const newSegments: any = (segments as any).slice();
     const newId = uuid();
     const hasNoCurSeg = currentSegment === undefined;
-    const lastSegEnd = hasNoCurSeg ? '0' : (currentSegment as any).end;
+    let lastSegEnd = hasNoCurSeg ? 0 : currentSegment?.end;
+    // This prevents an error that occurs when start === end
+    lastSegEnd = lastSegEnd === duration ? lastSegEnd - 1 : lastSegEnd;
 
     newSegments.push({
       segmentId: newId,
