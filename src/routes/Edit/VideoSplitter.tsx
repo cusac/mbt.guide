@@ -132,6 +132,7 @@ const VideoSplitter = ({
     newSegments.push({
       segmentId: newId,
       video: (video as any)._id,
+      // TODO: Make start and end profile settings. Below is volunteer specific
       start: Number(lastSegEnd), //duration * 0.25,
       end: duration, // * 0.75,
       title: 'New segment title',

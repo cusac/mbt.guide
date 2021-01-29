@@ -297,6 +297,8 @@ const Home = ({ videoId }: { videoId: string }) => {
   );
 
   const moreButtonName = readMore ? 'Collapse' : 'Read More';
+  // TODO: Update landing page to default to general users
+  // TODO: Make sure landing page does not override the default video (_ok27SPHhwA)
   const isLandingPage = selectedVideo ? selectedVideo.id === '_ok27SPHhwA' : false;
   let datePublished = selectedVideo ? selectedVideo.snippet.publishedAt.toString() : 'NA';
   datePublished = datePublished.replace('T', ' Time: ').replace('Z', '');
