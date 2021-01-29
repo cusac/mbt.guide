@@ -1,5 +1,4 @@
 import {
-  AppHeader,
   Button,
   Container,
   Form,
@@ -27,6 +26,7 @@ import {
   createVideo,
   RootState,
   setLastViewedSegmentId,
+  setShowSearchbar,
   updateSegments,
   useAppDispatch,
 } from 'store';
@@ -75,6 +75,7 @@ const VideoSplitter = ({
   const endRef: any = React.createRef();
 
   React.useEffect(() => {
+    dispatch(setShowSearchbar({ showSearchbar: false }));
     segmentId &&
       segmentId !== lastViewedSegmentId &&
       dispatch(setLastViewedSegmentId({ lastViewedSegmentId: segmentId }));
@@ -278,6 +279,7 @@ const VideoSplitter = ({
   }, [saveData]);
 
   React.useEffect(() => {
+    dispatch(setLastViewedSegmentId({ lastViewedSegmentId: segmentId }));
     segments && setCurrentSegment((segments as any).find((s: any) => s.segmentId === segmentId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [segmentId, segments]);
@@ -285,7 +287,6 @@ const VideoSplitter = ({
   if (!currentUser) {
     return (
       <div>
-        <AppHeader />
         <Header style={{ marginTop: 50 }}>
           <h1>You must sign in to create segments!</h1>
         </Header>
@@ -296,7 +297,6 @@ const VideoSplitter = ({
   if (error) {
     return (
       <div>
-        <AppHeader />
         <Header>There was an error loading the video. Please refresh the page.</Header>
       </div>
     );
@@ -318,7 +318,6 @@ const VideoSplitter = ({
     !newVidCreating && setnewVidCreating(true);
     return (
       <div>
-        <AppHeader />
         <Loading>Creating video...</Loading>
       </div>
     );
@@ -328,7 +327,6 @@ const VideoSplitter = ({
     getVideoData(videoId);
     return (
       <div>
-        <AppHeader />
         <Loading>Loading video...</Loading>
       </div>
     );
@@ -340,7 +338,6 @@ const VideoSplitter = ({
     }, 500);
     return (
       <div>
-        <AppHeader />
         <Loading>Loading player...</Loading>
       </div>
     );
@@ -362,7 +359,6 @@ const VideoSplitter = ({
   if (currentSegment && index < 0) {
     return (
       <div>
-        <AppHeader />
         <Header>Loading segment...</Header>
       </div>
     );
@@ -370,7 +366,6 @@ const VideoSplitter = ({
 
   return (
     <div>
-      <AppHeader currentVideoId={videoId} currentSegmentId={segmentId} />
       <Container style={{ marginTop: 20 }}>
         <Modal open={segmentsSaving} size="mini">
           <Container style={{ height: 150, marginTop: 50 }} textAlign="center">

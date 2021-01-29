@@ -1,35 +1,21 @@
-import { useDispatch, useSelector } from 'react-redux';
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout, RootState } from 'store';
 import * as components from '../components';
-import * as serv from '../services';
 import * as utils from '../utils';
 import { toastError } from '../utils';
-import logo from '../images/logo-wide.png';
-import { SearchType } from './Searchbar';
-import { Image } from 'semantic-ui-react';
 
 const { Button, Grid, Searchbar, Icon, Auth, Header, Menu } = components;
 
-const services = serv as any;
-
-const AppHeader = ({
-  onHandleSubmit,
-  showSearchbar,
-  currentVideoId,
-  currentSegmentId,
-  searchType,
-}: {
-  onHandleSubmit: (arg0: string) => void;
-  showSearchbar: boolean;
-  currentVideoId: string;
-  currentSegmentId: string;
-  searchType: SearchType;
-}): any => {
+const AppHeader = (): any => {
   const [loading, setLoading] = React.useState(false);
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const previousView = useSelector((state: RootState) => state.main.previousView);
+  const searchType = useSelector((state: RootState) => state.video.searchType);
+  const showSearchbar = useSelector((state: RootState) => state.main.showSearchbar);
+  const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
+  const lastViewedVideoId = useSelector((state: RootState) => state.video.lastViewedVideoId);
 
   const dispatch = useDispatch();
 
@@ -49,16 +35,16 @@ const AppHeader = ({
 
   const backToPreviousView = () => {
     if (previousView === 'video') {
-      utils.history.push(`/${currentVideoId}`);
+      utils.history.push(`/${lastViewedVideoId}`);
     } else {
-      utils.history.push(`/search/${currentSegmentId}`);
+      utils.history.push(`/search/${lastViewedSegmentId}`);
     }
   };
 
   return (
     <Grid className="AppHeader">
       <Grid.Row style={{ paddingBottom: 0 }}>
-        <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
+        {/* <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
           <Image
             src={logo}
             className="logo"
@@ -66,10 +52,10 @@ const AppHeader = ({
             //onClick={() => utils.history.push(`/`)}
             href="https://mbt-guide.netlify.app/"
           />
-        </Grid.Column>
+        </Grid.Column> */}
 
-        <Grid.Column style={{ color: 'black ' }} verticalAlign="middle" width={8}>
-          {showSearchbar && <Searchbar onHandleSubmit={onHandleSubmit} searchType={searchType} />}
+        <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" floated="right" width={8}>
+          {showSearchbar && <Searchbar />}
           {!showSearchbar && (
             <Button onClick={() => backToPreviousView()}>
               <Icon name="arrow left" />
@@ -79,7 +65,7 @@ const AppHeader = ({
         </Grid.Column>
 
         {!loading ? (
-          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
+          <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={6}>
             {currentUser ? (
               <div>
                 {'Welcome ' + currentUser.firstName + ' ' + currentUser.lastName + ' !'}
@@ -101,7 +87,7 @@ const AppHeader = ({
           </Header>
         )}
       </Grid.Row>
-      <Grid.Row columns={3} style={{ paddingTop: 0 }}>
+      {/* <Grid.Row columns={3} style={{ paddingTop: 0 }}>
         <Grid.Column style={{ color: 'white' }} width={6}></Grid.Column>
         <Grid.Column style={{ color: 'white' }} width={4}>
           <Menu fluid widths={2} inverted>
@@ -134,7 +120,7 @@ const AppHeader = ({
             </Button>
           </a>
         </Grid.Column>
-      </Grid.Row>
+      </Grid.Row> */}
     </Grid>
   );
 };

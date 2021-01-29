@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 // Import css
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+import Layout from 'components/Layout';
 
 toast.configure();
 
@@ -25,32 +26,34 @@ const App = () => {
   return (
     <div className="App">
       <components.ErrorBoundary onError={() => <div>Something went wrong!</div>}>
-        <Router history={utils.history}>
-          <Route
-            path="/:videoId?"
-            exact
-            render={props => {
-              const { videoId } = props.match.params;
-              return <routes.Home {...props} {...{ videoId }} />;
-            }}
-          />
-          <Route
-            path="/search/:segmentId"
-            exact
-            render={props => {
-              const { segmentId } = props.match.params;
-              return <routes.Search {...props} {...{ segmentId }} />;
-            }}
-          />
-          <Route
-            path="/edit/:videoId/:segmentId?"
-            render={props => {
-              const { videoId } = props.match.params;
-              const { segmentId } = props.match.params;
-              return <routes.Edit {...props} {...{ videoId, segmentId }} />;
-            }}
-          />
-        </Router>
+        <Layout>
+          <Router history={utils.history}>
+            <Route
+              path="/:videoId?"
+              exact
+              render={props => {
+                const { videoId } = props.match.params;
+                return <routes.Home {...props} {...{ videoId }} />;
+              }}
+            />
+            <Route
+              path="/search/:segmentId"
+              exact
+              render={props => {
+                const { segmentId } = props.match.params;
+                return <routes.Search {...props} {...{ segmentId }} />;
+              }}
+            />
+            <Route
+              path="/edit/:videoId/:segmentId?"
+              render={props => {
+                const { videoId } = props.match.params;
+                const { segmentId } = props.match.params;
+                return <routes.Edit {...props} {...{ videoId, segmentId }} />;
+              }}
+            />
+          </Router>
+        </Layout>
       </components.ErrorBoundary>
     </div>
   );

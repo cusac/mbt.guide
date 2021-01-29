@@ -1,6 +1,15 @@
-import { AxiosResponseGeneric, Segment, Video, VideoListYTVideo } from 'types';
+import {
+  AxiosResponseGeneric,
+  SearchYTVideo,
+  Segment,
+  Video,
+  VideoListYTVideo,
+  YTResult,
+} from 'types';
 import { httpClient as http } from '../services';
 import repository from './repository.service';
+import { AxiosPromise } from 'axios';
+import { youtubeCall } from './youtube.service';
 
 export const createVideoCall = ({
   youtube,
@@ -26,4 +35,21 @@ export const updateSegmentsCall = ({
   segments: Partial<Segment>[];
 }): Promise<AxiosResponseGeneric<Segment[]>> => {
   return http.post<Segment[]>('/update-video-segments', { videoId, segments });
+};
+
+export const searchSegmentsCall = ({ term }: { term: string }): AxiosPromise<Segment[]> => {
+  return http.get('/search/segments', { term });
+};
+
+export const searchVideosCall = ({
+  term,
+}: {
+  term: string;
+}): Promise<AxiosResponseGeneric<YTResult<SearchYTVideo>>> => {
+  return youtubeCall<SearchYTVideo>({
+    endpoint: 'search',
+    params: {
+      q: term,
+    },
+  });
 };

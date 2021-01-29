@@ -1,15 +1,17 @@
-import { useSelector } from 'react-redux';
 import React from 'react';
-import { RootState, setPreviousView, useAppDispatch } from 'store';
+import { useSelector } from 'react-redux';
+import ResizeObserver from 'resize-observer-polyfill';
 import {
-  PlaylistYTVideo,
-  SearchYTVideo,
-  Segment,
-  Video,
-  VideoListYTVideo,
-  YTResult,
-  YTVideo,
-} from 'types';
+  RootState,
+  setHasSearched,
+  setLastViewedVideoId,
+  setLoadingVideos,
+  setPreviousView,
+  setSearchType,
+  setShowSearchbar,
+  useAppDispatch,
+} from 'store';
+import { PlaylistYTVideo, Segment, Video, VideoListYTVideo, YTResult, YTVideo } from 'types';
 import * as components from '../../components';
 import * as services from '../../services';
 import repository from '../../services/repository.service';
@@ -20,13 +22,10 @@ import { captureAndLog, toastError } from '../../utils';
 import { useState } from 'react';
 import LandingPage from '../../components/LandingPage';
 
-const channelId = 'UCYwlraEwuFB4ZqASowjoM0g';
-
 const {
   Button,
   Link,
   Grid,
-  AppHeader,
   VideoList,
   Header,
   Icon,
@@ -39,7 +38,6 @@ const {
 
 const Home = ({ videoId }: { videoId: string }) => {
   const [error, setError] = React.useState();
-  const [loadingVideos, setLoadingVideos] = React.useState(true);
   const [loadingSelectedVideo, setLoadingSelectedVideo] = React.useState(true);
   const [loadingSegments, setLoadingSegments] = React.useState(true);
   const [segments, setSegments] = React.useState(undefined as Segment[] | void);
@@ -48,26 +46,31 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [videos, setVideos] = React.useState([] as YTVideo[]);
   const [filterProcessedVideos, setFilterProcessedVideos] = React.useState(true);
   const [segmentVideo, setSegmentVideo] = React.useState(undefined as Video | undefined);
-  const [hasSearched, setHasSearched] = React.useState(false);
-  const [searchResults, setSearchResults] = React.useState([] as YTVideo[]);
   const [matchedVids, setMatchedVids] = React.useState([] as Video[]);
+  const [videoColumnRef, setVideoColumnRef] = React.useState(
+    undefined as HTMLDivElement | undefined
+  );
+  const [columnHeight, setColumnHeight] = React.useState(1024);
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
-  const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
   const [readMore, setReadMore] = useState(false);
+  const searchYTVideosResult = useSelector((state: RootState) => state.video.searchYTVideosResult);
+  const hasSearched = useSelector((state: RootState) => state.video.hasSearched);
+  const loadingVideos = useSelector((state: RootState) => state.video.loadingVideos);
 
   const dispatch = useAppDispatch();
 
   const selectVideo = async (videoId: any) => {
+    dispatch(setLastViewedVideoId({ lastViewedVideoId: videoId }));
     utils.history.push(`/${videoId}`);
   };
 
   const fetchDefaultVideos = async () => {
     try {
-      setLoadingVideos(true);
+      dispatch(setLoadingVideos({ loadingVideos: true }));
 
       // We're piggybacking this view to update the stats for now
-      await (services as any).stats.logStats();
+      await services.stats.logStats();
 
       let defaultVids: YTVideo[] = [];
       let pageToken = '';
@@ -100,7 +103,7 @@ const Home = ({ videoId }: { videoId: string }) => {
         err
       );
     } finally {
-      setLoadingVideos(false);
+      dispatch(setLoadingVideos({ loadingVideos: false }));
     }
   };
 
@@ -148,11 +151,25 @@ const Home = ({ videoId }: { videoId: string }) => {
     return matchingVids;
   };
 
+  const videoColumnResizeObserver = new ResizeObserver(entries => {
+    setColumnHeight(entries[0].target.clientHeight);
+  });
+
   // Fetch the default list of videos from the MBT uploads list
   React.useEffect(() => {
     fetchDefaultVideos();
     dispatch(setPreviousView({ previousView: 'video' }));
+    dispatch(setSearchType({ searchType: 'ytVideo' }));
+    dispatch(setHasSearched({ hasSearched: false }));
+    dispatch(setShowSearchbar({ showSearchbar: true }));
+    dispatch(setLastViewedVideoId({ lastViewedVideoId: videoId }));
   }, []);
+
+  React.useEffect(() => {
+    if (videoColumnRef && videoColumnRef.clientHeight) {
+      videoColumnResizeObserver.observe(videoColumnRef);
+    }
+  }, [videoColumnRef]);
 
   // Fetch playlist videos when filter is toggled
   React.useEffect(() => {
@@ -163,10 +180,10 @@ const Home = ({ videoId }: { videoId: string }) => {
   React.useEffect(() => {
     if (hasSearched) {
       if (filterProcessedVideos) {
-        const filteredVids = filterVidsWithSegments(searchResults, matchedVids);
+        const filteredVids = filterVidsWithSegments(searchYTVideosResult, matchedVids);
         setVideos(filteredVids);
       } else {
-        setVideos(searchResults);
+        setVideos(searchYTVideosResult);
       }
     }
   }, [filterProcessedVideos]);
@@ -247,43 +264,24 @@ const Home = ({ videoId }: { videoId: string }) => {
       setMySegments(segments.filter(s => currentUser && s.ownerEmail === currentUser.email));
   }, [segments, currentUser]);
 
-  const videoSrc = selectedVideo ? `https://www.youtube.com/embed/${selectedVideo.id}` : '';
+  React.useEffect(() => {
+    const processSearchResults = async () => {
+      const mbtVids = await fetchMatchingVideos(searchYTVideosResult);
 
-  // Search youtube videos from the MBT channel
-  const searchVideos = async (term: string) => {
-    try {
-      setLoadingVideos(true);
-      const { data } = await youtubeCall<SearchYTVideo>({
-        endpoint: 'search',
-        params: {
-          q: term,
-        },
-      });
-
-      // Filter out any videos that don't belong to the MBT channel
-      const ytVids = data.items.filter(v => v.snippet.channelId === channelId).map(toYTVid);
-      const mbtVids = await fetchMatchingVideos(ytVids);
-
-      setSearchResults(ytVids);
       setMatchedVids(mbtVids);
-      setHasSearched(true);
 
       if (filterProcessedVideos) {
-        const filteredVids = filterVidsWithSegments(ytVids, mbtVids);
+        const filteredVids = filterVidsWithSegments(searchYTVideosResult, mbtVids);
         setVideos(filteredVids);
       } else {
-        setVideos(ytVids);
+        setVideos(searchYTVideosResult);
       }
-    } catch (err) {
-      captureAndLog({ file: 'Home', method: 'searchVideos', err });
-      toastError(
-        'There was an error fetching youtube data. Please refresh the page and try again.',
-        err
-      );
-    } finally {
-      setLoadingVideos(false);
-    }
-  };
+    };
+
+    hasSearched && processSearchResults();
+  }, [searchYTVideosResult]);
+
+  const videoSrc = selectedVideo ? `https://www.youtube.com/embed/${selectedVideo.id}` : '';
 
   const createVideo = (event: any) => {
     event.preventDefault();
@@ -305,16 +303,11 @@ const Home = ({ videoId }: { videoId: string }) => {
 
   return (
     <div>
-      <AppHeader
-        onHandleSubmit={searchVideos}
-        showSearchbar={true}
-        currentSegmentId={lastViewedSegmentId}
-      />
       <Grid>
         <Grid.Row>
-          <Grid.Column style={{ marginLeft: 30 }} width={11}>
+          <Grid.Column style={{ marginLeft: 5 }} width={11}>
             {!loadingSelectedVideo ? (
-              <div>
+              <div ref={setVideoColumnRef as any}>
                 {selectedVideo ? (
                   isLandingPage ? (
                     <LandingPage user={currentUser ? (currentUser as any).firstName : 'Guest'} />
@@ -525,10 +518,12 @@ const Home = ({ videoId }: { videoId: string }) => {
                         </Card.Header>
                       </Card.Content>
                     </Card>
-                    <VideoList
-                      videos={videos as any}
-                      handleVideoSelect={(video: YTVideo) => video && selectVideo(video.id)}
-                    />
+                    <div style={{ overflow: 'auto', maxHeight: columnHeight }}>
+                      <VideoList
+                        videos={videos as any}
+                        handleVideoSelect={(video: YTVideo) => video && selectVideo(video.id)}
+                      />
+                    </div>
                   </div>
                 ) : (
                   <div>
