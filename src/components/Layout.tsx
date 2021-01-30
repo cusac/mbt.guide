@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Grid } from 'semantic-ui-react';
 import { AppHeader, Menu, Icon, Sticky } from '../components';
-import logo from './logo-wide.png';
+import logo from '../images/logo-wide.png';
 import { RootState } from 'store';
 import { history } from 'utils';
 

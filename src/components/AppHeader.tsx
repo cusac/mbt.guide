@@ -1,10 +1,9 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout, RootState, setLastViewedSegmentId } from 'store';
+import { logout, RootState } from 'store';
 import * as components from '../components';
 import * as utils from '../utils';
 import { toastError } from '../utils';
-import logo from './logo-wide.png';
 
 const { Button, Grid, Searchbar, Icon, Auth, Header, Menu } = components;
 
@@ -46,11 +45,12 @@ const AppHeader = (): any => {
     <Grid className="AppHeader">
       <Grid.Row style={{ paddingBottom: 0 }}>
         {/* <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={4}>
-          <img
+          <Image
             src={logo}
             className="logo"
             alt="My Big TOE guide"
-            onClick={() => utils.history.push(`/`)}
+            //onClick={() => utils.history.push(`/`)}
+            href="https://mbt-guide.netlify.app/"
           />
         </Grid.Column> */}
 
@@ -68,9 +68,11 @@ const AppHeader = (): any => {
           <Grid.Column style={{ color: 'white ' }} verticalAlign="middle" width={6}>
             {currentUser ? (
               <div>
+                {'Welcome ' + currentUser.firstName + ' ' + currentUser.lastName + ' !'}
+                <br />
                 {currentUser.email}
                 <br />
-                <Button onClick={() => logoutClick()} style={{ margin: 5 }}>
+                <Button onClick={() => logoutClick()} style={{ margin: 10 }}>
                   Sign out
                 </Button>
               </div>

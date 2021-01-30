@@ -19,6 +19,8 @@ import { toYTVid, youtubeCall } from '../../services/youtube.service';
 import { assertModelArrayType } from '../../types/model.type';
 import * as utils from '../../utils';
 import { captureAndLog, toastError } from '../../utils';
+import { useState } from 'react';
+import LandingPage from '../../components/LandingPage';
 
 const {
   Button,
@@ -42,7 +44,7 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [mySegments, setMySegments] = React.useState(undefined as Array<Segment> | void);
   const [selectedVideo, setSelectedVideo] = React.useState(undefined as YTVideo | undefined);
   const [videos, setVideos] = React.useState([] as YTVideo[]);
-  const [filterProcessedVideos, setFilterProcessedVideos] = React.useState(false);
+  const [filterProcessedVideos, setFilterProcessedVideos] = React.useState(true);
   const [segmentVideo, setSegmentVideo] = React.useState(undefined as Video | undefined);
   const [matchedVids, setMatchedVids] = React.useState([] as Video[]);
   const [videoColumnRef, setVideoColumnRef] = React.useState(
@@ -51,6 +53,7 @@ const Home = ({ videoId }: { videoId: string }) => {
   const [columnHeight, setColumnHeight] = React.useState(1024);
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
+  const [readMore, setReadMore] = useState(false);
   const searchYTVideosResult = useSelector((state: RootState) => state.video.searchYTVideosResult);
   const hasSearched = useSelector((state: RootState) => state.video.hasSearched);
   const loadingVideos = useSelector((state: RootState) => state.video.loadingVideos);
@@ -285,6 +288,21 @@ const Home = ({ videoId }: { videoId: string }) => {
     utils.history.push(`/edit/${videoId}`);
   };
 
+  const descText = selectedVideo ? selectedVideo.snippet.description : 'None';
+  const descPreview = descText.substring(0, 150) + ' ...';
+  const extraContent = (
+    <div>
+      <p className="extra-content">{descText}</p>
+    </div>
+  );
+
+  const moreButtonName = readMore ? 'Collapse' : 'Read More';
+  // TODO: Update landing page to default to general users
+  // TODO: Make sure landing page does not override the default video (_ok27SPHhwA)
+  const isLandingPage = selectedVideo ? selectedVideo.id === '_ok27SPHhwA' : false;
+  let datePublished = selectedVideo ? selectedVideo.snippet.publishedAt.toString() : 'NA';
+  datePublished = datePublished.replace('T', ' Time: ').replace('Z', '');
+
   return (
     <div>
       <Grid>
@@ -293,30 +311,52 @@ const Home = ({ videoId }: { videoId: string }) => {
             {!loadingSelectedVideo ? (
               <div ref={setVideoColumnRef as any}>
                 {selectedVideo ? (
-                  <div>
-                    <div className="ui embed">
-                      <iframe src={videoSrc} allowFullScreen title="Video player" />
+                  isLandingPage ? (
+                    <LandingPage user={currentUser ? (currentUser as any).firstName : 'Guest'} />
+                  ) : (
+                    <div>
+                      <div className="ui embed">
+                        <iframe src={videoSrc} allowFullScreen title="Video player" />
+                      </div>
+                      <div className="videodesc">
+                        <h3>{(selectedVideo as any).snippet.title}</h3>
+
+                        <p>{'Date Published : ' + datePublished}</p>
+                        <p>
+                          {!readMore && descPreview}
+                          {readMore && extraContent}
+                          <Button
+                            icon
+                            labelPosition={readMore ? 'left' : 'right'}
+                            color="teal"
+                            floated="right"
+                            size="mini"
+                            onClick={() => {
+                              setReadMore(!readMore);
+                            }}
+                          >
+                            {moreButtonName}
+                            <Icon className={readMore ? 'left arrow' : 'right arrow'} />
+                          </Button>
+                        </p>
+                      </div>
                     </div>
-                    <div className="ui segment">
-                      <h4 className="ui header">{(selectedVideo as any).snippet.title}</h4>
-                      <p>{(selectedVideo as any).snippet.description}</p>
-                    </div>
-                  </div>
+                  )
                 ) : (
                   <div>Select a video</div>
                 )}
                 <br />
-
-                <Button
-                  color="teal"
-                  size="big"
-                  onClick={() => utils.history.push(`/edit/${videoId}`)}
-                >
-                  <Icon name="plus" /> New Segment
-                </Button>
-
+                {!isLandingPage && (
+                  <Button
+                    color="teal"
+                    size="big"
+                    onClick={() => utils.history.push(`/edit/${videoId}`)}
+                  >
+                    <Icon name="plus" /> New Segment
+                  </Button>
+                )}
                 <br />
-                {!loadingSegments ? (
+                {!loadingSegments && !isLandingPage ? (
                   <div>
                     {currentUser && (
                       <div>
@@ -454,7 +494,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                     )}
                   </div>
                 ) : (
-                  <Loading>Loading segments...</Loading>
+                  !isLandingPage && <Loading>Loading segments...</Loading>
                 )}
               </div>
             ) : (
@@ -488,10 +528,13 @@ const Home = ({ videoId }: { videoId: string }) => {
                     </div>
                   </div>
                 ) : (
-                  <h2 style={{ color: 'black' }}>
-                    No videos found. Try searching searching for something less specific or if
-                    searching for a title make sure the title is exact.{' '}
-                  </h2>
+                  <div>
+                    <h2 style={{ color: 'black' }}>No videos found. </h2>
+                    <h3 style={{ color: 'grey' }}>
+                      Try searching for something less specific or if searching for a title make
+                      sure the title is exact. Try unchecking the Hide Processed Videos checkbox.{' '}
+                    </h3>
+                  </div>
                 )}
               </div>
             ) : (

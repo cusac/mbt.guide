@@ -33,6 +33,7 @@ const VideoSegmentItem = ({
               style={{ margin: 0 }}
               circular
               icon={canEdit ? 'edit' : 'lock'}
+              color={active ? 'green' : 'grey'}
             />
           </Grid.Column>
           <Grid.Column width={10} style={{ color: 'black' }}>

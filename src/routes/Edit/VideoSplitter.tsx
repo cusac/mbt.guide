@@ -126,11 +126,17 @@ const VideoSplitter = ({
   const addSegment = async () => {
     const newSegments: any = (segments as any).slice();
     const newId = uuid();
+    const hasNoCurSeg = currentSegment === undefined;
+    let lastSegEnd = hasNoCurSeg ? 0 : currentSegment?.end;
+    // This prevents an error that occurs when start === end
+    lastSegEnd = lastSegEnd === duration ? lastSegEnd - 1 : lastSegEnd;
+
     newSegments.push({
       segmentId: newId,
       video: (video as any)._id,
-      start: duration * 0.25,
-      end: duration * 0.75,
+      // TODO: Make start and end profile settings. Below is volunteer specific
+      start: Number(lastSegEnd), //duration * 0.25,
+      end: duration, // * 0.75,
       title: 'New segment title',
       ownerEmail: currentUser ? currentUser.email : '',
       tags: [],
@@ -341,7 +347,6 @@ const VideoSplitter = ({
   }
 
   const { duration } = video;
-
   const canEdit =
     currentSegment && currentUser
       ? currentUser.email === (currentSegment as any).ownerEmail ||
@@ -399,7 +404,7 @@ const VideoSplitter = ({
                 </SegmentUI.Group>
               </SegmentUI>
               <Button.Group attached="bottom">
-                <Button onClick={addSegment}>
+                <Button onClick={addSegment} color="blue">
                   <Icon name="add" /> Add
                 </Button>
                 <Button
@@ -522,6 +527,14 @@ const VideoSplitter = ({
                     onChange={(event: any) => updateEnd(index, event.target.value)}
                   />
                 </Grid.Column>
+                <Grid.Column
+                  verticalAlign="middle"
+                  style={{ textAlign: 'right', color: 'black' }}
+                  width={6}
+                >
+                  <Icon name="help circle" />
+                  Tip : Type e.g. 012030 without : or spaces to enter 01:20:30.
+                </Grid.Column>
               </Grid.Row>
               <Grid.Row>
                 <Grid.Column verticalAlign="top" style={{ textAlign: 'right' }} width={2}>
@@ -577,6 +590,12 @@ const VideoSplitter = ({
                       onChange={(tags: any) => updateTags(index, tags, 1)}
                     />
                   </div>
+                  <p>
+                    <br />
+                    <Icon name="help circle" />
+                    Tip : Type a phrase and press Tab key to commit.
+                    <br />
+                  </p>
                 </Grid.Column>
               </Grid.Row>
             </Grid>

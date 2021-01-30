@@ -34,7 +34,7 @@ const SetTransform = createTransform(
     }
 
     // TODO: Find a better option than a default segmentId
-    if (key === 'video' && !outboundState.lastViewedSegmentId){
+    if (key === 'video' && !outboundState.lastViewedSegmentId) {
       outboundState.lastViewedSegmentId = '156b09ce-7dab-417a-8295-f6f86f1f504a';
     }
     return outboundState;
