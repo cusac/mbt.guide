@@ -29,19 +29,33 @@ const App = () => {
         <Layout>
           <Router history={utils.history}>
             <Route
-              path="/:videoId?"
+              path="/"
               exact
               render={props => {
-                const { videoId } = props.match.params;
-                return <routes.Home {...props} {...{ videoId }} />;
+                return <routes.Home />;
               }}
             />
             <Route
-              path="/search/:segmentId"
+              path="/videos/:videoId?"
+              exact
+              render={props => {
+                const { videoId } = props.match.params;
+                return <routes.Videos {...props} {...{ videoId }} />;
+              }}
+            />
+            <Route
+              path="/my-segments"
+              exact
+              render={props => {
+                return <routes.MySegments />;
+              }}
+            />
+            <Route
+              path="/segments/:segmentId"
               exact
               render={props => {
                 const { segmentId } = props.match.params;
-                return <routes.Search {...props} {...{ segmentId }} />;
+                return <routes.Segments {...props} {...{ segmentId }} />;
               }}
             />
             <Route

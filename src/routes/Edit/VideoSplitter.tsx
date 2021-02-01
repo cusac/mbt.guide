@@ -308,7 +308,7 @@ const VideoSplitter = ({
   if (newVid) {
     !newVidCreating &&
       dispatch(createVideo({ videoId }))
-        .then(result => {
+        .then((_: any) => {
           setNewVid(false);
           setnewVidCreating(false);
           getVideoData(videoId);

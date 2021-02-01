@@ -18,7 +18,7 @@ import { captureAndLog, toastError } from '../../utils';
 
 const { Grid, SegmentList, Loading } = components;
 
-const Search = ({ segmentId }: { segmentId: string }) => {
+const Segments = ({ segmentId }: { segmentId: string }) => {
   const [error, setError] = React.useState();
   const [loadingSelectedSegment, setLoadingSelectedSegment] = React.useState(true);
   const [segments, setSegments] = React.useState(undefined as Array<any> | void);
@@ -36,7 +36,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
 
   const selectSegment = async (selectSegmentId: string) => {
     dispatch(setLastViewedSegmentId({ lastViewedSegmentId: selectSegmentId }));
-    utils.history.push(`/search/${selectSegmentId}`);
+    utils.history.push(`/segments/${selectSegmentId}`);
   };
 
   const videoColumnResizeObserver = new ResizeObserver(entries => {
@@ -58,7 +58,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
 
         setSegments(segments);
       } catch (err) {
-        captureAndLog({ file: 'Search', method: 'fetchSegments', err });
+        captureAndLog({ file: 'Segments', method: 'fetchSegments', err });
         toastError(
           'There was an error fetching segment data. Please refresh the page and try again.',
           err
@@ -102,7 +102,7 @@ const Search = ({ segmentId }: { segmentId: string }) => {
         setSelectedSegment(segment);
       } catch (err) {
         setLoadingSelectedSegment(false);
-        captureAndLog({ file: 'Search', method: 'fetchSelectedSegment', err });
+        captureAndLog({ file: 'Segments', method: 'fetchSelectedSegment', err });
         toastError(
           'There was an error fetching the selected segment. Please refresh the page and try again.',
           err
@@ -160,4 +160,4 @@ const Search = ({ segmentId }: { segmentId: string }) => {
   );
 };
 
-export default Search;
+export default Segments;
