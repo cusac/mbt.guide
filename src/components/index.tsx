@@ -32,3 +32,4 @@ export { default as AppHeader } from './AppHeader';
 export { default as Loading } from './Loading';
 export { default as YouTubePlayerWithControls } from './YouTubePlayerWithControls';
 export { default as LandingPage } from './LandingPage';
+export { default as Tags } from './Tags';

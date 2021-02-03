@@ -33,8 +33,9 @@ import {
 import Swal from 'sweetalert2';
 import { Segment, Video } from 'types';
 import { captureAndLog, hasPermission, history, timeFormat, toastError } from 'utils';
-import { v4 as uuid } from 'uuid';
+import { stringify, v4 as uuid } from 'uuid';
 import VideoSegmentItem from './VideoSegmentItem';
+import Tags from '../../components/Tags';
 
 //TODO: Error Handling
 
@@ -123,6 +124,13 @@ const VideoSplitter = ({
     end && updateSegmentAt(index, { end });
   };
 
+  const setDefaultTimeSpan = () => {
+    const start = timeFormat.from(String(duration * 0.25));
+    start && updateSegmentAt(index, { start });
+    const end = timeFormat.from(String(duration * 0.75));
+    end && updateSegmentAt(index, { end });
+  };
+
   const addSegment = async () => {
     const newSegments: any = (segments as any).slice();
     const newId = uuid();
@@ -135,8 +143,8 @@ const VideoSplitter = ({
       segmentId: newId,
       video: (video as any)._id,
       // TODO: Make start and end profile settings. Below is volunteer specific
-      start: Number(lastSegEnd), //duration * 0.25,
-      end: duration, // * 0.75,
+      start: lastSegEnd === duration - 1 ? 0 : Number(lastSegEnd),
+      end: duration,
       title: 'New segment title',
       ownerEmail: currentUser ? currentUser.email : '',
       tags: [],
@@ -367,6 +375,38 @@ const VideoSplitter = ({
     );
   }
 
+  const convertTags = (rank: number) => {
+    if (currentSegment === undefined) {
+      return undefined;
+    }
+    let oldtag = (currentSegment as any).tags;
+
+    class newtag {
+      id: string;
+      text: string;
+      constructor(n: number) {
+        this.id = '';
+        this.text = '';
+        //console.log("Tag Num - " + n);
+      }
+    }
+
+    let newtagarr: newtag[] = [];
+    let count = 0;
+    for (let i = 0; i < oldtag.length; i++) {
+      //console.log("Rank - " + oldtag[i].rank + " Name - " + oldtag[i].tag.name + " nTags - " + oldtag.length);
+      if (rank === Number(oldtag[i].rank)) {
+        newtagarr[count] = new newtag(count);
+        newtagarr[count].id = oldtag[i].tag._id;
+        newtagarr[count].text = oldtag[i].tag.name;
+        //console.log(newtagarr[count].text);
+        //console.log(newtagarr[count].id);
+        count = count + 1;
+      }
+    }
+    return newtagarr;
+  };
+
   return (
     <div>
       <Container style={{ marginTop: 20 }}>
@@ -527,6 +567,12 @@ const VideoSplitter = ({
                     onChange={(event: any) => updateEnd(index, event.target.value)}
                   />
                 </Grid.Column>
+
+                <Button size="tiny" floated="left" onClick={() => setDefaultTimeSpan()}>
+                  {' '}
+                  Set Default
+                </Button>
+
                 <Grid.Column
                   verticalAlign="middle"
                   style={{ textAlign: 'right', color: 'black' }}
@@ -596,6 +642,57 @@ const VideoSplitter = ({
                     Tip : Type a phrase and press Tab key to commit.
                     <br />
                   </p>
+                </Grid.Column>
+              </Grid.Row>
+
+              {/*Experimental tags*/}
+
+              <Grid.Row>
+                <Grid.Column verticalAlign="top" style={{ textAlign: 'right' }} width={2}>
+                  <Label>Tags:</Label>
+                </Grid.Column>
+                <Grid.Column width={14}>
+                  <hr />
+                  Experimental Tagging
+                  <hr />
+                  <div className="tagdesc">High Relevance</div>
+                  {/*{JSON.stringify((currentSegment as any).tags)}*/}
+                  <div className="segment-field" data-disabled={!currentUser || !canEdit}>
+                    <Tags
+                      //tags={[{ id: 'Thailand', text: 'Thailand' }, { id: 'India', text: 'India' }]}
+                      //tags={[{id: (currentSegment as any).tags[2].tag._id, text:(currentSegment as any).tags[2].tag.name}]}
+                      tags={convertTags(11) as any}
+                    />
+                  </div>
+                  <div className="tagdesc">Mid Relevance</div>
+                  <div className="segment-field" data-disabled={!currentUser || !canEdit}>
+                    <Tags tags={convertTags(6) as any} />
+                  </div>
+                  <div className="tagdesc">Low Relevance</div>
+                  <div className="segment-field" data-disabled={!currentUser || !canEdit}>
+                    <Tags tags={convertTags(1) as any} />
+                  </div>
+                  <p>
+                    <br />
+                    <Icon name="help circle" />
+                    Tip : Arrows to select a suggestion. Enter to commit. Try Drag &amp; Drop (Not
+                    Working across tag inputs).
+                    <br />
+                  </p>
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
                 </Grid.Column>
               </Grid.Row>
             </Grid>

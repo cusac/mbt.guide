@@ -324,12 +324,13 @@ const Home = ({ videoId }: { videoId: string }) => {
                         <p>{'Date Published : ' + datePublished}</p>
                         <p>
                           {!readMore && descPreview}
+                          <br />
                           {readMore && extraContent}
+                          <br />
                           <Button
                             icon
                             labelPosition={readMore ? 'left' : 'right'}
-                            color="teal"
-                            floated="right"
+                            floated="left"
                             size="mini"
                             onClick={() => {
                               setReadMore(!readMore);
@@ -338,6 +339,7 @@ const Home = ({ videoId }: { videoId: string }) => {
                             {moreButtonName}
                             <Icon className={readMore ? 'left arrow' : 'right arrow'} />
                           </Button>
+                          <br />
                         </p>
                       </div>
                     </div>
