@@ -303,6 +303,10 @@ const Home = ({ videoId }: { videoId: string }) => {
   let datePublished = selectedVideo ? selectedVideo.snippet.publishedAt.toString() : 'NA';
   datePublished = datePublished.replace('T', ' Time: ').replace('Z', '');
 
+  //Simulating a volunteer
+  //let groups = ["Super User", "Volunteer"]
+  console.log(currentUser?.groups);
+
   return (
     <div>
       <Grid>
@@ -312,7 +316,12 @@ const Home = ({ videoId }: { videoId: string }) => {
               <div ref={setVideoColumnRef as any}>
                 {selectedVideo ? (
                   isLandingPage ? (
-                    <LandingPage user={currentUser ? (currentUser as any).firstName : 'Guest'} />
+                    <LandingPage
+                      user={currentUser ? (currentUser as any).firstName : 'Guest'}
+                      groups={currentUser ? (currentUser as any).groups : 'Unknown'}
+                      role={currentUser ? (currentUser as any).role : 'Unknown'}
+                      rolename={currentUser ? currentUser?.roleName : 'Unknown'}
+                    />
                   ) : (
                     <div>
                       <div className="ui embed">

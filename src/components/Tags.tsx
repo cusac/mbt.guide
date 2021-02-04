@@ -6,6 +6,7 @@ import { MBTTAGS } from './TagSuggestions';
 //npm install --save react-dnd@5.0.0
 //npm install --save react-dnd-html5-backend@3.0.2
 import { WithContext as ReactTags } from 'react-tag-input';
+import { stringify, v4 as uuid } from 'uuid';
 
 const suggestions = MBTTAGS.map(mbttags => {
   return {
@@ -19,6 +20,9 @@ const KeyCodes = {
   enter: 13,
 };
 
+let inputStr = '';
+let editMode = false;
+
 interface MyProps {
   tags: { id: string; text: string }[];
 }
@@ -26,9 +30,21 @@ interface MyProps {
 interface MyState {
   tags: any;
   suggestions: any;
+  inputStr: string;
+  editMode: boolean;
 }
 
 const delimiters = [KeyCodes.comma, KeyCodes.enter];
+
+function capWords(str: string) {
+  if (str == undefined) return 'Error';
+  var pieces = str.split(' ');
+  for (var i = 0; i < pieces.length; i++) {
+    var j = pieces[i].charAt(0).toUpperCase();
+    pieces[i] = j + pieces[i].substr(1);
+  }
+  return pieces.join(' ');
+}
 
 class Tags extends React.Component<MyProps, MyState> {
   constructor(props: MyProps) {
@@ -36,6 +52,8 @@ class Tags extends React.Component<MyProps, MyState> {
     this.state = {
       tags: props.tags,
       suggestions: suggestions,
+      inputStr: inputStr,
+      editMode: false,
     };
 
     this.handleDelete = this.handleDelete.bind(this);
@@ -52,15 +70,19 @@ class Tags extends React.Component<MyProps, MyState> {
   }
 
   handleAddition(tag: any) {
+    tag.id = uuid();
+    tag.text = capWords(tag.text);
     this.setState(state => ({ tags: [...state.tags, tag] }));
   }
 
   handleDrag(tag: any, currPos: any, newPos: any) {
+    console.log(tag, currPos, newPos);
+
     const tags = [...this.state.tags];
     const newTags = tags.slice();
 
-    newTags.splice(currPos, 1);
-    newTags.splice(newPos, 0, tag);
+    tag && newTags.splice(currPos, 1);
+    tag && newTags.splice(newPos, 0, tag);
 
     // re-render
     this.setState({ tags: newTags });
@@ -68,9 +90,11 @@ class Tags extends React.Component<MyProps, MyState> {
 
   handleTagClick(index: any) {
     console.log('The tag at index ' + index + ' was clicked');
-    //console.log(this.props.tags);
-    //const newTags = this.props.tags;
-    //this.setState({ tags: newTags });
+    inputStr = this.state.tags[index].text;
+    editMode = true;
+    console.log(inputStr);
+    this.setState({ inputStr, editMode });
+    //editMode=false;
   }
 
   render() {
@@ -86,6 +110,7 @@ class Tags extends React.Component<MyProps, MyState> {
           handleAddition={this.handleAddition}
           handleDrag={this.handleDrag}
           handleTagClick={this.handleTagClick}
+          //inputValue = {this.editMode? this.inputStr:""}
         />
         {/*JSON.stringify(this.props.tags[0])*/}
       </div>

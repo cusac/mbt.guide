@@ -36,6 +36,7 @@ import { captureAndLog, hasPermission, history, timeFormat, toastError } from 'u
 import { stringify, v4 as uuid } from 'uuid';
 import VideoSegmentItem from './VideoSegmentItem';
 import Tags from '../../components/Tags';
+import { YouTubePlayerState } from 'components/YouTubePlayer';
 
 //TODO: Error Handling
 
@@ -129,6 +130,19 @@ const VideoSplitter = ({
     start && updateSegmentAt(index, { start });
     const end = timeFormat.from(String(duration * 0.75));
     end && updateSegmentAt(index, { end });
+  };
+
+  const setSegmentEndTime = () => {
+    let pauseTime = String((window as any).$gsecs);
+    const end = timeFormat.from(pauseTime);
+    //console.log(end, currentSegment?.end , currentSegment?.start);
+    end && end != currentSegment?.start && updateSegmentAt(index, { end });
+    end == currentSegment?.start &&
+      Swal.fire({
+        title: 'Error!',
+        text: 'Start time and end time cannot be equal!',
+        type: 'error',
+      });
   };
 
   const addSegment = async () => {
@@ -399,8 +413,7 @@ const VideoSplitter = ({
         newtagarr[count] = new newtag(count);
         newtagarr[count].id = oldtag[i].tag._id;
         newtagarr[count].text = oldtag[i].tag.name;
-        //console.log(newtagarr[count].text);
-        //console.log(newtagarr[count].id);
+        //console.log("Tag text: ", newtagarr[count].text, " , Tag Id: ", newtagarr[count].id);
         count = count + 1;
       }
     }
@@ -568,6 +581,10 @@ const VideoSplitter = ({
                   />
                 </Grid.Column>
 
+                <Button size="tiny" floated="left" onClick={() => setSegmentEndTime()}>
+                  {' '}
+                  Set End Time
+                </Button>
                 <Button size="tiny" floated="left" onClick={() => setDefaultTimeSpan()}>
                   {' '}
                   Set Default
