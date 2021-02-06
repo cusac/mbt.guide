@@ -10,6 +10,7 @@ import {
   Link,
   Loading,
   Modal,
+  Popup,
   SegmentUI,
   Slider,
   TextArea,
@@ -36,6 +37,7 @@ import { captureAndLog, hasPermission, history, timeFormat, toastError } from 'u
 import { stringify, v4 as uuid } from 'uuid';
 import VideoSegmentItem from './VideoSegmentItem';
 import Tags from '../../components/Tags';
+import Tip from '../../components/Tip';
 import { YouTubePlayerState } from 'components/YouTubePlayer';
 
 //TODO: Error Handling
@@ -64,6 +66,7 @@ const VideoSplitter = ({
   const [newVidCreating, setnewVidCreating]: [boolean, any] = React.useState(false);
   const [wait, setWait]: [boolean, any] = React.useState(true);
   const [error, setError] = React.useState();
+  const [stag, setTag]: [Tags | undefined, any] = React.useState();
 
   // TODO: REPLACE WITH STORE AND CHECK "PROCESSED VIDEO" FILTER AND TEST STORE CALLS THROW eRRORS
 
@@ -417,8 +420,12 @@ const VideoSplitter = ({
         count = count + 1;
       }
     }
+
+    //console.log(newtagarr);
     return newtagarr;
   };
+
+  let key = JSON.stringify(currentSegment as any);
 
   return (
     <div>
@@ -492,13 +499,14 @@ const VideoSplitter = ({
                 <Grid.Column style={{ padding: 0 }}>
                   <div
                     style={{
-                      height: 120,
+                      height: 140,
                       overflowX: 'auto',
                       overflowY: 'hidden',
                       paddingLeft: 50,
-                      paddingTop: 50,
+                      paddingTop: 10,
                     }}
                   >
+                    <Tip tipText="Drag handles to set the start and end time of the segment." />
                     <Slider
                       disabled={!currentUser || !canEdit}
                       key={(segments as any).length} // causes slider recreation on segments count change
@@ -581,22 +589,35 @@ const VideoSplitter = ({
                   />
                 </Grid.Column>
 
-                <Button size="tiny" floated="left" onClick={() => setSegmentEndTime()}>
+                <Button
+                  size="tiny"
+                  floated="left"
+                  data-tooltip="Set end time to current player time (pause the video)"
+                  data-variation="mini"
+                  data-position="right center"
+                  onClick={() => setSegmentEndTime()}
+                >
                   {' '}
                   Set End Time
                 </Button>
-                <Button size="tiny" floated="left" onClick={() => setDefaultTimeSpan()}>
+                <Button
+                  size="tiny"
+                  floated="left"
+                  data-tooltip="Reset segment time to default"
+                  data-variation="mini"
+                  data-position="right center"
+                  onClick={() => setDefaultTimeSpan()}
+                >
                   {' '}
                   Set Default
                 </Button>
 
                 <Grid.Column
                   verticalAlign="middle"
-                  style={{ textAlign: 'right', color: 'black' }}
+                  style={{ textAlign: 'left', color: 'black' }}
                   width={6}
                 >
-                  <Icon name="help circle" />
-                  Tip : Type e.g. 012030 without : or spaces to enter 01:20:30.
+                  <Tip tipText="Tip : Type e.g. 012030 without : or spaces to enter 01:20:30." />
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
@@ -618,7 +639,8 @@ const VideoSplitter = ({
                   </Form>
                 </Grid.Column>
               </Grid.Row>
-              <Grid.Row>
+
+              {/*<Grid.Row>
                 <Grid.Column verticalAlign="middle" style={{ textAlign: 'right' }} width={2}>
                   <Label>Tags:</Label>
                 </Grid.Column>
@@ -656,60 +678,56 @@ const VideoSplitter = ({
                   <p>
                     <br />
                     <Icon name="help circle" />
-                    Tip : Type a phrase and press Tab key to commit.
+                    <small>Tip : Type a phrase and press Tab key to commit.</small>
                     <br />
                   </p>
                 </Grid.Column>
-              </Grid.Row>
+              </Grid.Row>*/}
 
-              {/*Experimental tags*/}
+              {/*Experimental tags (not to be merged at this time)*/}
 
               <Grid.Row>
                 <Grid.Column verticalAlign="top" style={{ textAlign: 'right' }} width={2}>
                   <Label>Tags:</Label>
                 </Grid.Column>
                 <Grid.Column width={14}>
-                  <hr />
-                  Experimental Tagging
-                  <hr />
-                  <div className="tagdesc">High Relevance</div>
-                  {/*{JSON.stringify((currentSegment as any).tags)}*/}
+                  <div className="tagdesc">
+                    High Relevance&nbsp;&nbsp;&nbsp;
+                    <Tip tipText="Add words or phrases directly relevant to the topic of this segment." />
+                  </div>
                   <div className="segment-field" data-disabled={!currentUser || !canEdit}>
                     <Tags
-                      //tags={[{ id: 'Thailand', text: 'Thailand' }, { id: 'India', text: 'India' }]}
-                      //tags={[{id: (currentSegment as any).tags[2].tag._id, text:(currentSegment as any).tags[2].tag.name}]}
                       tags={convertTags(11) as any}
+                      seg={currentSegment}
+                      rank={11}
+                      key={key} //this will force redraw of Tags component
                     />
                   </div>
-                  <div className="tagdesc">Mid Relevance</div>
-                  <div className="segment-field" data-disabled={!currentUser || !canEdit}>
-                    <Tags tags={convertTags(6) as any} />
+
+                  <div className="tagdesc">
+                    Mid Relevance&nbsp;&nbsp;&nbsp;
+                    <Tip tipText="Add words or phrases that are not the main topic here, but are mentioned in the segment." />
                   </div>
-                  <div className="tagdesc">Low Relevance</div>
                   <div className="segment-field" data-disabled={!currentUser || !canEdit}>
-                    <Tags tags={convertTags(1) as any} />
+                    <Tags tags={convertTags(6) as any} seg={currentSegment} rank={6} key={key} />
+                  </div>
+
+                  <div className="tagdesc">
+                    Low Relevance&nbsp;&nbsp;&nbsp;
+                    <Tip tipText="Add words or phrases that might be searched and can be useful, such as synonyms or broad concepts." />
+                  </div>
+                  <div className="segment-field" data-disabled={!currentUser || !canEdit}>
+                    <Tags tags={convertTags(1) as any} seg={currentSegment} rank={1} key={key} />
                   </div>
                   <p>
                     <br />
-                    <Icon name="help circle" />
-                    Tip : Arrows to select a suggestion. Enter to commit. Try Drag &amp; Drop (Not
-                    Working across tag inputs).
+                    <Tip
+                      tipText="Arrows to select a suggestion. Enter to commit. Try Drag &amp; Drop (Not Working across tag inputs)."
+                      position="bottom center"
+                    />
                     <br />
                   </p>
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
+                  <div className="pageend" />
                 </Grid.Column>
               </Grid.Row>
             </Grid>
