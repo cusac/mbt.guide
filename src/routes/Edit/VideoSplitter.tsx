@@ -162,7 +162,7 @@ const VideoSplitter = ({
       // TODO: Make start and end profile settings. Below is volunteer specific
       start: lastSegEnd === duration - 1 ? 0 : Number(lastSegEnd),
       end: duration,
-      title: 'New segment title',
+      title: '', //'New segment title',
       ownerEmail: currentUser ? currentUser.email : '',
       tags: [],
       description: '',
@@ -210,6 +210,17 @@ const VideoSplitter = ({
   };
 
   const saveChanges = async () => {
+    console.log(currentSegment?.title.length);
+    if (!currentSegment?.title.length || !currentSegment?.description.length) {
+      Swal.fire({
+        title: 'Error!',
+        text: 'Blank Title or Description',
+        type: 'error',
+        confirmButtonText: 'OK',
+      });
+      return undefined;
+    }
+
     try {
       setSegmentsSaving(true);
       const updatedSegments = await dispatch(
@@ -719,14 +730,14 @@ const VideoSplitter = ({
                   <div className="segment-field" data-disabled={!currentUser || !canEdit}>
                     <Tags tags={convertTags(1) as any} seg={currentSegment} rank={1} key={key} />
                   </div>
-                  <p>
+                  <div>
                     <br />
                     <Tip
                       tipText="Arrows to select a suggestion. Enter to commit. Try Drag &amp; Drop (Not Working across tag inputs)."
                       position="bottom center"
                     />
                     <br />
-                  </p>
+                  </div>
                   <div className="pageend" />
                 </Grid.Column>
               </Grid.Row>

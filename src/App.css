@@ -35,7 +35,7 @@
   position: fixed;
   top: 0;
   right: 0;
-  left: 300px; /* this is the size of the side nav */
+  left: 200px; /* this is the size of the side nav */
   z-index: 100;
 }
 
@@ -235,4 +235,16 @@ div.ReactTags__suggestions ul li.ReactTags__activeSuggestion {
 textarea:focus,
 input:focus {
   outline-color: #aaa;
+}
+
+.vidtitle {
+  color: #000 !important;
+  white-space: pre-wrap;
+  font-weight: bold;
+  padding: 10px;
+  text-align: left;
+}
+
+.contact {
+  float: left;
 }

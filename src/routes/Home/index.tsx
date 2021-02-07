@@ -311,7 +311,7 @@ const Home = ({ videoId }: { videoId: string }) => {
     <div>
       <Grid>
         <Grid.Row>
-          <Grid.Column style={{ marginLeft: 5 }} width={11}>
+          <Grid.Column style={{ marginLeft: 5 }} width={10}>
             {!loadingSelectedVideo ? (
               <div ref={setVideoColumnRef as any}>
                 {selectedVideo ? (
@@ -512,7 +512,7 @@ const Home = ({ videoId }: { videoId: string }) => {
               <Loading>Loading video...</Loading>
             )}
           </Grid.Column>
-          <Grid.Column style={{ color: 'white' }} verticalAlign="top" width={4}>
+          <Grid.Column style={{ color: 'white' }} verticalAlign="top" width={5}>
             {!loadingVideos ? (
               <div>
                 {videos && videos.length > 0 ? (
