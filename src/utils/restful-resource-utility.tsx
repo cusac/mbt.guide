@@ -10,6 +10,7 @@ export type Params = {
   $page?: number;
   $limit?: number;
   $sort?: string | string[];
+  $text?: string;
 };
 
 export type ListResponse<T> = {
