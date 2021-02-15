@@ -3,19 +3,19 @@ import { Button, Container, Grid, Icon, Label, Link, List } from '../components'
 import { Image } from 'semantic-ui-react';
 import timage from '../images/landing-background-top.png';
 import bimage from '../images/landing-background-bot.png';
+import { RootState } from 'store';
+import { useSelector } from 'react-redux';
+import * as utils from '../utils';
 
-const LandingPage = ({
-  user,
-  groups,
-  role,
-  rolename,
-}: {
-  user: string;
-  groups: any;
-  role: string;
-  rolename: string;
-}): any => {
-  const isVolunteer = groups && groups.includes('Volunteer');
+const LandingPage = ({}: {}): any => {
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const currentUserScope = useSelector((state: RootState) => state.auth.scope);
+
+  const isVolunteer =
+    currentUser &&
+    utils.hasPermission({ currentScope: currentUserScope, requiredScope: ['Volunteer'] });
+  const user = currentUser?.firstName;
+  const rolename = currentUser?.roleName;
 
   return (
     <React.Fragment>
@@ -68,7 +68,7 @@ const LandingPage = ({
             <br />
             <small>
               User Info: <br />
-              {'Group : ' + groups + isVolunteer} <br />
+              {'Scope : ' + (currentUserScope && currentUserScope[1])} <br />
               {'Role Name : ' + rolename}
             </small>
           </p>
@@ -106,16 +106,7 @@ const LandingPage = ({
               MBT Website
             </a>
           </p>
-          <p>
-            <br />
-            <br />
-            <br />
-            <small>
-              User Info: <br />
-              {'Group : ' + groups} <br />
-              {'Role Name : ' + rolename}
-            </small>
-          </p>
+          <p></p>
 
           <Image src={bimage} fluid rounded />
         </div>

@@ -18,7 +18,7 @@ import repository from '../../services/repository.service';
 import { toYTVid, youtubeCall } from '../../services/youtube.service';
 import { assertModelArrayType } from '../../types/model.type';
 import * as utils from '../../utils';
-import { captureAndLog, toastError } from '../../utils';
+import { captureAndLog, toastError, timeFormat } from '../../utils';
 import { useState } from 'react';
 import LandingPage from '../../components/LandingPage';
 
@@ -61,8 +61,10 @@ const Home = ({ videoId }: { videoId: string }) => {
   const dispatch = useAppDispatch();
 
   const selectVideo = async (videoId: any) => {
-    dispatch(setLastViewedVideoId({ lastViewedVideoId: videoId }));
-    utils.history.push(`/${videoId}`);
+    if (videoId !== 'contact') {
+      dispatch(setLastViewedVideoId({ lastViewedVideoId: videoId }));
+      utils.history.push(`/${videoId}`);
+    }
   };
 
   const fetchDefaultVideos = async () => {
@@ -297,15 +299,17 @@ const Home = ({ videoId }: { videoId: string }) => {
   );
 
   const moreButtonName = readMore ? 'Collapse' : 'Read More';
-  // TODO: Update landing page to default to general users
+  // TODO: Update landing page to default to general users // Done - sanjeev
   // TODO: Make sure landing page does not override the default video (_ok27SPHhwA)
   const isLandingPage = selectedVideo ? selectedVideo.id === '_ok27SPHhwA' : false;
   let datePublished = selectedVideo ? selectedVideo.snippet.publishedAt.toString() : 'NA';
-  datePublished = datePublished.replace('T', ' Time: ').replace('Z', '');
+  //datePublished = datePublished.replace('T', ' | Time: ').replace('Z', '');
+  datePublished = datePublished.slice(0, 10);
+  datePublished = datePublished + ' | Duration: ' + timeFormat.to(Number(segmentVideo?.duration));
 
-  //Simulating a volunteer
-  //let groups = ["Super User", "Volunteer"]
-  console.log(currentUser?.groups);
+  if (videoId === 'contact') {
+    return <p>&nbsp;</p>;
+  }
 
   return (
     <div>
@@ -316,12 +320,7 @@ const Home = ({ videoId }: { videoId: string }) => {
               <div ref={setVideoColumnRef as any}>
                 {selectedVideo ? (
                   isLandingPage ? (
-                    <LandingPage
-                      user={currentUser ? (currentUser as any).firstName : 'Guest'}
-                      groups={currentUser ? (currentUser as any).groups : 'Unknown'}
-                      role={currentUser ? (currentUser as any).role : 'Unknown'}
-                      rolename={currentUser ? currentUser?.roleName : 'Unknown'}
-                    />
+                    <LandingPage />
                   ) : (
                     <div>
                       <div className="ui embed">
@@ -515,35 +514,38 @@ const Home = ({ videoId }: { videoId: string }) => {
           <Grid.Column style={{ color: 'white' }} verticalAlign="top" width={5}>
             {!loadingVideos ? (
               <div>
+                <div>
+                  <Card fluid color="blue">
+                    <Card.Content>
+                      <Card.Header>
+                        <Checkbox
+                          toggle
+                          label="Hide Processed Videos"
+                          checked={filterProcessedVideos}
+                          onChange={(event, data) =>
+                            setFilterProcessedVideos((data as any).checked)
+                          }
+                        />
+                      </Card.Header>
+                    </Card.Content>
+                  </Card>
+                </div>
                 {videos && videos.length > 0 ? (
-                  <div>
-                    <Card fluid color="blue">
-                      <Card.Content>
-                        <Card.Header>
-                          <Checkbox
-                            toggle
-                            label="Hide Processed Videos"
-                            checked={filterProcessedVideos}
-                            onChange={(event, data) =>
-                              setFilterProcessedVideos((data as any).checked)
-                            }
-                          />
-                        </Card.Header>
-                      </Card.Content>
-                    </Card>
-                    <div style={{ overflow: 'auto', maxHeight: columnHeight }}>
-                      <VideoList
-                        videos={videos as any}
-                        handleVideoSelect={(video: YTVideo) => video && selectVideo(video.id)}
-                      />
-                    </div>
+                  <div style={{ overflow: 'auto', maxHeight: columnHeight }}>
+                    <VideoList
+                      videos={videos as any}
+                      handleVideoSelect={(video: YTVideo) => video && selectVideo(video.id)}
+                    />
                   </div>
                 ) : (
                   <div>
+                    <br />
                     <h2 style={{ color: 'black' }}>No videos found. </h2>
                     <h3 style={{ color: 'grey' }}>
                       Try searching for something less specific or if searching for a title make
-                      sure the title is exact. Try unchecking the Hide Processed Videos checkbox.{' '}
+                      sure the title is exact.
+                      <br />
+                      <br /> Try unchecking the Hide Processed Videos checkbox.{' '}
                     </h3>
                   </div>
                 )}

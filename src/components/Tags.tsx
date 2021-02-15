@@ -23,7 +23,7 @@ const KeyCodes = {
 type tagstruct = {
   rank: number;
   segment: string;
-  tag: { createdAT: string; isDeleted: boolean; name: string; _id: string };
+  tag: { name: string };
   _id: string;
 };
 
@@ -31,6 +31,7 @@ interface MyProps {
   tags: { id: string; text: string }[];
   seg: any;
   rank: number;
+  forceUpdate: any;
 }
 
 interface MyState {
@@ -40,13 +41,6 @@ interface MyState {
 }
 
 const delimiters = [KeyCodes.comma, KeyCodes.enter];
-
-const capWords = (str: string) => {
-  if (!str) return 'Error';
-  let pieces = str.split(' ');
-  pieces.forEach((p, i) => (pieces[i] = p.charAt(0).toUpperCase() + p.substr(1)));
-  return pieces.join(' ');
-};
 
 class Tags extends React.Component<MyProps, MyState> {
   constructor(props: MyProps) {
@@ -74,33 +68,40 @@ class Tags extends React.Component<MyProps, MyState> {
     //del from segment
     for (let j = 0; j < this.props.seg.tags.length; j++) {
       if (this.props.seg.tags[j].tag._id == delIndex) {
-        //console.log("Match ", i, delIndex, this.props.seg.tags);
         this.props.seg.tags.splice(j, 1);
       }
-      //console.log("Result ",i, this.props.seg.tags);
     }
   }
 
   handleAddition(tag: any) {
     tag.id = uuid();
-    tag.text = capWords(tag.text);
+
+    //force lowercase
+    tag.text = tag.text.toLowerCase();
+
+    //remove duplicates
+    for (let index = 0; index < this.props.seg.tags.length; index++) {
+      const element = this.props.seg.tags[index];
+      if (tag.text === this.props.seg.tags[index].tag.name) {
+        this.props.seg.tags.splice(index, 1);
+      }
+    }
+
     this.setState(state => ({ tags: [...state.tags, tag] }));
-    //TODO : Do we need _id, createdAT and isDeleted while saving the tag?
+
     let newtag: tagstruct = {
       rank: this.props.rank,
       segment: this.props.seg._id,
-      tag: { createdAT: 'datetime', isDeleted: false, name: tag.text, _id: tag.id },
+      tag: { name: tag.text },
       _id: uuid(),
     };
 
     this.props.seg.tags.push(newtag);
-    //console.log(this.props.seg);
     this.props.seg.pristine = true;
+    this.props.forceUpdate();
   }
 
   handleDrag(tag: any, currPos: any, newPos: any) {
-    console.log(tag, currPos, newPos);
-
     const tags = [...this.state.tags];
     const newTags = tags.slice();
 
@@ -130,7 +131,7 @@ class Tags extends React.Component<MyProps, MyState> {
           handleTagClick={this.handleTagClick}
           autofocus={false}
           allowDeleteFromEmptyInput={false}
-          //inputValue = {this.editMode? this.inputStr:""}
+          allowDragDrop={false}
         />
       </div>
     );

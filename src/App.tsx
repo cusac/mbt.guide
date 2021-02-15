@@ -53,9 +53,11 @@ const App = () => {
               }}
             />
             <Route
-              path="/contact/"
+              path="/contact/:videoId?"
+              exact
               render={props => {
-                return <routes.Contact />;
+                const { videoId } = props.match.params;
+                return <routes.Contact {...props} {...{ videoId }} />;
               }}
             />
           </Router>

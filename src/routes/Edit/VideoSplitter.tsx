@@ -38,7 +38,6 @@ import { stringify, v4 as uuid } from 'uuid';
 import VideoSegmentItem from './VideoSegmentItem';
 import Tags from '../../components/Tags';
 import Tip from '../../components/Tip';
-import { YouTubePlayerState } from 'components/YouTubePlayer';
 
 //TODO: Error Handling
 
@@ -66,7 +65,6 @@ const VideoSplitter = ({
   const [newVidCreating, setnewVidCreating]: [boolean, any] = React.useState(false);
   const [wait, setWait]: [boolean, any] = React.useState(true);
   const [error, setError] = React.useState();
-  const [stag, setTag]: [Tags | undefined, any] = React.useState();
 
   // TODO: REPLACE WITH STORE AND CHECK "PROCESSED VIDEO" FILTER AND TEST STORE CALLS THROW eRRORS
 
@@ -78,6 +76,10 @@ const VideoSplitter = ({
 
   const startRef: any = React.createRef();
   const endRef: any = React.createRef();
+
+  const forceUpdate = () => {
+    setRefresh(refresh.slice());
+  };
 
   React.useEffect(() => {
     dispatch(setShowSearchbar({ showSearchbar: false }));
@@ -138,8 +140,7 @@ const VideoSplitter = ({
   const setSegmentEndTime = () => {
     let pauseTime = String((window as any).$gsecs);
     const end = timeFormat.from(pauseTime);
-    //console.log(end, currentSegment?.end , currentSegment?.start);
-    end && end != currentSegment?.start && updateSegmentAt(index, { end });
+    end && end !== currentSegment?.start && updateSegmentAt(index, { end });
     end == currentSegment?.start &&
       Swal.fire({
         title: 'Error!',
@@ -210,15 +211,29 @@ const VideoSplitter = ({
   };
 
   const saveChanges = async () => {
-    console.log(currentSegment?.title.length);
-    if (!currentSegment?.title.length || !currentSegment?.description.length) {
-      Swal.fire({
-        title: 'Error!',
-        text: 'Blank Title or Description',
-        type: 'error',
-        confirmButtonText: 'OK',
-      });
-      return undefined;
+    if (currentSegment) {
+      if (currentSegment?.start >= currentSegment?.end) {
+        Swal.fire({
+          title: 'Error!',
+          text: 'Start time cannot be equal or greater than end time.',
+          type: 'error',
+          confirmButtonText: 'OK',
+        });
+        return undefined;
+      }
+      if (
+        !currentSegment?.title.length ||
+        !currentSegment?.description.length ||
+        (currentSegment?.tags && currentSegment?.tags?.length < 1)
+      ) {
+        Swal.fire({
+          title: 'Error!',
+          text: 'Blank title or description or you forgot to add tags!',
+          type: 'error',
+          confirmButtonText: 'OK',
+        });
+        return undefined;
+      }
     }
 
     try {
@@ -415,24 +430,20 @@ const VideoSplitter = ({
       constructor(n: number) {
         this.id = '';
         this.text = '';
-        //console.log("Tag Num - " + n);
       }
     }
 
     let newtagarr: newtag[] = [];
     let count = 0;
     for (let i = 0; i < oldtag.length; i++) {
-      //console.log("Rank - " + oldtag[i].rank + " Name - " + oldtag[i].tag.name + " nTags - " + oldtag.length);
       if (rank === Number(oldtag[i].rank)) {
         newtagarr[count] = new newtag(count);
         newtagarr[count].id = oldtag[i].tag._id;
         newtagarr[count].text = oldtag[i].tag.name;
-        //console.log("Tag text: ", newtagarr[count].text, " , Tag Id: ", newtagarr[count].id);
         count = count + 1;
       }
     }
 
-    //console.log(newtagarr);
     return newtagarr;
   };
 
@@ -695,8 +706,6 @@ const VideoSplitter = ({
                 </Grid.Column>
               </Grid.Row>*/}
 
-              {/*Experimental tags (not to be merged at this time)*/}
-
               <Grid.Row>
                 <Grid.Column verticalAlign="top" style={{ textAlign: 'right' }} width={2}>
                   <Label>Tags:</Label>
@@ -712,6 +721,7 @@ const VideoSplitter = ({
                       seg={currentSegment}
                       rank={11}
                       key={key} //this will force redraw of Tags component
+                      forceUpdate={forceUpdate}
                     />
                   </div>
 
@@ -720,7 +730,13 @@ const VideoSplitter = ({
                     <Tip tipText="Add words or phrases that are not the main topic here, but are mentioned in the segment." />
                   </div>
                   <div className="segment-field" data-disabled={!currentUser || !canEdit}>
-                    <Tags tags={convertTags(6) as any} seg={currentSegment} rank={6} key={key} />
+                    <Tags
+                      tags={convertTags(6) as any}
+                      seg={currentSegment}
+                      rank={6}
+                      key={key}
+                      forceUpdate={forceUpdate}
+                    />
                   </div>
 
                   <div className="tagdesc">
@@ -728,12 +744,18 @@ const VideoSplitter = ({
                     <Tip tipText="Add words or phrases that might be searched and can be useful, such as synonyms or broad concepts." />
                   </div>
                   <div className="segment-field" data-disabled={!currentUser || !canEdit}>
-                    <Tags tags={convertTags(1) as any} seg={currentSegment} rank={1} key={key} />
+                    <Tags
+                      tags={convertTags(1) as any}
+                      seg={currentSegment}
+                      rank={1}
+                      key={key}
+                      forceUpdate={forceUpdate}
+                    />
                   </div>
                   <div>
                     <br />
                     <Tip
-                      tipText="Arrows to select a suggestion. Enter to commit. Try Drag &amp; Drop (Not Working across tag inputs)."
+                      tipText="Arrows to select a suggestion. Enter to commit."
                       position="bottom center"
                     />
                     <br />
