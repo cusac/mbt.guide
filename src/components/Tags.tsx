@@ -44,12 +44,15 @@ const Tags = ({
 }): JSX.Element => {
   const [reactTags, setReactTags] = React.useState([] as ReactTag[]);
 
-  const segmentTagToReactTag = (segTag: SegmentTag): ReactTag => {
-    return {
-      text: segTag.tag.name,
-      id: segTag.tag.name,
-    };
-  };
+  const segmentTagToReactTag = (segTag: SegmentTag): ReactTag => ({
+    text: segTag.tag.name,
+    id: segTag.tag.name,
+  });
+
+  const reactTagToSegmentTag = (reactTag: ReactTag): SegmentTag => ({
+    tag: { name: reactTag.text },
+    rank,
+  });
 
   const updateTags = (tags: ReactTag[]) => {
     let currentSegmentTags = currentSegment.tags || [];
@@ -59,16 +62,13 @@ const Tags = ({
       // Remove old tag if rank changed
       currentSegmentTags = differenceBy(
         currentSegmentTags,
-        tags.map(t => ({ tag: { name: t.text }, rank })),
+        tags.map(reactTagToSegmentTag),
         'tag.name'
       );
       // Keep segments of other ranks
       currentSegmentTags = currentSegmentTags.filter(t => t.rank !== rank);
       // Add new tags to old
-      currentSegmentTags = [
-        ...currentSegmentTags,
-        ...tags.map(t => ({ tag: { name: t.text }, rank })),
-      ];
+      currentSegmentTags = [...currentSegmentTags, ...tags.map(reactTagToSegmentTag)];
       setReactTags(currentSegmentTags.filter(t => t.rank === rank).map(segmentTagToReactTag));
       updateSegmentAt(segmentIndex, { tags: currentSegmentTags });
     }
