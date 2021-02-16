@@ -1,17 +1,22 @@
+import { differenceBy, isEqual, uniq } from 'lodash';
 import * as React from 'react';
-import { MBTTAGS } from './TagSuggestions';
-
 //Dependencies for drag n drop tags with suggestions
 //npm install --save react-tag-input
 //npm install --save react-dnd@5.0.0
 //npm install --save react-dnd-html5-backend@3.0.2
 import { WithContext as ReactTags } from 'react-tag-input';
-import { stringify, v4 as uuid } from 'uuid';
+import { assertModelArrayType, Segment, SegmentTag } from 'types';
+import { MBTTAGS } from './TagSuggestions';
 
-const suggestions = MBTTAGS.map(mbttags => {
+type ReactTag = {
+  id: string;
+  text: string;
+};
+
+const suggestions: ReactTag[] = MBTTAGS.map(mbttag => {
   return {
-    id: uuid(),
-    text: mbttags,
+    id: mbttag.toLowerCase(), // MBT Tags are globally unique, so the tag name serves as the id
+    text: mbttag.toLowerCase(),
   };
 });
 
@@ -20,122 +25,114 @@ const KeyCodes = {
   enter: 13,
 };
 
-type tagstruct = {
-  rank: number;
-  segment: string;
-  tag: { name: string };
-  _id: string;
-};
-
-interface MyProps {
-  tags: { id: string; text: string }[];
-  seg: any;
-  rank: number;
-  forceUpdate: any;
-}
-
-interface MyState {
-  tags: any;
-  suggestions: any;
-  k: number;
-}
-
 const delimiters = [KeyCodes.comma, KeyCodes.enter];
 
-class Tags extends React.Component<MyProps, MyState> {
-  constructor(props: MyProps) {
-    super(props);
-    this.state = {
-      tags: props.tags,
-      suggestions: suggestions,
-      k: 1,
-    };
+const Tags = ({
+  disabled,
+  currentSegment,
+  segmentIndex,
+  rank,
+  updateSegmentAt,
+  refresh,
+}: {
+  disabled: boolean;
+  currentSegment: Segment;
+  segmentIndex: number;
+  rank: number;
+  updateSegmentAt: (index: number, data: Partial<Segment>) => void;
+  refresh: [boolean];
+}): JSX.Element => {
+  const [reactTags, setReactTags] = React.useState([] as ReactTag[]);
 
-    this.handleDelete = this.handleDelete.bind(this);
-    this.handleAddition = this.handleAddition.bind(this);
-    this.handleDrag = this.handleDrag.bind(this);
-    this.handleTagClick = this.handleTagClick.bind(this);
-  }
+  const segmentTagToReactTag = (segTag: SegmentTag): ReactTag => ({
+    text: segTag.tag.name,
+    id: segTag.tag.name,
+  });
 
-  handleDelete(i: any) {
-    const { tags } = this.state;
-    const delIndex = tags[i].id;
+  const reactTagToSegmentTag = (reactTag: ReactTag): SegmentTag => ({
+    tag: { name: reactTag.text },
+    rank,
+  });
 
-    this.setState({
-      tags: tags.filter((tag: any, index: any) => index !== i),
-    });
-
-    //del from segment
-    for (let j = 0; j < this.props.seg.tags.length; j++) {
-      if (this.props.seg.tags[j].tag._id == delIndex) {
-        this.props.seg.tags.splice(j, 1);
-      }
+  const updateTags = (tags: ReactTag[]) => {
+    let currentSegmentTags = currentSegment.tags || [];
+    if (assertModelArrayType<SegmentTag>(currentSegmentTags, 'SegmentTag')) {
+      // Remove duplicates
+      tags = uniq(tags);
+      // Remove old tag if rank changed
+      currentSegmentTags = differenceBy(
+        currentSegmentTags,
+        tags.map(reactTagToSegmentTag),
+        'tag.name'
+      );
+      // Keep segments of other ranks
+      currentSegmentTags = currentSegmentTags.filter(t => t.rank !== rank);
+      // Add new tags to old
+      currentSegmentTags = [...currentSegmentTags, ...tags.map(reactTagToSegmentTag)];
+      setReactTags(currentSegmentTags.filter(t => t.rank === rank).map(segmentTagToReactTag));
+      updateSegmentAt(segmentIndex, { tags: currentSegmentTags });
     }
-  }
+  };
 
-  handleAddition(tag: any) {
-    tag.id = uuid();
+  const handleDelete = (i: number): void => {
+    updateTags(reactTags.filter((tag, index) => index !== i));
+  };
 
+  const handleAddition = (tag: ReactTag): void => {
     //force lowercase
     tag.text = tag.text.toLowerCase();
+    updateTags([...reactTags, tag]);
+  };
 
-    //remove duplicates
-    for (let index = 0; index < this.props.seg.tags.length; index++) {
-      const element = this.props.seg.tags[index];
-      if (tag.text === this.props.seg.tags[index].tag.name) {
-        this.props.seg.tags.splice(index, 1);
-      }
-    }
-
-    this.setState(state => ({ tags: [...state.tags, tag] }));
-
-    let newtag: tagstruct = {
-      rank: this.props.rank,
-      segment: this.props.seg._id,
-      tag: { name: tag.text },
-      _id: uuid(),
-    };
-
-    this.props.seg.tags.push(newtag);
-    this.props.seg.pristine = true;
-    this.props.forceUpdate();
-  }
-
-  handleDrag(tag: any, currPos: any, newPos: any) {
-    const tags = [...this.state.tags];
-    const newTags = tags.slice();
+  const handleDrag = (tag: ReactTag, currPos: number, newPos: number) => {
+    const newTags = reactTags.slice();
 
     tag && newTags.splice(currPos, 1);
     tag && newTags.splice(newPos, 0, tag);
 
-    // re-render
-    this.setState({ tags: newTags });
-  }
+    updateTags(newTags);
+  };
 
-  handleTagClick(index: any) {
+  const handleTagClick = (index: number) => {
     console.log('The tag at index ' + index + ' was clicked');
-  }
+  };
 
-  render() {
-    const { tags, suggestions } = this.state;
+  // This effect will run once during component initialization
+  React.useEffect(() => {
+    const tagsInput = currentSegment.tags || [];
+    if (assertModelArrayType<SegmentTag>(tagsInput, 'SegmentTag')) {
+      setReactTags(tagsInput.filter(tag => tag.rank === rank).map(segmentTagToReactTag));
+    }
+  }, []);
 
-    return (
-      <div>
-        <ReactTags
-          tags={tags}
-          suggestions={suggestions}
-          delimiters={delimiters}
-          handleDelete={this.handleDelete}
-          handleAddition={this.handleAddition}
-          handleDrag={this.handleDrag}
-          handleTagClick={this.handleTagClick}
-          autofocus={false}
-          allowDeleteFromEmptyInput={false}
-          allowDragDrop={false}
-        />
-      </div>
-    );
-  }
-}
+  // This re-renders the tags when a refresh is triggered
+  React.useEffect(() => {
+    const tagsInput = currentSegment.tags || [];
+    if (assertModelArrayType<SegmentTag>(tagsInput, 'SegmentTag')) {
+      const updatedTags = tagsInput.filter(t => t.rank === rank).map(segmentTagToReactTag);
+      if (!isEqual(updatedTags, reactTags)) {
+        setReactTags(updatedTags);
+      }
+    }
+  }, [refresh]);
+
+  return (
+    <div>
+      <ReactTags
+        readOnly={disabled}
+        tags={reactTags}
+        suggestions={suggestions}
+        delimiters={delimiters}
+        handleDelete={handleDelete}
+        handleAddition={handleAddition}
+        handleDrag={handleDrag}
+        handleTagClick={handleTagClick}
+        autofocus={false}
+        allowDeleteFromEmptyInput={false}
+        allowDragDrop={false}
+      />
+    </div>
+  );
+};
 
 export default Tags;
