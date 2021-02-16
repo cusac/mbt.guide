@@ -77,7 +77,7 @@ const VideoSplitter = ({
   const startRef: any = React.createRef();
   const endRef: any = React.createRef();
 
-  const forceUpdate = () => {
+  const triggerRender = () => {
     setRefresh(refresh.slice());
   };
 
@@ -88,36 +88,20 @@ const VideoSplitter = ({
       dispatch(setLastViewedSegmentId({ lastViewedSegmentId: segmentId }));
   }, []);
 
-  const updateSegmentAt = (index: any, data: any) => {
-    const newSegments = (segments as any).slice();
+  const updateSegmentAt = (index: number, data: Partial<Segment>) => {
+    const newSegments = segments.slice();
     Object.assign(newSegments[index], { ...data, pristine: false });
-    startRef.current &&
+    data.start !== undefined &&
+      startRef.current &&
       startRef.current.value &&
-      (startRef.current.value = timeFormat.to(data.start as any));
-    endRef.current &&
+      (startRef.current.value = timeFormat.to(data.start));
+    data.end !== undefined &&
+      endRef.current &&
       endRef.current.value &&
-      (endRef.current.value = timeFormat.to(data.end as any));
+      (endRef.current.value = timeFormat.to(data.end));
     setSegments(newSegments);
     setSaveData(true);
-  };
-
-  const updateTags = (index: any, tags: string[], rank: number) => {
-    // Remove duplicates
-    tags = uniq(tags);
-    // Remove old tag if rank changed
-    (currentSegment as any).tags = differenceBy(
-      (currentSegment as any).tags,
-      tags.map((t: any) => ({ tag: { name: t } })),
-      'tag.name'
-    );
-    // Keep segments of other ranks
-    (currentSegment as any).tags = (currentSegment as any).tags.filter((t: any) => t.rank !== rank);
-    // Add new tags to old
-    tags = [
-      ...(currentSegment as any).tags,
-      ...tags.map((t: any) => ({ tag: { name: t }, rank })),
-    ] as any;
-    updateSegmentAt(index, { ...currentSegment, tags });
+    triggerRender();
   };
 
   const updateStart = (index: any, value: any) => {
@@ -321,7 +305,7 @@ const VideoSplitter = ({
       endRef.current &&
       (endRef.current.value = timeFormat.to((currentSegment as any).end));
     // Update the state to make sure things are rendered properly
-    setRefresh(refresh.slice());
+    triggerRender();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSegment, segments]);
 
@@ -417,37 +401,6 @@ const VideoSplitter = ({
       </div>
     );
   }
-
-  const convertTags = (rank: number) => {
-    if (currentSegment === undefined) {
-      return undefined;
-    }
-    let oldtag = (currentSegment as any).tags;
-
-    class newtag {
-      id: string;
-      text: string;
-      constructor(n: number) {
-        this.id = '';
-        this.text = '';
-      }
-    }
-
-    let newtagarr: newtag[] = [];
-    let count = 0;
-    for (let i = 0; i < oldtag.length; i++) {
-      if (rank === Number(oldtag[i].rank)) {
-        newtagarr[count] = new newtag(count);
-        newtagarr[count].id = oldtag[i].tag._id;
-        newtagarr[count].text = oldtag[i].tag.name;
-        count = count + 1;
-      }
-    }
-
-    return newtagarr;
-  };
-
-  let key = JSON.stringify(currentSegment as any);
 
   return (
     <div>
@@ -655,56 +608,12 @@ const VideoSplitter = ({
                       placeholder="Enter a description"
                       value={segments[index].description}
                       onChange={(event, { value }) =>
-                        updateSegmentAt(index, { description: value })
+                        updateSegmentAt(index, { description: value as string })
                       }
                     />
                   </Form>
                 </Grid.Column>
               </Grid.Row>
-
-              {/*<Grid.Row>
-                <Grid.Column verticalAlign="middle" style={{ textAlign: 'right' }} width={2}>
-                  <Label>Tags:</Label>
-                </Grid.Column>
-                <Grid.Column width={14}>
-                  <h2>High Relevance</h2>
-                  <div className="segment-field" data-disabled={!currentUser || !canEdit}>
-                    <TagsInput
-                      disabled={!currentUser || !canEdit}
-                      value={(currentSegment as any).tags
-                        .filter((t: any) => t.rank === 11)
-                        .map((t: any) => t.tag.name)}
-                      onChange={(tags: any) => updateTags(index, tags, 11)}
-                    />
-                  </div>
-                  <h2>Mid Relevance</h2>
-                  <div className="segment-field" data-disabled={!currentUser || !canEdit}>
-                    <TagsInput
-                      disabled={!currentUser || !canEdit}
-                      value={(currentSegment as any).tags
-                        .filter((t: any) => t.rank === 6)
-                        .map((t: any) => t.tag.name)}
-                      onChange={(tags: any) => updateTags(index, tags, 6)}
-                    />
-                  </div>
-                  <h2>Low Relevance</h2>
-                  <div className="segment-field" data-disabled={!currentUser || !canEdit}>
-                    <TagsInput
-                      disabled={!currentUser || !canEdit}
-                      value={(currentSegment as any).tags
-                        .filter((t: any) => t.rank === 1)
-                        .map((t: any) => t.tag.name)}
-                      onChange={(tags: any) => updateTags(index, tags, 1)}
-                    />
-                  </div>
-                  <p>
-                    <br />
-                    <Icon name="help circle" />
-                    <small>Tip : Type a phrase and press Tab key to commit.</small>
-                    <br />
-                  </p>
-                </Grid.Column>
-              </Grid.Row>*/}
 
               <Grid.Row>
                 <Grid.Column verticalAlign="top" style={{ textAlign: 'right' }} width={2}>
@@ -717,11 +626,12 @@ const VideoSplitter = ({
                   </div>
                   <div className="segment-field" data-disabled={!currentUser || !canEdit}>
                     <Tags
-                      tags={convertTags(11) as any}
-                      seg={currentSegment}
+                      disabled={!currentUser || !canEdit}
+                      refresh={refresh}
+                      segmentIndex={index}
+                      currentSegment={currentSegment}
                       rank={11}
-                      key={key} //this will force redraw of Tags component
-                      forceUpdate={forceUpdate}
+                      updateSegmentAt={updateSegmentAt}
                     />
                   </div>
 
@@ -731,11 +641,12 @@ const VideoSplitter = ({
                   </div>
                   <div className="segment-field" data-disabled={!currentUser || !canEdit}>
                     <Tags
-                      tags={convertTags(6) as any}
-                      seg={currentSegment}
+                      disabled={!currentUser || !canEdit}
+                      refresh={refresh}
+                      segmentIndex={index}
+                      currentSegment={currentSegment}
                       rank={6}
-                      key={key}
-                      forceUpdate={forceUpdate}
+                      updateSegmentAt={updateSegmentAt}
                     />
                   </div>
 
@@ -745,11 +656,12 @@ const VideoSplitter = ({
                   </div>
                   <div className="segment-field" data-disabled={!currentUser || !canEdit}>
                     <Tags
-                      tags={convertTags(1) as any}
-                      seg={currentSegment}
+                      disabled={!currentUser || !canEdit}
+                      refresh={refresh}
+                      segmentIndex={index}
+                      currentSegment={currentSegment}
                       rank={1}
-                      key={key}
-                      forceUpdate={forceUpdate}
+                      updateSegmentAt={updateSegmentAt}
                     />
                   </div>
                   <div>
