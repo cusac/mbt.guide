@@ -6,11 +6,13 @@ export type Logger = typeof console;
 export type Params = {
   [key: string]: any;
   $embed?: string | [string];
+  $term?: string;
+  $limit?: number;
 };
 
 export type ListResponse<T> = {
   data: {
-    docs: [T];
+    docs: T[];
   };
 };
 
