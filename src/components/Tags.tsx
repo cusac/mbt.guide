@@ -1,19 +1,20 @@
-import { differenceBy, isEqual, uniq } from 'lodash';
+import { differenceBy, isEqual, uniq, uniqBy } from 'lodash';
 import * as React from 'react';
 //Dependencies for drag n drop tags with suggestions
 //npm install --save react-tag-input
 //npm install --save react-dnd@5.0.0
 //npm install --save react-dnd-html5-backend@3.0.2
 import { WithContext as ReactTags } from 'react-tag-input';
-import { assertModelArrayType, Segment, SegmentTag } from 'types';
+import { assertModelArrayType, Segment, SegmentTag, Tag } from 'types';
 import { MBTTAGS } from './TagSuggestions';
+import { repository } from 'services';
 
 type ReactTag = {
   id: string;
   text: string;
 };
 
-const suggestions: ReactTag[] = MBTTAGS.map(mbttag => {
+const presetSuggestions: ReactTag[] = MBTTAGS.map(mbttag => {
   return {
     id: mbttag.toLowerCase(), // MBT Tags are globally unique, so the tag name serves as the id
     text: mbttag.toLowerCase(),
@@ -43,6 +44,7 @@ const Tags = ({
   refresh: [boolean];
 }): JSX.Element => {
   const [reactTags, setReactTags] = React.useState([] as ReactTag[]);
+  const [suggestions, setSuggestions] = React.useState([] as ReactTag[]);
 
   const segmentTagToReactTag = (segTag: SegmentTag): ReactTag => ({
     text: segTag.tag.name,
@@ -52,6 +54,11 @@ const Tags = ({
   const reactTagToSegmentTag = (reactTag: ReactTag): SegmentTag => ({
     tag: { name: reactTag.text },
     rank,
+  });
+
+  const tagToReactTag = (tag: Tag): ReactTag => ({
+    text: tag.name,
+    id: tag.name,
   });
 
   const updateTags = (tags: ReactTag[]) => {
@@ -72,6 +79,16 @@ const Tags = ({
       setReactTags(currentSegmentTags.filter(t => t.rank === rank).map(segmentTagToReactTag));
       updateSegmentAt(segmentIndex, { tags: currentSegmentTags });
     }
+  };
+
+  const formatSuggestions = (suggestions: ReactTag[]): ReactTag[] => {
+    return uniqBy(
+      suggestions.map(tag => ({
+        id: tag.text.toLowerCase().trim(),
+        text: tag.text.toLowerCase().trim(),
+      })),
+      'text'
+    );
   };
 
   const handleDelete = (i: number): void => {
@@ -95,6 +112,17 @@ const Tags = ({
 
   const handleTagClick = (index: number) => {
     console.log('The tag at index ' + index + ' was clicked');
+  };
+
+  const handleInputChange = async (text: string) => {
+    let {
+      data: { docs },
+    } = await repository.tag.list({ $term: text, $limit: 50, $embed: 'segments' });
+
+    // NOTE: Soon the tag filters and formatting will be accomplished on the backend
+    docs = docs.filter(tag => tag.segments && tag.segments.length > 0);
+
+    setSuggestions(formatSuggestions(docs.map(tagToReactTag).concat(presetSuggestions)));
   };
 
   // This effect will run once during component initialization
@@ -127,6 +155,7 @@ const Tags = ({
         handleAddition={handleAddition}
         handleDrag={handleDrag}
         handleTagClick={handleTagClick}
+        handleInputChange={handleInputChange}
         autofocus={false}
         allowDeleteFromEmptyInput={false}
         allowDragDrop={false}
