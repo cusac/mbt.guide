@@ -62,16 +62,6 @@ const LandingPage = ({}: {}): any => {
               MBT Timestamping Volunteers Channel on Slack
             </a>
           </p>
-          <p>
-            <br />
-            <br />
-            <br />
-            <small>
-              User Info: <br />
-              {'Scope : ' + (currentUserScope && currentUserScope[1])} <br />
-              {'Role Name : ' + rolename}
-            </small>
-          </p>
           <Image src={bimage} fluid rounded />
         </div>
       ) : (
