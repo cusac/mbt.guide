@@ -21,6 +21,7 @@ import { debounce } from 'lodash';
 import { Loading } from '../../components';
 import { Params } from '../../utils/restful-resource-utility';
 import statefulDebounce from '../../utils/statefulDebounce';
+import { history } from 'utils';
 
 const MySegments = () => {
   const [error, setError] = React.useState();
@@ -48,14 +49,14 @@ const MySegments = () => {
         dispatch(setLoadingSegments({ loadingSegments: true }));
 
         const query: Params = {
-          // ownerEmail: currentUser?.email,
+          ownerEmail: currentUser?.email,
           $page: currentPage,
           $embed: ['video', 'tags'],
           $limit: itemLimit,
         };
 
         if (searchText) {
-          query.$text = searchText;
+          query.$term = searchText;
         }
 
         const {
@@ -96,14 +97,42 @@ const MySegments = () => {
       {
         Header: 'Title',
         accessor: 'title',
+      },
+      {
+        Header: 'Description',
+        accessor: 'description',
+      },
+      {
+        Header: 'Edit',
+        accessor: (seg: Segment) => seg,
         // eslint-disable-next-line react/display-name
-        Cell: ({ value }: { value: string }) => {
-          return <Label ribbon>{value}</Label>;
+        Cell: ({ value }: { value: Segment }) => {
+          return (
+            <Icon
+              link={true}
+              size="big"
+              name="edit"
+              color="blue"
+              onClick={() => history.push(`/edit/${value.videoYtId}/${value.segmentId}`)}
+            />
+          );
         },
       },
       {
-        Header: 'Owner',
-        accessor: 'ownerEmail',
+        Header: 'Watch',
+        accessor: (seg: Segment) => seg,
+        // eslint-disable-next-line react/display-name
+        Cell: ({ value }: { value: Segment }) => {
+          return (
+            <Icon
+              link={true}
+              size="big"
+              name="video play"
+              color="green"
+              onClick={() => history.push(`/segments/${value.segmentId}`)}
+            />
+          );
+        },
       },
     ],
     []
@@ -132,34 +161,6 @@ const MySegments = () => {
     setSelectedPage(1);
   }, 500);
 
-  // const {
-  //   getTableProps,
-  //   getTableBodyProps,
-  //   headerGroups,
-  //   prepareRow,
-  //   page,
-  //   canPreviousPage,
-  //   canNextPage,
-  //   pageOptions,
-  //   gotoPage,
-  //   nextPage,
-  //   previousPage,
-  //   setPageSize,
-  //   state: { pageIndex, pageSize, sortBy }
-  // } = useTable(
-  //   {
-  //     columns,
-  //     data,
-  //     manualPagination: true,
-  //     manualSortBy: true,
-  //     autoResetPage: false,
-  //     autoResetSortBy: false,
-  //     pageCount: controlledPageCount
-  //   },
-  //   useSortBy,
-  //   usePagination
-  // );
-
   if (!currentUser) {
     return (
       <div>
@@ -182,18 +183,16 @@ const MySegments = () => {
                   onChange={event => onSearchChange(event.target.value)}
                   type="text"
                   placeholder={'Search your segments.'}
-                  // value={term}
                 />
                 <i className="search icon" />
               </div>
             </Grid.Column>
             <Grid.Column width={6}>
               <Pagination
-                defaultActivePage={currentPage}
+                // defaultActivePage={currentPage}
                 totalPages={totalPages}
                 activePage={selectedPage}
                 onPageChange={(_, { activePage }) => {
-                  // activePage && onPageChange(Number(activePage));
                   activePage && onSelectedPageChange(Number(activePage));
                 }}
                 ellipsisItem={{ content: <Icon name="ellipsis horizontal" />, icon: true }}

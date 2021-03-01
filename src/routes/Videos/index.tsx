@@ -363,7 +363,7 @@ const Videos = ({ videoId }: { videoId: string }) => {
                         <Divider horizontal>
                           <Header as="h2">
                             <Icon name="user" color="blue" />
-                            <Header.Content>Your Segments</Header.Content>
+                            <Header.Content>My Segments</Header.Content>
                           </Header>
                         </Divider>
                         {mySegments && mySegments.length > 0 ? (
