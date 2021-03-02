@@ -8,14 +8,14 @@ export type Range = { min: number; max: number };
 
 const Loading = ({ children }: { children: any }) => {
   return (
-    <div>
+    <React.Fragment>
       <Container style={{ height: 300, marginTop: 50 }} textAlign="center">
         <Header as="h2" icon textAlign="center">
           <Icon loading name="spinner" />
           <Header.Content>{children}</Header.Content>
         </Header>
       </Container>
-    </div>
+    </React.Fragment>
   );
 };
 

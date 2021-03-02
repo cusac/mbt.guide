@@ -1,5 +1,5 @@
 import { Crud, Association } from '../utils/restful-resource-utility';
-import { Video, Segment } from '../types';
+import { Video, Segment, Tag } from '../types';
 
 export default {
   // serverURI: 'http://localhost:8080',
@@ -18,6 +18,14 @@ export default {
 
 console.log('SERVER:', process.env.REACT_APP_SERVER_URI);
 console.log('NODE ENV:', process.env.NODE_ENV);
+
+/**
+ * This provides a list of default values to use if none have been set.
+ */
+export const defaultValues = {
+  defaultSegmentId: '89553224-aff5-449b-be32-56c2ab1df5a4',
+  defaultVideoId: '_ok27SPHhwA',
+};
 
 /**
  * Adding a property to this object will create a repository for that property.
@@ -116,8 +124,8 @@ export type Repository = {
   video: Crud<Video> & {
     segments: Association<Segment>;
   };
-  segment: Crud<any> & {
-    tags: Association<any>;
+  segment: Crud<Segment> & {
+    tags: Association<Tag>;
   };
   tag: Crud<any>;
   visitor: Crud<any>;

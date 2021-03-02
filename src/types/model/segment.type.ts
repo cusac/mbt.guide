@@ -11,6 +11,9 @@ export type Segment = {
   tags?: Tag[] | SegmentTag[];
   video: Video | Video['_id'];
   owner: User | User['_id'];
+  videoYtId: string;
+  videoTitle: string;
+  videoDuration: number;
   ownerEmail: string;
   segmentId: string;
   title: string;

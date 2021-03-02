@@ -11,6 +11,7 @@ const Layout = ({ children }: { children: any }) => {
 
   const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
   const lastViewedVideoId = useSelector((state: RootState) => state.video.lastViewedVideoId);
+  const currentUser = useSelector((state: RootState) => state.auth.user);
 
   return (
     <div className="ui two grid" ref={setContextRef as any}>
@@ -25,14 +26,33 @@ const Layout = ({ children }: { children: any }) => {
                 src={logo}
                 className="logo"
                 alt="My Big TOE guide"
-                // onClick={() => utils.history.push(`/`)}
+                onClick={() => history.push(`/`)}
               />
             </Menu.Item>
-            <Menu.Item as="a" onClick={() => history.push(`/search/${lastViewedSegmentId}`)}>
+            <Menu.Item as="a" onClick={() => history.push(`/segments/${lastViewedSegmentId}`)}>
               <Icon name="video" />
-              Segments
+              All Segments
             </Menu.Item>
-            <Menu.Item as="a" onClick={() => history.push(`/${lastViewedVideoId}`)}>
+            {currentUser ? (
+              <Menu.Item as="a" onClick={() => history.push(`/my-segments`)}>
+                <Grid>
+                  <Grid.Row>
+                    <Grid.Column>
+                      <Grid.Row style={{ marginBottom: '5px' }}>
+                        <Icon.Group size="big">
+                          <Icon name="user" />
+                          <Icon corner="bottom right" name="video" color="black" />
+                        </Icon.Group>
+                      </Grid.Row>
+                      <Grid.Row>My Segments</Grid.Row>
+                    </Grid.Column>
+                  </Grid.Row>
+                </Grid>
+              </Menu.Item>
+            ) : (
+              <div></div>
+            )}
+            <Menu.Item as="a" onClick={() => history.push(`/videos/${lastViewedVideoId}`)}>
               <Icon name="film" />
               Videos
             </Menu.Item>

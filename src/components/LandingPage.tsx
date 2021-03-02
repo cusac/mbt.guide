@@ -1,10 +1,16 @@
 import * as React from 'react';
-import { Button, Container, Grid, Icon, Label, Link, List } from '../components';
+import { useSelector } from 'react-redux';
 import { Image } from 'semantic-ui-react';
-import timage from '../images/landing-background-top.png';
+import { RootState } from 'store';
+import { Icon } from '../components';
 import bimage from '../images/landing-background-bot.png';
+import timage from '../images/landing-background-top.png';
 
-const LandingPage = ({ user }: { user: string }): any => {
+const LandingPage = (): any => {
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+
+  const user = currentUser ? currentUser.firstName : 'Guest';
+
   return (
     <React.Fragment>
       <div className="videodesc">
