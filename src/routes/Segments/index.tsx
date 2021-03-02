@@ -15,6 +15,7 @@ import SegmentViewer from '../../components/SegmentViewer';
 import * as services from '../../services';
 import * as utils from '../../utils';
 import { captureAndLog, toastError } from '../../utils';
+import { defaultValues } from 'config';
 
 const { Grid, SegmentList, Loading } = components;
 
@@ -68,7 +69,11 @@ const Segments = ({ segmentId }: { segmentId: string }) => {
       }
     }
     // Hardcode a default segment for now
-    const currentSegmentId = segmentId ? segmentId : lastViewedSegmentId;
+    const currentSegmentId = segmentId
+      ? segmentId
+      : lastViewedSegmentId
+      ? lastViewedSegmentId
+      : defaultValues.defaultSegmentId;
     !segmentId && selectSegment(currentSegmentId);
     dispatch(setPreviousView({ previousView: 'segment' }));
     dispatch(setSearchType({ searchType: 'segment' }));

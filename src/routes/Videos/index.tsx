@@ -21,6 +21,7 @@ import * as utils from '../../utils';
 import { captureAndLog, toastError } from '../../utils';
 import { useState } from 'react';
 import LandingPage from '../../components/LandingPage';
+import { defaultValues } from 'config';
 
 const {
   Button,
@@ -95,7 +96,7 @@ const Videos = ({ videoId }: { videoId: string }) => {
       }
 
       setVideos(defaultVids);
-      !videoId && selectVideo(`_ok27SPHhwA`);
+      !videoId && selectVideo(defaultValues.defaultVideoId);
     } catch (err) {
       captureAndLog({ file: 'Home', method: 'fetchVideos', err });
       toastError(
@@ -297,9 +298,6 @@ const Videos = ({ videoId }: { videoId: string }) => {
   );
 
   const moreButtonName = readMore ? 'Collapse' : 'Read More';
-  // TODO: Update landing page to default to general users
-  // TODO: Make sure landing page does not override the default video (_ok27SPHhwA)
-  const isLandingPage = selectedVideo ? selectedVideo.id === '_ok27SPHhwA' : false;
   let datePublished = selectedVideo ? selectedVideo.snippet.publishedAt.toString() : 'NA';
   datePublished = datePublished.replace('T', ' Time: ').replace('Z', '');
 
@@ -311,42 +309,38 @@ const Videos = ({ videoId }: { videoId: string }) => {
             {!loadingSelectedVideo ? (
               <div ref={setVideoColumnRef as any}>
                 {selectedVideo ? (
-                  isLandingPage ? (
-                    <LandingPage />
-                  ) : (
-                    <div>
-                      <div className="ui embed">
-                        <iframe src={videoSrc} allowFullScreen title="Video player" />
-                      </div>
-                      <div className="videodesc">
-                        <h3>{(selectedVideo as any).snippet.title}</h3>
-
-                        <p>{'Date Published : ' + datePublished}</p>
-                        <p>
-                          {!readMore && descPreview}
-                          {readMore && extraContent}
-                          <Button
-                            icon
-                            labelPosition={readMore ? 'left' : 'right'}
-                            color="teal"
-                            floated="right"
-                            size="mini"
-                            onClick={() => {
-                              setReadMore(!readMore);
-                            }}
-                          >
-                            {moreButtonName}
-                            <Icon className={readMore ? 'left arrow' : 'right arrow'} />
-                          </Button>
-                        </p>
-                      </div>
+                  <div>
+                    <div className="ui embed">
+                      <iframe src={videoSrc} allowFullScreen title="Video player" />
                     </div>
-                  )
+                    <div className="videodesc">
+                      <h3>{(selectedVideo as any).snippet.title}</h3>
+
+                      <p>{'Date Published : ' + datePublished}</p>
+                      <p>
+                        {!readMore && descPreview}
+                        {readMore && extraContent}
+                        <Button
+                          icon
+                          labelPosition={readMore ? 'left' : 'right'}
+                          color="teal"
+                          floated="right"
+                          size="mini"
+                          onClick={() => {
+                            setReadMore(!readMore);
+                          }}
+                        >
+                          {moreButtonName}
+                          <Icon className={readMore ? 'left arrow' : 'right arrow'} />
+                        </Button>
+                      </p>
+                    </div>
+                  </div>
                 ) : (
                   <div>Select a video</div>
                 )}
                 <br />
-                {!isLandingPage && (
+                {
                   <Button
                     color="teal"
                     size="big"
@@ -354,9 +348,9 @@ const Videos = ({ videoId }: { videoId: string }) => {
                   >
                     <Icon name="plus" /> New Segment
                   </Button>
-                )}
+                }
                 <br />
-                {!loadingSegments && !isLandingPage ? (
+                {!loadingSegments ? (
                   <div>
                     {currentUser && (
                       <div>
@@ -496,7 +490,7 @@ const Videos = ({ videoId }: { videoId: string }) => {
                     )}
                   </div>
                 ) : (
-                  !isLandingPage && <Loading>Loading segments...</Loading>
+                  <Loading>Loading segments...</Loading>
                 )}
               </div>
             ) : (

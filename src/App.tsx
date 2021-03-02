@@ -51,7 +51,7 @@ const App = () => {
               }}
             />
             <Route
-              path="/segments/:segmentId"
+              path="/segments/:segmentId?"
               exact
               render={props => {
                 const { segmentId } = props.match.params;
