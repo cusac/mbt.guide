@@ -1,4 +1,5 @@
-import React from 'react';
+import { defaultValues } from 'config';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import ResizeObserver from 'resize-observer-polyfill';
 import {
@@ -18,10 +19,7 @@ import repository from '../../services/repository.service';
 import { toYTVid, youtubeCall } from '../../services/youtube.service';
 import { assertModelArrayType } from '../../types/model.type';
 import * as utils from '../../utils';
-import { captureAndLog, toastError } from '../../utils';
-import { useState } from 'react';
-import LandingPage from '../../components/LandingPage';
-import { defaultValues } from 'config';
+import { captureAndLog, timeFormat, toastError } from '../../utils';
 
 const {
   Button,
@@ -37,7 +35,7 @@ const {
   Card,
 } = components;
 
-const Videos = ({ videoId }: { videoId: string }) => {
+const Videos = ({ videoId }: { videoId?: string }) => {
   const [error, setError] = React.useState();
   const [loadingSelectedVideo, setLoadingSelectedVideo] = React.useState(true);
   const [loadingSegments, setLoadingSegments] = React.useState(true);
@@ -90,7 +88,7 @@ const Videos = ({ videoId }: { videoId: string }) => {
 
         defaultVids = defaultVids.concat(filteredVids);
 
-        if (defaultVids.length >= 10) {
+        if (defaultVids.length >= 5) {
           break;
         }
       }
@@ -152,7 +150,7 @@ const Videos = ({ videoId }: { videoId: string }) => {
     return matchingVids;
   };
 
-  const videoColumnResizeObserver = new ResizeObserver(entries => {
+  const videoColumnResizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
     setColumnHeight(entries[0].target.clientHeight);
   });
 
@@ -163,7 +161,7 @@ const Videos = ({ videoId }: { videoId: string }) => {
     dispatch(setSearchType({ searchType: 'ytVideo' }));
     dispatch(setHasSearched({ hasSearched: false }));
     dispatch(setShowSearchbar({ showSearchbar: true }));
-    dispatch(setLastViewedVideoId({ lastViewedVideoId: videoId }));
+    videoId && dispatch(setLastViewedVideoId({ lastViewedVideoId: videoId }));
   }, []);
 
   React.useEffect(() => {
@@ -299,13 +297,15 @@ const Videos = ({ videoId }: { videoId: string }) => {
 
   const moreButtonName = readMore ? 'Collapse' : 'Read More';
   let datePublished = selectedVideo ? selectedVideo.snippet.publishedAt.toString() : 'NA';
-  datePublished = datePublished.replace('T', ' Time: ').replace('Z', '');
+  //datePublished = datePublished.replace('T', ' | Time: ').replace('Z', '');
+  datePublished = datePublished.slice(0, 10);
+  datePublished = datePublished + ' | Duration: ' + timeFormat.to(Number(segmentVideo?.duration));
 
   return (
     <div>
       <Grid>
         <Grid.Row>
-          <Grid.Column style={{ marginLeft: 5 }} width={11}>
+          <Grid.Column style={{ marginLeft: 5 }} width={10}>
             {!loadingSelectedVideo ? (
               <div ref={setVideoColumnRef as any}>
                 {selectedVideo ? (
@@ -319,12 +319,13 @@ const Videos = ({ videoId }: { videoId: string }) => {
                       <p>{'Date Published : ' + datePublished}</p>
                       <p>
                         {!readMore && descPreview}
+                        <br />
                         {readMore && extraContent}
+                        <br />
                         <Button
                           icon
                           labelPosition={readMore ? 'left' : 'right'}
-                          color="teal"
-                          floated="right"
+                          floated="left"
                           size="mini"
                           onClick={() => {
                             setReadMore(!readMore);
@@ -333,6 +334,7 @@ const Videos = ({ videoId }: { videoId: string }) => {
                           {moreButtonName}
                           <Icon className={readMore ? 'left arrow' : 'right arrow'} />
                         </Button>
+                        <br />
                       </p>
                     </div>
                   </div>
@@ -497,38 +499,41 @@ const Videos = ({ videoId }: { videoId: string }) => {
               <Loading>Loading video...</Loading>
             )}
           </Grid.Column>
-          <Grid.Column style={{ color: 'white' }} verticalAlign="top" width={4}>
+          <Grid.Column style={{ color: 'white' }} verticalAlign="top" width={5}>
             {!loadingVideos ? (
               <div>
+                <div>
+                  <Card fluid color="blue">
+                    <Card.Content>
+                      <Card.Header>
+                        <Checkbox
+                          toggle
+                          label="Hide Processed Videos"
+                          checked={filterProcessedVideos}
+                          onChange={(event, data) =>
+                            setFilterProcessedVideos((data as any).checked)
+                          }
+                        />
+                      </Card.Header>
+                    </Card.Content>
+                  </Card>
+                </div>
                 {videos && videos.length > 0 ? (
-                  <div>
-                    <Card fluid color="blue">
-                      <Card.Content>
-                        <Card.Header>
-                          <Checkbox
-                            toggle
-                            label="Hide Processed Videos"
-                            checked={filterProcessedVideos}
-                            onChange={(event, data) =>
-                              setFilterProcessedVideos((data as any).checked)
-                            }
-                          />
-                        </Card.Header>
-                      </Card.Content>
-                    </Card>
-                    <div style={{ overflow: 'auto', maxHeight: columnHeight }}>
-                      <VideoList
-                        videos={videos as any}
-                        handleVideoSelect={(video: YTVideo) => video && selectVideo(video.id)}
-                      />
-                    </div>
+                  <div style={{ overflow: 'auto', maxHeight: columnHeight }}>
+                    <VideoList
+                      videos={videos as any}
+                      handleVideoSelect={(video: YTVideo) => video && selectVideo(video.id)}
+                    />
                   </div>
                 ) : (
                   <div>
+                    <br />
                     <h2 style={{ color: 'black' }}>No videos found. </h2>
                     <h3 style={{ color: 'grey' }}>
                       Try searching for something less specific or if searching for a title make
-                      sure the title is exact. Try unchecking the Hide Processed Videos checkbox.{' '}
+                      sure the title is exact.
+                      <br />
+                      <br /> Try unchecking the Hide Processed Videos checkbox.{' '}
                     </h3>
                   </div>
                 )}
