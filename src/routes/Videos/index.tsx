@@ -500,24 +500,22 @@ const Videos = ({ videoId }: { videoId?: string }) => {
             )}
           </Grid.Column>
           <Grid.Column style={{ color: 'white' }} verticalAlign="top" width={5}>
+            <div>
+              <Card fluid color="blue">
+                <Card.Content>
+                  <Card.Header>
+                    <Checkbox
+                      toggle
+                      label="Hide Processed Videos"
+                      checked={filterProcessedVideos}
+                      onChange={(event, data) => setFilterProcessedVideos((data as any).checked)}
+                    />
+                  </Card.Header>
+                </Card.Content>
+              </Card>
+            </div>
             {!loadingVideos ? (
               <div>
-                <div>
-                  <Card fluid color="blue">
-                    <Card.Content>
-                      <Card.Header>
-                        <Checkbox
-                          toggle
-                          label="Hide Processed Videos"
-                          checked={filterProcessedVideos}
-                          onChange={(event, data) =>
-                            setFilterProcessedVideos((data as any).checked)
-                          }
-                        />
-                      </Card.Header>
-                    </Card.Content>
-                  </Card>
-                </div>
                 {videos && videos.length > 0 ? (
                   <div style={{ overflow: 'auto', maxHeight: columnHeight }}>
                     <VideoList
