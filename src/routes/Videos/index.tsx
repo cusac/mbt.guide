@@ -43,7 +43,7 @@ const Videos = ({ videoId }: { videoId?: string }) => {
   const [mySegments, setMySegments] = React.useState(undefined as Array<Segment> | void);
   const [selectedVideo, setSelectedVideo] = React.useState(undefined as YTVideo | undefined);
   const [videos, setVideos] = React.useState([] as YTVideo[]);
-  const [filterProcessedVideos, setFilterProcessedVideos] = React.useState(true);
+  const [filterProcessedVideos, setFilterProcessedVideos] = React.useState(false);
   const [segmentVideo, setSegmentVideo] = React.useState(undefined as Video | undefined);
   const [matchedVids, setMatchedVids] = React.useState([] as Video[]);
   const [videoColumnRef, setVideoColumnRef] = React.useState(
@@ -508,7 +508,7 @@ const Videos = ({ videoId }: { videoId?: string }) => {
                       toggle
                       label="Hide Processed Videos"
                       checked={filterProcessedVideos}
-                      onChange={(event, data) => setFilterProcessedVideos((data as any).checked)}
+                      onChange={(_, data) => setFilterProcessedVideos(data.checked || false)}
                     />
                   </Card.Header>
                 </Card.Content>
