@@ -10,17 +10,14 @@ import {
   Link,
   Loading,
   Modal,
-  Popup,
   SegmentUI,
   Slider,
   TextArea,
   YouTubePlayerWithControls,
 } from 'components';
-import { differenceBy, uniq } from 'lodash';
 import React from 'react';
 import InputMask from 'react-input-mask';
 import { useSelector } from 'react-redux';
-import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
 import { repository } from 'services';
 import {
@@ -34,10 +31,10 @@ import {
 import Swal from 'sweetalert2';
 import { Segment, Video } from 'types';
 import { captureAndLog, hasPermission, history, timeFormat, toastError } from 'utils';
-import { stringify, v4 as uuid } from 'uuid';
-import VideoSegmentItem from './VideoSegmentItem';
+import { v4 as uuid } from 'uuid';
 import Tags from '../../components/Tags';
 import Tip from '../../components/Tip';
+import VideoSegmentItem from './VideoSegmentItem';
 
 //TODO: Error Handling
 
@@ -50,7 +47,7 @@ const VideoSplitter = ({
   minSegmentDuration,
 }: {
   videoId: string;
-  segmentId: string;
+  segmentId?: string;
   segmentColors: Array<string>;
   minSegmentDuration: number;
 }) => {
@@ -122,7 +119,7 @@ const VideoSplitter = ({
   };
 
   const setSegmentEndTime = () => {
-    let pauseTime = String((window as any).$gsecs);
+    const pauseTime = String((window as any).$gsecs);
     const end = timeFormat.from(pauseTime);
     end && end !== currentSegment?.start && updateSegmentAt(index, { end });
     end == currentSegment?.start &&
@@ -317,7 +314,7 @@ const VideoSplitter = ({
   }, [saveData]);
 
   React.useEffect(() => {
-    dispatch(setLastViewedSegmentId({ lastViewedSegmentId: segmentId }));
+    segmentId && dispatch(setLastViewedSegmentId({ lastViewedSegmentId: segmentId }));
     segments && setCurrentSegment((segments as any).find((s: any) => s.segmentId === segmentId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [segmentId, segments]);
@@ -343,7 +340,7 @@ const VideoSplitter = ({
   if (newVid) {
     !newVidCreating &&
       dispatch(createVideo({ videoId }))
-        .then(result => {
+        .then((_: any) => {
           setNewVid(false);
           setnewVidCreating(false);
           getVideoData(videoId);

@@ -35,9 +35,9 @@ const AppHeader = (): any => {
 
   const backToPreviousView = () => {
     if (previousView === 'video') {
-      utils.history.push(`/${lastViewedVideoId}`);
+      utils.history.push(`/videos/${lastViewedVideoId}`);
     } else {
-      utils.history.push(`/search/${lastViewedSegmentId}`);
+      utils.history.push(`/segments/${lastViewedSegmentId}`);
     }
   };
 

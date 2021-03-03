@@ -1,21 +1,20 @@
 import * as React from 'react';
-import { Button, Container, Grid, Icon, Label, Link, List } from '../components';
-import { Image } from 'semantic-ui-react';
-import timage from '../images/landing-background-top.png';
-import bimage from '../images/landing-background-bot.png';
-import { RootState } from 'store';
 import { useSelector } from 'react-redux';
+import { Image } from 'semantic-ui-react';
+import { RootState } from 'store';
+import { Icon } from '../components';
+import bimage from '../images/landing-background-bot.png';
+import timage from '../images/landing-background-top.png';
 import * as utils from '../utils';
 
-const LandingPage = ({}: {}): any => {
+const LandingPage = (): any => {
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const currentUserScope = useSelector((state: RootState) => state.auth.scope);
 
   const isVolunteer =
     currentUser &&
     utils.hasPermission({ currentScope: currentUserScope, requiredScope: ['Volunteer'] });
-  const user = currentUser?.firstName;
-  const rolename = currentUser?.roleName;
+  const user = currentUser ? currentUser.firstName : 'Guest';
 
   return (
     <React.Fragment>
@@ -77,7 +76,7 @@ const LandingPage = ({}: {}): any => {
             Welcome to the <b>MBT Guide</b>!{' '}
           </p>
           <p></p>
-          {user === 'Guest' && <p>Please log in (or sign up) before you begin.</p>}
+          {user === 'Guest' && <p>Please log in (or sign up) to access all the features.</p>}
           <p>
             This is an introduction to the My Big TOE, a theory of everything. You can search the
             video content using keywords, browse through the segments of your interest, create

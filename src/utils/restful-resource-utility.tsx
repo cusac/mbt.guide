@@ -5,14 +5,32 @@ export type Logger = typeof console;
 // TODO: Fill out params
 export type Params = {
   [key: string]: any;
-  $embed?: string | [string];
   $term?: string;
+  $embed?: string | string[];
+  $skip?: number;
+  $page?: number;
   $limit?: number;
+  $sort?: string | string[];
+  $text?: string;
 };
 
 export type ListResponse<T> = {
   data: {
     docs: T[];
+    pages: {
+      current: number;
+      prev: number;
+      hasPrev: boolean;
+      next: number;
+      hasNext: boolean;
+      total: number;
+    };
+    items: {
+      limit: number;
+      begin: number;
+      end: number;
+      total: number;
+    };
   };
 };
 
