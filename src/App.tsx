@@ -1,4 +1,4 @@
-import { Router, Route } from 'react-router-dom';
+import { Router, Route, Switch } from 'react-router-dom';
 import * as components from './components';
 import React from 'react';
 import * as routes from './routes';
@@ -64,6 +64,13 @@ const App = () => {
                 const { videoId } = props.match.params;
                 const { segmentId } = props.match.params;
                 return <routes.Edit {...props} {...{ videoId, segmentId }} />;
+              }}
+            />
+            <Route
+              path="/contact"
+              exact
+              render={props => {
+                return <routes.Contact />;
               }}
             />
           </Router>

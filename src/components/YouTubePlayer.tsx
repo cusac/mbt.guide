@@ -105,11 +105,16 @@ const YouTubePlayer = ({
     }
 
     (player as any).seekTo(seconds, true);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player, seconds]);
 
   // broadcast current player time as it changes
   const [counter, setCounter] = React.useState(0);
+
+  //TODO : Need a better way to get the current time
+  (window as any).$gsecs = String(seconds);
+
   React.useEffect(() => {
     const timeout = setTimeout(() => {
       setCounter(counter + 1); // make sure effect runs again

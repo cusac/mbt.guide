@@ -5,6 +5,7 @@ export type Logger = typeof console;
 // TODO: Fill out params
 export type Params = {
   [key: string]: any;
+  $term?: string;
   $embed?: string | string[];
   $skip?: number;
   $page?: number;

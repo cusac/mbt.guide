@@ -15,11 +15,9 @@ import {
   TextArea,
   YouTubePlayerWithControls,
 } from 'components';
-import { differenceBy, uniq } from 'lodash';
 import React from 'react';
 import InputMask from 'react-input-mask';
 import { useSelector } from 'react-redux';
-import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
 import { repository } from 'services';
 import {
@@ -34,6 +32,8 @@ import Swal from 'sweetalert2';
 import { Segment, Video } from 'types';
 import { captureAndLog, hasPermission, history, timeFormat, toastError } from 'utils';
 import { v4 as uuid } from 'uuid';
+import Tags from '../../components/Tags';
+import Tip from '../../components/Tip';
 import VideoSegmentItem from './VideoSegmentItem';
 
 //TODO: Error Handling
@@ -47,7 +47,7 @@ const VideoSplitter = ({
   minSegmentDuration,
 }: {
   videoId: string;
-  segmentId: string;
+  segmentId?: string;
   segmentColors: Array<string>;
   minSegmentDuration: number;
 }) => {
@@ -74,6 +74,10 @@ const VideoSplitter = ({
   const startRef: any = React.createRef();
   const endRef: any = React.createRef();
 
+  const triggerRender = () => {
+    setRefresh(refresh.slice());
+  };
+
   React.useEffect(() => {
     dispatch(setShowSearchbar({ showSearchbar: false }));
     segmentId &&
@@ -81,36 +85,20 @@ const VideoSplitter = ({
       dispatch(setLastViewedSegmentId({ lastViewedSegmentId: segmentId }));
   }, []);
 
-  const updateSegmentAt = (index: any, data: any) => {
-    const newSegments = (segments as any).slice();
+  const updateSegmentAt = (index: number, data: Partial<Segment>) => {
+    const newSegments = segments.slice();
     Object.assign(newSegments[index], { ...data, pristine: false });
-    startRef.current &&
+    data.start !== undefined &&
+      startRef.current &&
       startRef.current.value &&
-      (startRef.current.value = timeFormat.to(data.start as any));
-    endRef.current &&
+      (startRef.current.value = timeFormat.to(data.start));
+    data.end !== undefined &&
+      endRef.current &&
       endRef.current.value &&
-      (endRef.current.value = timeFormat.to(data.end as any));
+      (endRef.current.value = timeFormat.to(data.end));
     setSegments(newSegments);
     setSaveData(true);
-  };
-
-  const updateTags = (index: any, tags: string[], rank: number) => {
-    // Remove duplicates
-    tags = uniq(tags);
-    // Remove old tag if rank changed
-    (currentSegment as any).tags = differenceBy(
-      (currentSegment as any).tags,
-      tags.map((t: any) => ({ tag: { name: t } })),
-      'tag.name'
-    );
-    // Keep segments of other ranks
-    (currentSegment as any).tags = (currentSegment as any).tags.filter((t: any) => t.rank !== rank);
-    // Add new tags to old
-    tags = [
-      ...(currentSegment as any).tags,
-      ...tags.map((t: any) => ({ tag: { name: t }, rank })),
-    ] as any;
-    updateSegmentAt(index, { ...currentSegment, tags });
+    triggerRender();
   };
 
   const updateStart = (index: any, value: any) => {
@@ -121,6 +109,25 @@ const VideoSplitter = ({
   const updateEnd = (index: any, value: any) => {
     const end = timeFormat.from(value);
     end && updateSegmentAt(index, { end });
+  };
+
+  const setDefaultTimeSpan = () => {
+    const start = timeFormat.from(String(duration * 0.25));
+    start && updateSegmentAt(index, { start });
+    const end = timeFormat.from(String(duration * 0.75));
+    end && updateSegmentAt(index, { end });
+  };
+
+  const setSegmentEndTime = () => {
+    const pauseTime = String((window as any).$gsecs);
+    const end = timeFormat.from(pauseTime);
+    end && end !== currentSegment?.start && updateSegmentAt(index, { end });
+    end == currentSegment?.start &&
+      Swal.fire({
+        title: 'Error!',
+        text: 'Start time and end time cannot be equal!',
+        type: 'error',
+      });
   };
 
   const addSegment = async () => {
@@ -135,9 +142,9 @@ const VideoSplitter = ({
       segmentId: newId,
       video: (video as any)._id,
       // TODO: Make start and end profile settings. Below is volunteer specific
-      start: Number(lastSegEnd), //duration * 0.25,
-      end: duration, // * 0.75,
-      title: 'New segment title',
+      start: lastSegEnd === duration - 1 ? 0 : Number(lastSegEnd),
+      end: duration,
+      title: '', //'New segment title',
       ownerEmail: currentUser ? currentUser.email : '',
       tags: [],
       description: '',
@@ -185,6 +192,31 @@ const VideoSplitter = ({
   };
 
   const saveChanges = async () => {
+    if (currentSegment) {
+      if (currentSegment?.start >= currentSegment?.end) {
+        Swal.fire({
+          title: 'Error!',
+          text: 'Start time cannot be equal or greater than end time.',
+          type: 'error',
+          confirmButtonText: 'OK',
+        });
+        return undefined;
+      }
+      if (
+        !currentSegment?.title.length ||
+        !currentSegment?.description.length ||
+        (currentSegment?.tags && currentSegment?.tags?.length < 1)
+      ) {
+        Swal.fire({
+          title: 'Error!',
+          text: 'Blank title or description or you forgot to add tags!',
+          type: 'error',
+          confirmButtonText: 'OK',
+        });
+        return undefined;
+      }
+    }
+
     try {
       setSegmentsSaving(true);
       const updatedSegments = await dispatch(
@@ -270,7 +302,7 @@ const VideoSplitter = ({
       endRef.current &&
       (endRef.current.value = timeFormat.to((currentSegment as any).end));
     // Update the state to make sure things are rendered properly
-    setRefresh(refresh.slice());
+    triggerRender();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSegment, segments]);
 
@@ -282,7 +314,7 @@ const VideoSplitter = ({
   }, [saveData]);
 
   React.useEffect(() => {
-    dispatch(setLastViewedSegmentId({ lastViewedSegmentId: segmentId }));
+    segmentId && dispatch(setLastViewedSegmentId({ lastViewedSegmentId: segmentId }));
     segments && setCurrentSegment((segments as any).find((s: any) => s.segmentId === segmentId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [segmentId, segments]);
@@ -439,13 +471,14 @@ const VideoSplitter = ({
                 <Grid.Column style={{ padding: 0 }}>
                   <div
                     style={{
-                      height: 120,
+                      height: 140,
                       overflowX: 'auto',
                       overflowY: 'hidden',
                       paddingLeft: 50,
-                      paddingTop: 50,
+                      paddingTop: 10,
                     }}
                   >
+                    <Tip tipText="Drag handles to set the start and end time of the segment." />
                     <Slider
                       disabled={!currentUser || !canEdit}
                       key={(segments as any).length} // causes slider recreation on segments count change
@@ -527,13 +560,36 @@ const VideoSplitter = ({
                     onChange={(event: any) => updateEnd(index, event.target.value)}
                   />
                 </Grid.Column>
+
+                <Button
+                  size="tiny"
+                  floated="left"
+                  data-tooltip="Set end time to current player time (pause the video)"
+                  data-variation="mini"
+                  data-position="right center"
+                  onClick={() => setSegmentEndTime()}
+                >
+                  {' '}
+                  Set End Time
+                </Button>
+                <Button
+                  size="tiny"
+                  floated="left"
+                  data-tooltip="Reset segment time to default"
+                  data-variation="mini"
+                  data-position="right center"
+                  onClick={() => setDefaultTimeSpan()}
+                >
+                  {' '}
+                  Set Default
+                </Button>
+
                 <Grid.Column
                   verticalAlign="middle"
-                  style={{ textAlign: 'right', color: 'black' }}
+                  style={{ textAlign: 'left', color: 'black' }}
                   width={6}
                 >
-                  <Icon name="help circle" />
-                  Tip : Type e.g. 012030 without : or spaces to enter 01:20:30.
+                  <Tip tipText="Tip : Type e.g. 012030 without : or spaces to enter 01:20:30." />
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
@@ -549,53 +605,71 @@ const VideoSplitter = ({
                       placeholder="Enter a description"
                       value={segments[index].description}
                       onChange={(event, { value }) =>
-                        updateSegmentAt(index, { description: value })
+                        updateSegmentAt(index, { description: value as string })
                       }
                     />
                   </Form>
                 </Grid.Column>
               </Grid.Row>
+
               <Grid.Row>
-                <Grid.Column verticalAlign="middle" style={{ textAlign: 'right' }} width={2}>
+                <Grid.Column verticalAlign="top" style={{ textAlign: 'right' }} width={2}>
                   <Label>Tags:</Label>
                 </Grid.Column>
                 <Grid.Column width={14}>
-                  <h2>High Relevance</h2>
+                  <div className="tagdesc">
+                    High Relevance&nbsp;&nbsp;&nbsp;
+                    <Tip tipText="Add words or phrases directly relevant to the topic of this segment." />
+                  </div>
                   <div className="segment-field" data-disabled={!currentUser || !canEdit}>
-                    <TagsInput
+                    <Tags
                       disabled={!currentUser || !canEdit}
-                      value={(currentSegment as any).tags
-                        .filter((t: any) => t.rank === 11)
-                        .map((t: any) => t.tag.name)}
-                      onChange={(tags: any) => updateTags(index, tags, 11)}
+                      refresh={refresh}
+                      segmentIndex={index}
+                      currentSegment={currentSegment}
+                      rank={11}
+                      updateSegmentAt={updateSegmentAt}
                     />
                   </div>
-                  <h2>Mid Relevance</h2>
+
+                  <div className="tagdesc">
+                    Mid Relevance&nbsp;&nbsp;&nbsp;
+                    <Tip tipText="Add words or phrases that are not the main topic here, but are mentioned in the segment." />
+                  </div>
                   <div className="segment-field" data-disabled={!currentUser || !canEdit}>
-                    <TagsInput
+                    <Tags
                       disabled={!currentUser || !canEdit}
-                      value={(currentSegment as any).tags
-                        .filter((t: any) => t.rank === 6)
-                        .map((t: any) => t.tag.name)}
-                      onChange={(tags: any) => updateTags(index, tags, 6)}
+                      refresh={refresh}
+                      segmentIndex={index}
+                      currentSegment={currentSegment}
+                      rank={6}
+                      updateSegmentAt={updateSegmentAt}
                     />
                   </div>
-                  <h2>Low Relevance</h2>
+
+                  <div className="tagdesc">
+                    Low Relevance&nbsp;&nbsp;&nbsp;
+                    <Tip tipText="Add words or phrases that might be searched and can be useful, such as synonyms or broad concepts." />
+                  </div>
                   <div className="segment-field" data-disabled={!currentUser || !canEdit}>
-                    <TagsInput
+                    <Tags
                       disabled={!currentUser || !canEdit}
-                      value={(currentSegment as any).tags
-                        .filter((t: any) => t.rank === 1)
-                        .map((t: any) => t.tag.name)}
-                      onChange={(tags: any) => updateTags(index, tags, 1)}
+                      refresh={refresh}
+                      segmentIndex={index}
+                      currentSegment={currentSegment}
+                      rank={1}
+                      updateSegmentAt={updateSegmentAt}
                     />
                   </div>
-                  <p>
+                  <div>
                     <br />
-                    <Icon name="help circle" />
-                    Tip : Type a phrase and press Tab key to commit.
+                    <Tip
+                      tipText="Arrows to select a suggestion. Enter to commit."
+                      position="bottom center"
+                    />
                     <br />
-                  </p>
+                  </div>
+                  <div className="pageend" />
                 </Grid.Column>
               </Grid.Row>
             </Grid>

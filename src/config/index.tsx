@@ -1,5 +1,5 @@
 import { Crud, Association } from '../utils/restful-resource-utility';
-import { Video, Segment, Tag } from '../types';
+import { Video, Segment, Tag, User, Group, Permission, Role } from '../types';
 
 export default {
   // serverURI: 'http://localhost:8080',
@@ -116,10 +116,10 @@ export const resources = {
 export type Repository = {
   install: (...args: any) => any;
   auditLog: Crud<any>;
-  user: Crud<any> & {
-    groups: Association<any>;
-    permissions: Association<any>;
-    segments: Association<any>;
+  user: Crud<User> & {
+    groups: Association<Group>;
+    permissions: Association<Permission>;
+    segments: Association<Segment>;
   };
   video: Crud<Video> & {
     segments: Association<Segment>;
@@ -127,20 +127,20 @@ export type Repository = {
   segment: Crud<Segment> & {
     tags: Association<Tag>;
   };
-  tag: Crud<any>;
+  tag: Crud<Tag>;
   visitor: Crud<any>;
-  role: Crud<any> & {
-    users: Association<any>;
-    permissions: Association<any>;
+  role: Crud<Role> & {
+    users: Association<User>;
+    permissions: Association<Permission>;
   };
-  group: Crud<any> & {
-    users: Association<any>;
-    permissions: Association<any>;
+  group: Crud<Group> & {
+    users: Association<User>;
+    permissions: Association<Permission>;
   };
-  permissions: Crud<any> & {
-    users: Association<any>;
-    roles: Association<any>;
-    groups: Association<any>;
+  permissions: Crud<Permission> & {
+    users: Association<User>;
+    roles: Association<Role>;
+    groups: Association<Group>;
   };
 };
 

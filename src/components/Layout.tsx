@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Grid } from 'semantic-ui-react';
 import { AppHeader, Menu, Icon, Sticky } from '../components';
-import logo from '../images/logo-wide.png';
+import logo from '../images/logo-square.png';
 import { RootState } from 'store';
 import { history } from 'utils';
 
@@ -17,7 +17,7 @@ const Layout = ({ children }: { children: any }) => {
     <div className="ui two grid" ref={setContextRef as any}>
       <div
         className="column"
-        style={{ flex: '0 0 300px', paddingRight: 0, backgroundColor: 'rgba(0, 0, 0, 0.87)' }}
+        style={{ flex: '0 0 200px', paddingRight: 0, backgroundColor: 'rgba(0, 0, 0, 0.87)' }}
       >
         <Sticky context={contextRef}>
           <Menu icon="labeled" fluid pointing inverted vertical>
@@ -55,6 +55,10 @@ const Layout = ({ children }: { children: any }) => {
             <Menu.Item as="a" onClick={() => history.push(`/videos/${lastViewedVideoId}`)}>
               <Icon name="film" />
               Videos
+            </Menu.Item>
+            <Menu.Item as="a" onClick={() => history.push(`/contact`)}>
+              <Icon name="envelope outline" />
+              Contact
             </Menu.Item>
             <Menu.Item
               as="a"

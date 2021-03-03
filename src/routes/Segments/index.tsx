@@ -19,7 +19,7 @@ import { defaultValues } from 'config';
 
 const { Grid, SegmentList, Loading } = components;
 
-const Segments = ({ segmentId }: { segmentId: string }) => {
+const Segments = ({ segmentId }: { segmentId?: string }) => {
   const [error, setError] = React.useState();
   const [loadingSelectedSegment, setLoadingSelectedSegment] = React.useState(true);
   const [segments, setSegments] = React.useState(undefined as Array<any> | void);
@@ -40,7 +40,7 @@ const Segments = ({ segmentId }: { segmentId: string }) => {
     utils.history.push(`/segments/${selectSegmentId}`);
   };
 
-  const videoColumnResizeObserver = new ResizeObserver(entries => {
+  const videoColumnResizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
     setColumnHeight(entries[0].target.clientHeight);
   });
 

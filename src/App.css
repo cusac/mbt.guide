@@ -35,7 +35,7 @@
   position: fixed;
   top: 0;
   right: 0;
-  left: 300px; /* this is the size of the side nav */
+  left: 200px; /* this is the size of the side nav */
   z-index: 100;
 }
 
@@ -131,10 +131,121 @@
   white-space: pre-line;
 }
 
+.tagdesc {
+  text-align: left;
+  margin: 0px;
+  background-color: #e5e5e5;
+  padding: 10px;
+  border-width: 1px;
+  border-color: lightgrey;
+  border-style: solid;
+  white-space: pre-line;
+  font-weight: bold;
+  font-size: 12pt;
+  color: #666;
+}
+
 .ui.segment.search-bar {
   background-color: #bbb;
 }
 
 .search-bar.ui.segment {
   margin: 20px;
+}
+
+/* Styles for React Tags*/
+
+div.ReactTags__tags {
+  position: relative;
+  border: 1px solid #aaa;
+  padding: 5px;
+  background: #f5f5f5;
+}
+
+/* Styles for the input */
+div.ReactTags__tagInput {
+  width: 300px;
+  display: inline-block;
+  background: #ccc;
+  border-radius: 5px;
+}
+div.ReactTags__tagInput input.ReactTags__tagInputField,
+div.ReactTags__tagInput input.ReactTags__tagInputField:focus {
+  height: 28px;
+  margin: 0;
+  font-size: 12px;
+  width: 100%;
+  border: 1px dashed rgb(114, 114, 114);
+  padding: 0 4px;
+  background: #fff;
+  border-radius: 3px;
+  text-align: center;
+}
+
+/* Styles for selected tags */
+div.ReactTags__selected span.ReactTags__tag {
+  border: 1px solid #999b95;
+  background: #c6e790d3;
+  font-size: 12px;
+  display: inline-block;
+  padding: 5px;
+  margin: 0 5px;
+  cursor: move;
+  border-radius: 3px;
+}
+div.ReactTags__selected .ReactTags__remove {
+  color: rgb(54, 54, 54);
+  margin-left: 5px;
+  cursor: pointer;
+  background: transparent;
+  border: 0px;
+}
+
+/* Styles for suggestions */
+div.ReactTags__suggestions {
+  position: absolute;
+  text-align: left;
+}
+div.ReactTags__suggestions ul {
+  list-style-type: none;
+  box-shadow: 0.05em 0.01em 0.5em rgba(0, 0, 0, 0.2);
+  background: #fff;
+  width: 300px;
+  z-index: 2 !important;
+  position: relative;
+}
+div.ReactTags__suggestions li {
+  border-bottom: 1px solid #ddd;
+  padding: 5px 10px;
+  margin: 0;
+}
+div.ReactTags__suggestions li mark {
+  text-decoration: underline;
+  background: none;
+  font-weight: 600;
+}
+div.ReactTags__suggestions ul li.ReactTags__activeSuggestion {
+  background: #d2ff9ed3;
+  cursor: pointer;
+}
+
+.pageend {
+  margin: 500px;
+}
+
+textarea:focus,
+input:focus {
+  outline-color: #aaa;
+}
+
+.vidtitle {
+  color: #000 !important;
+  white-space: pre-wrap;
+  font-weight: bold;
+  padding: 10px;
+  text-align: left;
+}
+
+.contact {
+  float: left;
 }
