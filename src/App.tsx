@@ -36,6 +36,14 @@ const App = () => {
               }}
             />
             <Route
+              path="/:param"
+              exact
+              render={props => {
+                const { param } = props.match.params;
+                return <routes.Home {...props} {...{ param }} />;
+              }}
+            />
+            <Route
               path="/videos/:videoId?"
               exact
               render={props => {
