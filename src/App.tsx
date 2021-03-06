@@ -29,6 +29,13 @@ const App = () => {
         <Layout>
           <Router history={utils.history}>
             <Route
+              path="/"
+              exact
+              render={props => {
+                return <routes.Home />;
+              }}
+            />
+            <Route
               path="/:param"
               exact
               render={props => {

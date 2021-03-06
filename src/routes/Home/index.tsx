@@ -9,7 +9,7 @@ const Home = ({ param }: { param?: string }): JSX.Element => {
   } else if (param) {
     history.push(`videos/${param}`);
   }
-  return param ? <div></div> : <LandingPage />;
+  return <LandingPage />;
 };
 
 export default Home;
