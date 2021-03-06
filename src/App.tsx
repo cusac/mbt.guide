@@ -29,10 +29,11 @@ const App = () => {
         <Layout>
           <Router history={utils.history}>
             <Route
-              path="/"
+              path="/:param"
               exact
               render={props => {
-                return <routes.Home />;
+                const { param } = props.match.params;
+                return <routes.Home {...props} {...{ param }} />;
               }}
             />
             <Route
