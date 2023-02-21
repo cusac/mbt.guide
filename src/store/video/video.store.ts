@@ -307,12 +307,17 @@ function formatSegmentForUpdate(segment: Partial<Segment>): Partial<Segment> {
       end,
       title,
       description,
-      tags: tags.map(formatTagForUpdate),
+      tags: tags.filter(filterTags).map(formatTagForUpdate),
       pristine: pristine === false ? false : true,
     };
   } else {
     throw new Error('Tags to update are incorrect format.');
   }
+}
+
+// function that filters out objecs where the tag is null or undefined
+function filterTags(segmentTag: SegmentTag): boolean {
+  return segmentTag.tag !== null && segmentTag.tag !== undefined;
 }
 
 function formatTagForUpdate(segmentTag: SegmentTag): SegmentTag {

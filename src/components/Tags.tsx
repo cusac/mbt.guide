@@ -76,7 +76,9 @@ const Tags = ({
       currentSegmentTags = currentSegmentTags.filter(t => t.rank !== rank);
       // Add new tags to old
       currentSegmentTags = [...currentSegmentTags, ...tags.map(reactTagToSegmentTag)];
-      setReactTags(currentSegmentTags.filter(t => t.rank === rank).map(segmentTagToReactTag));
+      setReactTags(
+        currentSegmentTags.filter(t => t.tag && t.rank === rank).map(segmentTagToReactTag)
+      );
       updateSegmentAt(segmentIndex, { tags: currentSegmentTags });
     }
   };
@@ -129,7 +131,7 @@ const Tags = ({
   React.useEffect(() => {
     const tagsInput = currentSegment.tags || [];
     if (assertModelArrayType<SegmentTag>(tagsInput, 'SegmentTag')) {
-      setReactTags(tagsInput.filter(tag => tag.rank === rank).map(segmentTagToReactTag));
+      setReactTags(tagsInput.filter(tag => tag.tag && tag.rank === rank).map(segmentTagToReactTag));
     }
   }, []);
 
@@ -137,7 +139,7 @@ const Tags = ({
   React.useEffect(() => {
     const tagsInput = currentSegment.tags || [];
     if (assertModelArrayType<SegmentTag>(tagsInput, 'SegmentTag')) {
-      const updatedTags = tagsInput.filter(t => t.rank === rank).map(segmentTagToReactTag);
+      const updatedTags = tagsInput.filter(t => t.tag && t.rank === rank).map(segmentTagToReactTag);
       if (!isEqual(updatedTags, reactTags)) {
         setReactTags(updatedTags);
       }
