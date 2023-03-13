@@ -57,6 +57,7 @@ const VideoSplitter = ({
   const [currentSegment, setCurrentSegment]: [Segment | undefined, any] = React.useState();
   const [saveData, setSaveData]: [boolean, any] = React.useState(false);
   const [segmentsSaving, setSegmentsSaving]: [boolean, any] = React.useState(false);
+  const [autoSaving, setAutoSaving]: [boolean, any] = React.useState(false);
   const [refresh, setRefresh]: [[boolean], any] = React.useState([true]);
   const [newVid, setNewVid]: [boolean, any] = React.useState(false);
   const [newVidCreating, setnewVidCreating]: [boolean, any] = React.useState(false);
@@ -243,9 +244,10 @@ const VideoSplitter = ({
   };
 
   const saveIfNeeded = async () => {
-    if (saveData) {
+    if (saveData && !autoSaving) {
       try {
         //TODO: make sure segments are updated in the local state so they change in the UI
+        setAutoSaving(true);
         await dispatch(
           updateSegments({
             videoId,
@@ -253,7 +255,9 @@ const VideoSplitter = ({
           })
         );
         setSaveData(false);
+        setAutoSaving(false);
       } catch (err) {
+        setAutoSaving(false);
         //TODO: make sure error is thrown above
         if (err && err.message !== 'Network Error') {
           // Continue to attempt saving if the error is due to a bad network.
@@ -306,9 +310,9 @@ const VideoSplitter = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSegment, segments]);
 
-  // Autosave data every 5s if needed
+  // Autosave data every 1m if needed
   React.useEffect(() => {
-    const stopSaving = setInterval(saveIfNeeded, 5000);
+    const stopSaving = setInterval(saveIfNeeded, 60000);
     return () => clearInterval(stopSaving);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [saveData]);
