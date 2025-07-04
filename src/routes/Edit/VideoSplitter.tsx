@@ -123,11 +123,11 @@ const VideoSplitter = ({
     const pauseTime = String((window as any).$gsecs);
     const end = timeFormat.from(pauseTime);
     end && end !== currentSegment?.start && updateSegmentAt(index, { end });
-    end == currentSegment?.start &&
+    end === currentSegment?.start &&
       Swal.fire({
         title: 'Error!',
         text: 'Start time and end time cannot be equal!',
-        type: 'error',
+        icon: 'error',
       });
   };
 
@@ -159,12 +159,12 @@ const VideoSplitter = ({
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
-      type: 'warning',
+      icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, delete it!',
-    }).then(async result => {
+    }).then(async (result) => {
       if (result.value) {
         try {
           const newSegments = (segments as any).filter(
@@ -198,7 +198,7 @@ const VideoSplitter = ({
         Swal.fire({
           title: 'Error!',
           text: 'Start time cannot be equal or greater than end time.',
-          type: 'error',
+          icon: 'error',
           confirmButtonText: 'OK',
         });
         return undefined;
@@ -211,7 +211,7 @@ const VideoSplitter = ({
         Swal.fire({
           title: 'Error!',
           text: 'Blank title or description or you forgot to add tags!',
-          type: 'error',
+          icon: 'error',
           confirmButtonText: 'OK',
         });
         return undefined;
@@ -231,10 +231,10 @@ const VideoSplitter = ({
       Swal.fire({
         title: 'Saved!',
         text: 'Your changes have been saved.',
-        type: 'success',
+        icon: 'success',
         confirmButtonText: 'OK',
       });
-    } catch (err) {
+    } catch (err: any) {
       setSegmentsSaving(false);
       captureAndLog({ file: 'VideoSplitter', method: 'saveChanges', err });
       toastError('There was an error updating the segment.', err);
@@ -256,10 +256,10 @@ const VideoSplitter = ({
         );
         setSaveData(false);
         setAutoSaving(false);
-      } catch (err) {
+      } catch (err: any) {
         setAutoSaving(false);
         //TODO: make sure error is thrown above
-        if (err && err.message !== 'Network Error') {
+        if (err && (err as any).message !== 'Network Error') {
           // Continue to attempt saving if the error is due to a bad network.
           setSaveData(false);
         }
@@ -287,7 +287,7 @@ const VideoSplitter = ({
           setSegments((video as any).segments);
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       captureAndLog({ file: 'VideoSplitter', method: 'getVideoData', err });
       setError(err);
     }

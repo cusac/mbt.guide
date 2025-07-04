@@ -1,11 +1,11 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout, RootState } from 'store';
+import { logout, RootState, AppDispatch } from 'store';
 import * as components from '../components';
 import * as utils from '../utils';
 import { toastError } from '../utils';
 
-const { Button, Grid, Searchbar, Icon, Auth, Header, Menu } = components;
+const { Button, Grid, Searchbar, Icon, Auth, Header } = components;
 
 const AppHeader = (): any => {
   const [loading, setLoading] = React.useState(false);
@@ -17,7 +17,7 @@ const AppHeader = (): any => {
   const lastViewedSegmentId = useSelector((state: RootState) => state.video.lastViewedSegmentId);
   const lastViewedVideoId = useSelector((state: RootState) => state.video.lastViewedVideoId);
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const logoutClick = async () => {
     try {
@@ -26,10 +26,6 @@ const AppHeader = (): any => {
       toastError('There was an error logging out.', err);
     }
   };
-
-  const defaultSegmentId = '156b09ce-7dab-417a-8295-f6f86f1f504a';
-
-  const activeTab = previousView ? previousView : searchType;
 
   const backText = previousView === 'video' ? 'Back To Video Search' : 'Back To Segment Search';
 

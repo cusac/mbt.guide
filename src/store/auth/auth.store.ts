@@ -92,58 +92,58 @@ const { setError, clearError } = authStore.actions;
  */
 
 //#region login
-export const login = ({
-  idToken,
-  email,
-  password,
-  displayName,
-}: {
-  idToken?: string;
-  email?: string;
-  password?: string;
-  displayName?: string;
-}): AsyncAppThunk => async (dispatch, getState) => {
-  let response;
-  try {
-    const { data } = await loginCall({ idToken, email, password, displayName });
-    response = data;
-  } catch (err) {
-    dispatch(loginFailure(err));
-  }
-  if (response !== undefined) {
-    dispatch(loginSuccess(response));
-  }
-};
+export const login =
+  ({
+    idToken,
+    email,
+    password,
+    displayName,
+  }: {
+    idToken?: string;
+    email?: string;
+    password?: string;
+    displayName?: string;
+  }): AsyncAppThunk =>
+  async (dispatch, getState) => {
+    let response;
+    try {
+      const { data } = await loginCall({ idToken, email, password, displayName });
+      response = data;
+    } catch (err: any) {
+      dispatch(loginFailure(err as Error));
+    }
+    if (response !== undefined) {
+      dispatch(loginSuccess(response));
+    }
+  };
 
-export const loginSuccess = (response: LoginResponse): AsyncAppThunk => async (
-  dispatch,
-  getState
-) => {
-  dispatch(setAuth({ response }));
-  dispatch(clearError({ action: 'login' }));
+export const loginSuccess =
+  (response: LoginResponse): AsyncAppThunk =>
+  async (dispatch, getState) => {
+    dispatch(setAuth({ response }));
+    dispatch(clearError({ action: 'login' }));
 
-  const { user, accessToken } = response;
+    const { user, accessToken } = response;
 
-  updateAuthHeader(accessToken);
+    updateAuthHeader(accessToken);
 
-  if (verifyModelType<User>(user, 'User')) {
-    Sentry.configureScope(scope => {
-      scope.setUser({
-        id: user._id,
-        username: `${user.firstName} ${user.lastName}`,
-        email: user.email,
+    if (verifyModelType<User>(user, 'User')) {
+      Sentry.configureScope((scope) => {
+        scope.setUser({
+          id: user._id,
+          username: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+        });
       });
-    });
-  }
-};
+    }
+  };
 
-export const loginFailure = (err: Error | AxiosResponse): AsyncAppThunk => async (
-  dispatch,
-  getState
-) => {
-  captureAndLog({ file: 'authStore', method: 'login', err });
-  dispatch(setError({ action: 'login', err: parseError(err) }));
-};
+export const loginFailure =
+  (err: Error | AxiosResponse): AsyncAppThunk =>
+  async (dispatch, getState) => {
+    captureAndLog({ file: 'authStore', method: 'login', err });
+    dispatch(setError({ action: 'login', err: parseError(err) }));
+  };
 //#endregion
 
 //#region logout
@@ -151,8 +151,8 @@ export const logout = (): AsyncAppThunk => async (dispatch, getState) => {
   try {
     dispatch(useRefreshToken());
     await logoutCall();
-  } catch (err) {
-    dispatch(logoutFailure(err));
+  } catch (err: any) {
+    dispatch(logoutFailure(err as Error));
   }
   dispatch(logoutSuccess());
 };
@@ -165,15 +165,17 @@ export const logoutSuccess = (): AsyncAppThunk => async (dispatch, getState) => 
 
   axios.defaults.headers.common.Authorization = undefined;
 
-  Sentry.configureScope(scope => {
+  Sentry.configureScope((scope) => {
     scope.setUser(null);
   });
 };
 
-export const logoutFailure = (err: Error): AsyncAppThunk => async (dispatch, getState) => {
-  captureAndLog({ file: 'authStore', method: 'logout', err });
-  dispatch(setError({ action: 'logout', err: parseError(err) }));
-};
+export const logoutFailure =
+  (err: Error): AsyncAppThunk =>
+  async (dispatch, getState) => {
+    captureAndLog({ file: 'authStore', method: 'logout', err });
+    dispatch(setError({ action: 'logout', err: parseError(err) }));
+  };
 //#endregion
 
 //#endregion
@@ -183,17 +185,13 @@ export const logoutFailure = (err: Error): AsyncAppThunk => async (dispatch, get
  * These actions contain only synchronous logic
  */
 
-export const updateTokens = ({
-  accessToken,
-  refreshToken,
-}: {
-  accessToken: string;
-  refreshToken: string;
-}): AppThunk => (dispatch, getState) => {
-  updateAuthHeader(accessToken);
-  dispatch(setAccessToken({ accessToken }));
-  dispatch(setRefreshToken({ refreshToken }));
-};
+export const updateTokens =
+  ({ accessToken, refreshToken }: { accessToken: string; refreshToken: string }): AppThunk =>
+  (dispatch, getState) => {
+    updateAuthHeader(accessToken);
+    dispatch(setAccessToken({ accessToken }));
+    dispatch(setRefreshToken({ refreshToken }));
+  };
 
 export const useRefreshToken = (): AppThunk => async (dispatch, getState) => {
   const {

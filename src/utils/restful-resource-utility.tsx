@@ -52,14 +52,14 @@ export type Association<T> = {
 };
 
 // For info on rest-hapi endpoints see: https://resthapi.com/
-const ResourceHelper = function(httpClient: HttpClient, logger: Logger) {
+const ResourceHelper = function (httpClient: HttpClient, logger: Logger) {
   return {
     /**
      * Generate the CRUD methods for a resource.
      * @param resourceRoute: The API route for the resource.
      * @param options: Additional options to customize the caller.
      */
-    generateCrudCallers: function(resourceRoute: string, options: any): Crud<any> {
+    generateCrudCallers: function (resourceRoute: string, options: any): Crud<any> {
       options = options || {};
       return {
         list: this.generateListCaller(resourceRoute, options),
@@ -70,8 +70,8 @@ const ResourceHelper = function(httpClient: HttpClient, logger: Logger) {
         deleteMany: this.generateDeleteManyCaller(resourceRoute, options),
       };
     },
-    generateListCaller: function(resourceRoute: string, options: any) {
-      return function(params: Params) {
+    generateListCaller: function (resourceRoute: string, options: any) {
+      return function (params: Params) {
         logger.debug(resourceRoute + '.list + params: ', params);
 
         if (!params) {
@@ -86,34 +86,34 @@ const ResourceHelper = function(httpClient: HttpClient, logger: Logger) {
 
         return httpClient
           .get(resourceRoute, params)
-          .then(function(response) {
+          .then(function (response) {
             logger.debug(resourceRoute + '.list response:\n', response);
             return response;
           })
-          .catch(function(error) {
+          .catch(function (error) {
             logger.error(resourceRoute + '.list error:\n', error);
             throw error;
           });
       };
     },
-    generateFindCaller: function(resourceRoute: string, options: any) {
-      return function(_id: string, params: Params) {
+    generateFindCaller: function (resourceRoute: string, options: any) {
+      return function (_id: string, params: Params) {
         logger.debug(resourceRoute + '.find + _id: ', _id, ', params: ', params);
 
         return httpClient
           .get(resourceRoute + '/' + _id, params)
-          .then(function(response) {
+          .then(function (response) {
             logger.debug(resourceRoute + '.find response:\n', response);
             return response;
           })
-          .catch(function(error) {
+          .catch(function (error) {
             logger.error(resourceRoute + '.find error:\n', error);
             throw error;
           });
       };
     },
-    generateUpdateCaller: function(resourceRoute: string, options: any) {
-      return function(_id: string, payload: any) {
+    generateUpdateCaller: function (resourceRoute: string, options: any) {
+      return function (_id: string, payload: any) {
         delete payload.createdAt;
         delete payload.updatedAt;
         delete payload.isDeleted;
@@ -121,60 +121,60 @@ const ResourceHelper = function(httpClient: HttpClient, logger: Logger) {
 
         return httpClient
           .put(resourceRoute + '/' + _id, payload)
-          .then(function(response) {
+          .then(function (response) {
             logger.debug(resourceRoute + '.update response:\n', response);
             return response;
           })
-          .catch(function(error) {
+          .catch(function (error) {
             logger.error(resourceRoute + '.update error:\n', error);
             throw error;
           });
       };
     },
-    generateCreateCaller: function(resourceRoute: string, options: any) {
-      return function(payload: any) {
+    generateCreateCaller: function (resourceRoute: string, options: any) {
+      return function (payload: any) {
         logger.debug(resourceRoute + '.create + payload: ', payload);
 
         return httpClient
           .post(resourceRoute, payload)
-          .then(function(response) {
+          .then(function (response) {
             logger.debug(resourceRoute + '.create response:\n', response);
             return response;
           })
-          .catch(function(error) {
+          .catch(function (error) {
             logger.error(resourceRoute + '.create error:\n', error);
             throw error;
           });
       };
     },
-    generateDeleteOneCaller: function(resourceRoute: string, options: any) {
-      return function(_id: string, hardDelete: boolean) {
+    generateDeleteOneCaller: function (resourceRoute: string, options: any) {
+      return function (_id: string, hardDelete: boolean) {
         hardDelete = hardDelete || false;
         logger.debug(resourceRoute + '.deleteOne + _id: ', _id, ', hardDelete: ', hardDelete);
 
         return httpClient
           .delete(resourceRoute + '/' + _id, { hardDelete: hardDelete })
-          .then(function(response) {
+          .then(function (response) {
             logger.debug(resourceRoute + '.delete response:\n', response);
             return response;
           })
-          .catch(function(error) {
+          .catch(function (error) {
             logger.debug(resourceRoute + '.delete error:\n', error);
             throw error;
           });
       };
     },
-    generateDeleteManyCaller: function(resourceRoute: string, options: any) {
-      return function(payload: any) {
+    generateDeleteManyCaller: function (resourceRoute: string, options: any) {
+      return function (payload: any) {
         logger.debug(resourceRoute + '.deleteMany + payload', payload);
 
         return httpClient
           .delete(resourceRoute, payload)
-          .then(function(response) {
+          .then(function (response) {
             logger.debug(resourceRoute + '.delete response:\n', response);
             return response;
           })
-          .catch(function(error) {
+          .catch(function (error) {
             logger.debug(resourceRoute + '.delete error:\n', error);
             throw error;
           });
@@ -197,7 +197,7 @@ const ResourceHelper = function(httpClient: HttpClient, logger: Logger) {
      * DELETE /user/{ownerId}/cart-item/{childId}   Remove a single storeItem from a user's list of shoppingCartItems
      * PUT /user/{ownerId}/cart-item/{childId}      Add a single storeItem to a user's list of shoppingCartItems
      */
-    generateAssociationCallers: function(
+    generateAssociationCallers: function (
       ownerRoute: string,
       associationName: string,
       associationRoute: string,
@@ -241,13 +241,13 @@ const ResourceHelper = function(httpClient: HttpClient, logger: Logger) {
 
       return callers;
     },
-    generateGetAssociationsAssociationCaller: function(
+    generateGetAssociationsAssociationCaller: function (
       ownerRoute: string,
       associationRoute: string,
       resourceMethodName: string,
       options: any
     ) {
-      return function(ownerId: string, params: Params) {
+      return function (ownerId: string, params: Params) {
         var methodName = ownerRoute + '.get' + resourceMethodName;
         logger.debug(methodName + ' + ownerId: ', ownerId, ', params: ', params);
 
@@ -263,23 +263,23 @@ const ResourceHelper = function(httpClient: HttpClient, logger: Logger) {
 
         return httpClient
           .get(ownerRoute + '/' + ownerId + '/' + associationRoute, params)
-          .then(function(response) {
+          .then(function (response) {
             logger.debug(methodName + ' response:\n', response);
             return response;
           })
-          .catch(function(error) {
+          .catch(function (error) {
             logger.error(methodName + ' error:\n', error);
             throw error;
           });
       };
     },
-    generateAddOneAssociationCaller: function(
+    generateAddOneAssociationCaller: function (
       ownerRoute: string,
       associationRoute: string,
       resourceMethodName: string,
       options: any
     ) {
-      return function(ownerId: string, childId: string, payload: any) {
+      return function (ownerId: string, childId: string, payload: any) {
         var methodName = ownerRoute + '.addOne' + resourceMethodName;
         logger.debug(
           methodName + ' + ownerId: ',
@@ -292,23 +292,23 @@ const ResourceHelper = function(httpClient: HttpClient, logger: Logger) {
 
         return httpClient
           .put(ownerRoute + '/' + ownerId + '/' + associationRoute + '/' + childId, payload)
-          .then(function(response) {
+          .then(function (response) {
             logger.debug(methodName + ' response:\n', response);
             return response;
           })
-          .catch(function(error) {
+          .catch(function (error) {
             logger.error(methodName + ' error:\n', error);
             throw error;
           });
       };
     },
-    generateRemoveOneAssociationCaller: function(
+    generateRemoveOneAssociationCaller: function (
       ownerRoute: string,
       associationRoute: string,
       resourceMethodName: string,
       options: any
     ) {
-      return function(ownerId: string, childId: string) {
+      return function (ownerId: string, childId: string) {
         var methodName = ownerRoute + '.removeOne' + resourceMethodName;
         logger.debug(
           methodName + ' + ownerId: ',
@@ -321,55 +321,55 @@ const ResourceHelper = function(httpClient: HttpClient, logger: Logger) {
 
         return httpClient
           .delete(ownerRoute + '/' + ownerId + '/' + associationRoute + '/' + childId)
-          .then(function(response) {
+          .then(function (response) {
             logger.debug(methodName + ' response:\n', response);
             return response;
           })
-          .catch(function(error) {
+          .catch(function (error) {
             logger.error(methodName + ' error:\n', error);
             throw error;
           });
       };
     },
-    generateAddManyAssociationCaller: function(
+    generateAddManyAssociationCaller: function (
       ownerRoute: string,
       associationRoute: string,
       resourceMethodName: string,
       options: any
     ) {
-      return function(ownerId: string, payload: any) {
+      return function (ownerId: string, payload: any) {
         var methodName = ownerRoute + '.addMany' + resourceMethodName;
         logger.debug(methodName + ' + ownerId: ', ownerId, ', payload: ', payload);
 
         return httpClient
           .post(ownerRoute + '/' + ownerId + '/' + associationRoute, payload)
-          .then(function(response) {
+          .then(function (response) {
             logger.debug(methodName + ' response:\n', response);
             return response;
           })
-          .catch(function(error) {
+          .catch(function (error) {
             logger.error(methodName + ' error:\n', error);
             throw error;
           });
       };
     },
-    generateRemoveManyAssociationCaller: function(
+    generateRemoveManyAssociationCaller: function (
       ownerRoute: string,
       associationRoute: string,
       resourceMethodName: string,
       options: any
     ) {
-      return function(ownerId: string, payload: any) {
+      return function (ownerId: string, payload: any) {
         var methodName = ownerRoute + '.removeMany' + resourceMethodName;
         logger.debug(methodName + ' + ownerId: ', ownerId, ', payload: ', payload);
 
         return httpClient
           .delete(ownerRoute + '/' + ownerId + '/' + associationRoute, payload)
-          .then(function(response) {
+          .then(function (response) {
             logger.debug(methodName + ' response:\n', response);
             return response;
           })
-          .catch(function(error) {
+          .catch(function (error) {
             logger.error(methodName + ' error:\n', error);
             throw error;
           });

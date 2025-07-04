@@ -16,7 +16,7 @@ export const initHttpClientService = (storeBundle: StoreBundle): void => {
 };
 
 export const httpClient: HttpClient = {
-  get: function(url: string, params?: any, options?: any) {
+  get: function (url: string, params?: any, options?: any) {
     let config: AxiosRequestConfig = {
       method: 'GET',
       url: url,
@@ -24,13 +24,13 @@ export const httpClient: HttpClient = {
     };
     config = Object.assign(config, options);
     return axios(config)
-      .then(function(response) {
+      .then(function (response) {
         if (response.headers['x-access-token']) {
           updateTokensFromHeaders(response.headers);
         }
         return response;
       })
-      .catch(function(error) {
+      .catch(function (error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
           store.storeDispatch(store.useRefreshToken());
           return httpClient.get(url, params, options);
@@ -40,7 +40,7 @@ export const httpClient: HttpClient = {
       });
   },
 
-  put: function(url: string, payload?: any, options?: any) {
+  put: function (url: string, payload?: any, options?: any) {
     let config = {
       method: 'PUT',
       url: url,
@@ -48,13 +48,13 @@ export const httpClient: HttpClient = {
     };
     config = Object.assign(config, options);
     return axios(config)
-      .then(function(response) {
+      .then(function (response) {
         if (response.headers['x-access-token']) {
           updateTokensFromHeaders(response.headers);
         }
         return response;
       })
-      .catch(function(error) {
+      .catch(function (error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
           store.storeDispatch(store.useRefreshToken());
           return httpClient.put(url, payload, options);
@@ -64,7 +64,7 @@ export const httpClient: HttpClient = {
       });
   },
 
-  post: function(url: string, payload?: any, options?: any) {
+  post: function (url: string, payload?: any, options?: any) {
     let config: AxiosRequestConfig = {
       method: 'POST',
       url: url,
@@ -72,13 +72,13 @@ export const httpClient: HttpClient = {
     };
     config = Object.assign(config, options);
     return axios(config)
-      .then(function(response) {
+      .then(function (response) {
         if (response.headers['x-access-token']) {
           updateTokensFromHeaders(response.headers);
         }
         return response;
       })
-      .catch(function(error) {
+      .catch(function (error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
           store.storeDispatch(store.useRefreshToken());
           return httpClient.post(url, payload, options);
@@ -88,7 +88,7 @@ export const httpClient: HttpClient = {
       });
   },
 
-  delete: function(url: string, payload?: any, options?: any) {
+  delete: function (url: string, payload?: any, options?: any) {
     let config = {
       method: 'DELETE',
       url: url,
@@ -96,13 +96,13 @@ export const httpClient: HttpClient = {
     };
     config = Object.assign(config, options);
     return axios(config)
-      .then(function(response) {
+      .then(function (response) {
         if (response.headers['x-access-token']) {
           updateTokensFromHeaders(response.headers);
         }
         return response;
       })
-      .catch(function(error) {
+      .catch(function (error) {
         if (error === RESPONSE_MESSAGES.EXPIRED_ACCESS_TOKEN) {
           store.storeDispatch(store.useRefreshToken());
           return httpClient.delete(url, payload, options);
@@ -113,15 +113,13 @@ export const httpClient: HttpClient = {
   },
 };
 
-const updateTokensFromHeaders = (headers: {
-  'x-access-token': string;
-  'x-refresh-token': string;
-}) => {
-  const tokens = {
-    accessToken: headers['x-access-token'],
-    refreshToken: headers['x-refresh-token'],
-  };
-  store.storeDispatch(store.updateTokens(tokens));
+const updateTokensFromHeaders = (headers: any) => {
+  if (headers['x-access-token']) {
+    localStorage.setItem('accessToken', headers['x-access-token']);
+  }
+  if (headers['x-refresh-token']) {
+    localStorage.setItem('refreshToken', headers['x-refresh-token']);
+  }
 };
 
 export default httpClient;

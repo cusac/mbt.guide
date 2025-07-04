@@ -141,149 +141,144 @@ const { setError, clearError } = videoStore.actions;
  */
 
 //#region createVideo
-export const createVideo = ({ videoId }: { videoId: string }): AsyncAppThunk<Video> => async (
-  dispatch,
-  getState
-) => {
-  try {
-    const { data } = await youtubeCall<VideoListYTVideo>({
-      endpoint: 'videos',
-      params: {
-        id: videoId,
-        part: 'snippet,contentDetails',
-      },
-    });
+export const createVideo =
+  ({ videoId }: { videoId: string }): AsyncAppThunk<Video> =>
+  async (dispatch, getState) => {
+    try {
+      const { data } = await youtubeCall<VideoListYTVideo>({
+        endpoint: 'videos',
+        params: {
+          id: videoId,
+          part: 'snippet,contentDetails',
+        },
+      });
 
-    const ytVideo = data.items[0];
+      const ytVideo = data.items[0];
 
-    if (!ytVideo) {
-      throw new Error(`Missing YouTube Video with id ${videoId}`);
+      if (!ytVideo) {
+        throw new Error(`Missing YouTube Video with id ${videoId}`);
+      }
+
+      let duration;
+
+      if (!ytVideo.contentDetails) {
+        throw new Error(`Missing contentDetails for YouTube Video with id ${videoId}`);
+      } else {
+        duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
+      }
+
+      const video = await createVideoCall({
+        youtube: ytVideo,
+        duration: duration,
+        ytId: videoId,
+      });
+
+      dispatch(clearError({ action: 'createVideo' }));
+
+      return video;
+    } catch (err: any) {
+      captureAndLog({ file: 'videoStore', method: 'createVideo', err });
+      dispatch(setError({ action: 'createVideo', err: parseError(err) }));
+      throw err;
     }
-
-    let duration;
-
-    if (!ytVideo.contentDetails) {
-      throw new Error(`Missing contentDetails for YouTube Video with id ${videoId}`);
-    } else {
-      duration = luxon.Duration.fromISO(ytVideo.contentDetails.duration).as('seconds');
-    }
-
-    const video = await createVideoCall({
-      youtube: ytVideo,
-      duration: duration,
-      ytId: videoId,
-    });
-
-    dispatch(clearError({ action: 'createVideo' }));
-
-    return video;
-  } catch (err) {
-    captureAndLog({ file: 'videoStore', method: 'createVideo', err });
-    dispatch(setError({ action: 'createVideo', err: parseError(err) }));
-    throw err;
-  }
-};
+  };
 
 //#endregion
 
 //#region updateSegments
-export const updateSegments = ({
-  videoId,
-  segments,
-}: {
-  videoId: string;
-  segments: Partial<Segment>[];
-}): AsyncAppThunk<Segment[]> => async (dispatch, getState) => {
-  try {
-    segments = segments.map(formatSegmentForUpdate);
-    const { data } = await updateSegmentsCall({ videoId, segments });
-    dispatch(clearError({ action: 'updateSegments' }));
-    return data;
-  } catch (err) {
-    captureAndLog({ file: 'videoStore', method: 'updateSegments', err });
-    dispatch(setError({ action: 'updateSegments', err: parseError(err) }));
-    throw err;
-  }
-};
+export const updateSegments =
+  ({
+    videoId,
+    segments,
+  }: {
+    videoId: string;
+    segments: Partial<Segment>[];
+  }): AsyncAppThunk<Segment[]> =>
+  async (dispatch, getState) => {
+    try {
+      segments = segments.map(formatSegmentForUpdate);
+      const { data } = await updateSegmentsCall({ videoId, segments });
+      dispatch(clearError({ action: 'updateSegments' }));
+      return data;
+    } catch (err: any) {
+      captureAndLog({ file: 'videoStore', method: 'updateSegments', err });
+      dispatch(setError({ action: 'updateSegments', err: parseError(err) }));
+      throw err;
+    }
+  };
 //#endregion
 
 //#region searchSegments
-export const searchSegments = ({ term }: { term: string }): AsyncAppThunk<Segment[]> => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch(setLoadingSegments({ loadingSegments: true }));
-    const { data } = await searchSegmentsCall({ term });
-    dispatch(searchSegmentsSuccess(data));
-    return data;
-  } catch (err) {
-    dispatch(searchSegmentsFailure(err));
-    throw err;
-  } finally {
-    dispatch(setLoadingSegments({ loadingSegments: false }));
-  }
-};
+export const searchSegments =
+  ({ term }: { term: string }): AsyncAppThunk<Segment[]> =>
+  async (dispatch, getState) => {
+    try {
+      dispatch(setLoadingSegments({ loadingSegments: true }));
+      const { data } = await searchSegmentsCall({ term });
+      dispatch(searchSegmentsSuccess(data));
+      return data;
+    } catch (err: any) {
+      dispatch(searchSegmentsFailure(err as Error));
+      throw err;
+    } finally {
+      dispatch(setLoadingSegments({ loadingSegments: false }));
+    }
+  };
 
-export const searchSegmentsSuccess = (searchSegmentsResult: Segment[]): AsyncAppThunk => async (
-  dispatch,
-  getState
-) => {
-  dispatch(setSearchSegmentsResult({ searchSegmentsResult }));
-  dispatch(clearError({ action: 'searchSegments' }));
-};
+export const searchSegmentsSuccess =
+  (searchSegmentsResult: Segment[]): AsyncAppThunk =>
+  async (dispatch, getState) => {
+    dispatch(setSearchSegmentsResult({ searchSegmentsResult }));
+    dispatch(clearError({ action: 'searchSegments' }));
+  };
 
-export const searchSegmentsFailure = (err: Error | AxiosResponse): AsyncAppThunk => async (
-  dispatch,
-  getState
-) => {
-  captureAndLog({ file: 'videoStore', method: 'searchSegments', err });
-  dispatch(setError({ action: 'searchSegments', err: parseError(err) }));
-};
+export const searchSegmentsFailure =
+  (err: Error | AxiosResponse): AsyncAppThunk =>
+  async (dispatch, getState) => {
+    captureAndLog({ file: 'videoStore', method: 'searchSegments', err });
+    dispatch(setError({ action: 'searchSegments', err: parseError(err) }));
+  };
 //#endregion
 
 //#region searchYTVideos
-export const searchYTVideos = ({ term }: { term: string }): AsyncAppThunk<YTVideo[]> => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch(setLoadingVideos({ loadingVideos: true }));
-    const { data } = await youtubeCall<SearchYTVideo>({
-      endpoint: 'search',
-      params: {
-        q: term,
-      },
-    });
+export const searchYTVideos =
+  ({ term }: { term: string }): AsyncAppThunk<YTVideo[]> =>
+  async (dispatch, getState) => {
+    try {
+      dispatch(setLoadingVideos({ loadingVideos: true }));
+      const { data } = await youtubeCall<SearchYTVideo>({
+        endpoint: 'search',
+        params: {
+          q: term,
+        },
+      });
 
-    // Filter out any videos that don't belong to the MBT channel
-    const ytVids = data.items.filter(v => v.snippet.channelId === channelId).map(toYTVid);
-    dispatch(searchVideosSuccess(ytVids));
-    return ytVids;
-  } catch (err) {
-    dispatch(searchVideosFailure(err));
-    throw err;
-  } finally {
-    dispatch(setLoadingVideos({ loadingVideos: false }));
-  }
-};
+      // Filter out any videos that don't belong to the MBT channel
+      const ytVids = data.items.filter((v) => v.snippet.channelId === channelId).map(toYTVid);
+      dispatch(searchVideosSuccess(ytVids));
+      return ytVids;
+    } catch (err: any) {
+      dispatch(searchVideosFailure(err as Error));
+      throw err;
+    } finally {
+      dispatch(setLoadingVideos({ loadingVideos: false }));
+    }
+  };
 
-export const searchVideosSuccess = (searchYTVideosResult: YTVideo[]): AsyncAppThunk => async (
-  dispatch,
-  getState
-) => {
-  dispatch(setHasSearched({ hasSearched: true }));
-  dispatch(setSearchYTVideosResult({ searchYTVideosResult }));
-  dispatch(clearError({ action: 'searchYTVideos' }));
-};
+export const searchVideosSuccess =
+  (searchYTVideosResult: YTVideo[]): AsyncAppThunk =>
+  async (dispatch, getState) => {
+    dispatch(setHasSearched({ hasSearched: true }));
+    dispatch(setSearchYTVideosResult({ searchYTVideosResult }));
+    dispatch(clearError({ action: 'searchYTVideos' }));
+  };
 
-export const searchVideosFailure = (err: Error | AxiosResponse): AsyncAppThunk => async (
-  dispatch,
-  getState
-) => {
-  captureAndLog({ file: 'videoStore', method: 'searchYTVideos', err });
-  dispatch(setError({ action: 'searchYTVideos', err: parseError(err) }));
-};
+export const searchVideosFailure =
+  (err: Error | AxiosResponse): AsyncAppThunk =>
+  async (dispatch, getState) => {
+    captureAndLog({ file: 'videoStore', method: 'searchYTVideos', err });
+    dispatch(setError({ action: 'searchYTVideos', err: parseError(err) }));
+  };
 //#endregion
 
 //#endregion

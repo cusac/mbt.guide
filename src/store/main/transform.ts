@@ -25,7 +25,7 @@ const SetTransform = createTransform(
     // Initialize sentry user
     if (outboundState.user) {
       const { user } = outboundState;
-      Sentry.configureScope(scope => {
+      Sentry.configureScope((scope) => {
         scope.setUser({
           id: user._id,
           username: `${user.firstName} ${user.lastName}`,

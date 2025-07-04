@@ -2,22 +2,15 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AxiosErrorData } from '../../types';
 
 //#region Types
-
 export type MainStoreAction = '';
-
 export type MainState = {
   previousView: 'video' | 'segment';
   showSearchbar: boolean;
   errors: Record<MainStoreAction, Error | AxiosErrorData | undefined>;
 };
-
 //#endregion
 
 //#region Reducers
-/**
- * Reducers should only contain logic to update state. All other store logic should be moved to the actions/thunks.
- */
-
 const initalVideoState: MainState = {
   errors: {} as any,
   previousView: 'video',
@@ -51,31 +44,4 @@ export const mainStore = createSlice({
 });
 
 export const { setPreviousView, setShowSearchbar } = mainStore.actions;
-
-//#region Async Actions (Thunks)
-/**
- * These actions contain the main logic to process and fetch state.
- *
- * Most async actions will be split into three parts: the call action, a success action, and a failure action.
- */
-
-//#region createVideo
-
-//#endregion
-
-//#region updateSegments
-
-//#endregion
-
-//#endregion
-
-//#region Synchronous Actions (Thunks)
-/**
- * These actions contain only synchronous logic
- */
-
-//#endregion
-
-//#region Utilities
-
 //#endregion

@@ -1,7 +1,7 @@
 import { Crud, Association } from '../utils/restful-resource-utility';
 import { Video, Segment, Tag, User, Group, Permission, Role } from '../types';
 
-export default {
+const config = {
   // serverURI: 'http://localhost:8080',
   serverURI: process.env.REACT_APP_SERVER_URI,
   // websocketURI: 'ws://localhost:8080',
@@ -15,6 +15,8 @@ export default {
   fixedLayout: false,
   hideLogoOnMobile: false,
 };
+
+export default config;
 
 console.log('SERVER:', process.env.REACT_APP_SERVER_URI);
 console.log('NODE ENV:', process.env.NODE_ENV);

@@ -1,4 +1,3 @@
-/* global YT */
 // https://developers.google.com/youtube/iframe_api_reference
 // https://developers.google.com/youtube/player_parameters
 import React from 'react';

@@ -23,8 +23,6 @@ const YouTubePlayerWithControls = ({
   offsetTooltip: boolean;
 }) => {
   const [seconds, setSeconds] = React.useState(start);
-  // eslint-disable-next-line no-unused-vars
-  const [state, setState] = React.useState('unstarted');
   const [playing, setPlaying] = React.useState(autoplay);
   // const [playBackRate, setPlayBackRate]: [PlayBackRate, any] = React.useState(playBackRates[2]);
   const [playBackRate, setPlayBackRate]: [any, any] = React.useState(playBackRates[2]);
@@ -58,7 +56,6 @@ const YouTubePlayerWithControls = ({
           {...{ videoId, seconds, autoplay, start, end, playing, playBackRate }}
           controls={false}
           onStateChange={(state: any) => {
-            setState(state);
             switch (state) {
               case 'playing':
                 setPlaying(true);

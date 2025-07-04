@@ -1,17 +1,13 @@
-import { Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
 import * as components from './components';
 import React from 'react';
 import * as routes from './routes';
 import * as services from './services';
-import * as utils from './utils';
-import { toast } from 'react-toastify';
 
 // Import css
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import Layout from 'components/Layout';
-
-toast.configure();
 
 const App = () => {
   const [, setUser] = React.useState(undefined);
@@ -25,67 +21,27 @@ const App = () => {
 
   return (
     <div className="App">
-      <components.ErrorBoundary onError={() => <div>Something went wrong!</div>}>
+      <components.ErrorBoundary onError={() => <div>Something went wrong</div>}>
         <Layout>
-          <Router history={utils.history}>
-            <Route
-              path="/"
-              exact
-              render={props => {
-                return <routes.Home />;
-              }}
-            />
-            <Route
-              path="/:param"
-              exact
-              render={props => {
-                const { param } = props.match.params;
-                return <routes.Home {...props} {...{ param }} />;
-              }}
-            />
-            <Route
-              path="/videos/:videoId?"
-              exact
-              render={props => {
-                const { videoId } = props.match.params;
-                return <routes.Videos {...props} {...{ videoId }} />;
-              }}
-            />
-            <Route
-              path="/my-segments"
-              exact
-              render={props => {
-                return <routes.MySegments />;
-              }}
-            />
-            <Route
-              path="/segments/:segmentId?"
-              exact
-              render={props => {
-                const { segmentId } = props.match.params;
-                return <routes.Segments {...props} {...{ segmentId }} />;
-              }}
-            />
-            <Route
-              path="/edit/:videoId/:segmentId?"
-              render={props => {
-                const { videoId } = props.match.params;
-                const { segmentId } = props.match.params;
-                return <routes.Edit {...props} {...{ videoId, segmentId }} />;
-              }}
-            />
-            <Route
-              path="/contact"
-              exact
-              render={props => {
-                return <routes.Contact />;
-              }}
-            />
-          </Router>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<routes.Home />} />
+              <Route path="/videos" element={<routes.Videos />} />
+              <Route path="/my-segments" element={<routes.MySegments />} />
+              <Route path="/segments/:segmentId" element={<routes.Segments />} />
+              <Route path="/edit/:videoId/:segmentId?" element={<EditRouteWrapper />} />
+              <Route path="/contact" element={<routes.Contact />} />
+            </Routes>
+          </BrowserRouter>
         </Layout>
       </components.ErrorBoundary>
     </div>
   );
+};
+
+const EditRouteWrapper = () => {
+  const { videoId, segmentId } = useParams();
+  return <routes.Edit videoId={videoId!} segmentId={segmentId} />;
 };
 
 export default App;

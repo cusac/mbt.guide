@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 
 // https://refreshless.com/nouislider/
-import 'nouislider/distribute/nouislider.css';
+import 'nouislider/dist/nouislider.css';
 import React from 'react';
 import * as utils from '../utils';
 import noUiSlider from 'nouislider';
@@ -67,11 +67,11 @@ const Slider = ({
     return () => slider.destroy();
   }, []);
 
-  React.useEffect(() => slider && (slider as any).updateOptions({ range }), [
-    slider,
-    range.min,
-    range.max,
-  ]);
+  React.useEffect(() => {
+    if (slider) {
+      (slider as any).updateOptions({ range });
+    }
+  }, [slider, range.min, range.max]);
   React.useEffect(() => {
     slider && (slider as any).updateOptions({ start });
     disabled && ref

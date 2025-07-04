@@ -17,9 +17,9 @@ const repository: Partial<Repository> = {
     httpClient = httpClient || axios;
 
     const fakeLogger: Logger | any = {
-      log: function() {},
-      debug: function() {},
-      error: function() {},
+      log: function () {},
+      debug: function () {},
+      error: function () {},
     };
 
     var logger = log ? console : fakeLogger;

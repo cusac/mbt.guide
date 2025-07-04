@@ -10,7 +10,7 @@ export const initAuthInterceptorService = (storeBundle: StoreBundle): void => {
   store = storeBundle;
 };
 
-internals.responseError = function(err: any) {
+internals.responseError = function (err: any) {
   let response: any = err.response;
 
   if (!response) {
@@ -29,12 +29,12 @@ internals.responseError = function(err: any) {
 
     store.storeDispatch(store.clearAuth());
 
-    Sentry.withScope(function(scope) {
+    Sentry.withScope(function (scope) {
       scope.setTag('status', response.status);
       response.config && scope.setTag('url', response.config.url);
       response.data && scope.setTag('serverError', response.data.error);
       response.config && scope.setExtra('request_payload', response.config.data);
-      scope.setLevel(Sentry.Severity.Warning);
+      scope.setLevel('warning');
       response.data && Sentry.captureMessage(response.data.message);
     });
 
@@ -42,12 +42,12 @@ internals.responseError = function(err: any) {
   } else if (response.status === 403) {
     // The user is unauthorized
     console.debug('authInterceptor.service: 403: response:', response);
-    Sentry.withScope(function(scope) {
+    Sentry.withScope(function (scope) {
       scope.setTag('status', response.status);
       response.config && scope.setTag('url', response.config.url);
       response.data && scope.setTag('serverError', response.data.error);
       response.config && scope.setExtra('request_payload', response.config.data);
-      scope.setLevel(Sentry.Severity.Warning);
+      scope.setLevel('warning');
       response.data && Sentry.captureMessage(response.data.message);
     });
 
@@ -55,12 +55,12 @@ internals.responseError = function(err: any) {
   } else {
     // If not a 401 or 403, do nothing with this error. This is necessary to make a `responseError`
     // interceptor a no-op. */
-    Sentry.withScope(function(scope) {
+    Sentry.withScope(function (scope) {
       scope.setTag('status', response.status);
       response.config && scope.setTag('url', response.config.url);
       response.data && scope.setTag('serverError', response.data.error);
       response.config && scope.setExtra('request_payload', response.config.data);
-      scope.setLevel(Sentry.Severity.Error);
+      scope.setLevel('error');
       response.data && Sentry.captureMessage(response.data.message);
     });
   }
@@ -68,6 +68,8 @@ internals.responseError = function(err: any) {
   return Promise.reject(response);
 };
 
-export default {
+const authInterceptorService = {
   responseError: internals.responseError,
 };
+
+export default authInterceptorService;

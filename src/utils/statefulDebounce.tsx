@@ -6,13 +6,13 @@
  * @param statefulTimeout the timeout value tracked in the component
  * @param setStatefulTimeout the react hook to set the timeout value
  */
-export default function statefulDebounce(
-  func: (...args: any) => any,
+export default function statefulDebounce<T extends (...args: any[]) => any>(
+  func: T,
   wait: number,
   statefulTimeout: number,
   setStatefulTimeout: (arg0: number) => void
 ) {
-  return function(...args: any) {
+  return function (...args: any) {
     // @ts-ignore
     const context = this;
     clearTimeout(statefulTimeout);

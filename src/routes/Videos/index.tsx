@@ -21,19 +21,8 @@ import { assertModelArrayType } from '../../types/model.type';
 import * as utils from '../../utils';
 import { captureAndLog, timeFormat, toastError } from '../../utils';
 
-const {
-  Button,
-  Link,
-  Grid,
-  VideoList,
-  Header,
-  Icon,
-  Container,
-  Divider,
-  Loading,
-  Checkbox,
-  Card,
-} = components;
+const { Button, Link, Grid, VideoList, Header, Icon, Container, Divider, Loading, Checkbox, Card } =
+  components;
 
 const Videos = ({ videoId }: { videoId?: string }) => {
   const [error, setError] = React.useState();
@@ -124,8 +113,8 @@ const Videos = ({ videoId }: { videoId?: string }) => {
 
   //TODO: TEST THIS
   const filterVidsWithSegments = (ytVids: YTVideo[], matchingVids: Video[]): YTVideo[] => {
-    return ytVids.filter(ytVid => {
-      const match = matchingVids.find(v => v.ytId === ytVid.id);
+    return ytVids.filter((ytVid) => {
+      const match = matchingVids.find((v) => v.ytId === ytVid.id);
       if (!match) {
         return true;
       } else {
@@ -139,7 +128,7 @@ const Videos = ({ videoId }: { videoId?: string }) => {
   };
 
   const fetchMatchingVideos = async (ytVideos: YTVideo[]): Promise<Video[]> => {
-    const videoIds = ytVideos.map(v => v.id);
+    const videoIds = ytVideos.map((v) => v.id);
     const matchingVids = (
       await repository.video.list({
         ytId: videoIds,
@@ -260,7 +249,7 @@ const Videos = ({ videoId }: { videoId?: string }) => {
 
   React.useEffect(() => {
     segments &&
-      setMySegments(segments.filter(s => currentUser && s.ownerEmail === currentUser.email));
+      setMySegments(segments.filter((s) => currentUser && s.ownerEmail === currentUser.email));
   }, [segments, currentUser]);
 
   React.useEffect(() => {
@@ -379,7 +368,7 @@ const Videos = ({ videoId }: { videoId?: string }) => {
                                   <h4>Watch</h4>
                                 </Grid.Column>
                               </Grid.Row>
-                              {mySegments.map(segment => (
+                              {mySegments.map((segment) => (
                                 <Grid.Row key={(segment as any).segmentId}>
                                   <Grid.Column verticalAlign="middle" width={3}>
                                     <Link to={`/segments/${(segment as any).segmentId}`}>
@@ -455,7 +444,7 @@ const Videos = ({ videoId }: { videoId?: string }) => {
                               <h4>Watch</h4>
                             </Grid.Column>
                           </Grid.Row>
-                          {segments.map(segment => (
+                          {segments.map((segment) => (
                             <Grid.Row key={(segment as any).segmentId}>
                               <Grid.Column verticalAlign="middle" width={3}>
                                 <Link to={`/segments/${(segment as any).segmentId}`}>

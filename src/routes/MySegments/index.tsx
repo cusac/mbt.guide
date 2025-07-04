@@ -180,7 +180,7 @@ const MySegments = () => {
               <div className="ui icon input">
                 <input
                   className="prompt"
-                  onChange={event => onSearchChange(event.target.value)}
+                  onChange={(event) => onSearchChange(event.target.value)}
                   type="text"
                   placeholder={'Search your segments.'}
                 />
@@ -224,9 +224,9 @@ const MySegments = () => {
 
       <Table celled {...getTableProps()}>
         <Table.Header>
-          {headerGroups.map(headerGroup => (
+          {headerGroups.map((headerGroup) => (
             <Table.Row {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map(column => (
+              {headerGroup.headers.map((column) => (
                 <Table.HeaderCell {...column.getHeaderProps()}>
                   {column.render('Header')}
                 </Table.HeaderCell>
@@ -238,11 +238,11 @@ const MySegments = () => {
           {loadingSegments ? (
             <Loading>Loading Segments...</Loading>
           ) : (
-            rows.map(row => {
+            rows.map((row) => {
               prepareRow(row);
               return (
                 <Table.Row {...row.getRowProps()}>
-                  {row.cells.map(cell => {
+                  {row.cells.map((cell) => {
                     return <Table.Cell {...cell.getCellProps()}>{cell.render('Cell')}</Table.Cell>;
                   })}
                 </Table.Row>

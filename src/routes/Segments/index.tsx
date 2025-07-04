@@ -72,8 +72,8 @@ const Segments = ({ segmentId }: { segmentId?: string }) => {
     const currentSegmentId = segmentId
       ? segmentId
       : lastViewedSegmentId
-      ? lastViewedSegmentId
-      : defaultValues.defaultSegmentId;
+        ? lastViewedSegmentId
+        : defaultValues.defaultSegmentId;
     !segmentId && selectSegment(currentSegmentId);
     dispatch(setPreviousView({ previousView: 'segment' }));
     dispatch(setSearchType({ searchType: 'segment' }));

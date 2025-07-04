@@ -9,7 +9,7 @@ const SegmentList = ({
   segments: Segment[];
   handleSegmentSelect: (segment: Segment) => any;
 }) => {
-  const renderedSegments = segments.map(segment => {
+  const renderedSegments = segments.map((segment) => {
     return (
       <SegmentItem
         key={segment.segmentId}

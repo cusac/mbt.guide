@@ -37,7 +37,7 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 function configureAppStore(preloadedState?: any) {
   const store = configureStore({
     reducer: persistedReducer,
-    middleware: getDefaultMiddleware =>
+    middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         serializableCheck: {
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
@@ -87,7 +87,7 @@ export const storeGetState: GetState = () => store.getState();
  */
 export const initApp = () => {
   // Add a response interceptor
-  axios.interceptors.response.use(function(response) {
+  axios.interceptors.response.use(function (response) {
     return Promise.resolve(response);
   }, authInterceptor.responseError);
 };

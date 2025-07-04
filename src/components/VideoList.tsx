@@ -9,7 +9,7 @@ const VideoList = ({
   videos: YTVideo[];
   handleVideoSelect: (video: YTVideo) => any;
 }): any => {
-  const renderedVideos = videos.map(video => {
+  const renderedVideos = videos.map((video) => {
     return <VideoItem key={video.id} video={video} handleVideoSelect={handleVideoSelect} />;
   });
 

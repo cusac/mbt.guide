@@ -4,22 +4,15 @@ import * as React from 'react';
 //npm install --save react-tag-input
 //npm install --save react-dnd@5.0.0
 //npm install --save react-dnd-html5-backend@3.0.2
-import { WithContext as ReactTags } from 'react-tag-input';
-import { assertModelArrayType, Segment, SegmentTag, Tag } from 'types';
+import { WithContext as ReactTags, Tag as ReactTag } from 'react-tag-input';
+import { assertModelArrayType, Segment, SegmentTag, Tag as AppTag } from 'types';
 import { MBTTAGS } from './TagSuggestions';
 import { repository } from 'services';
 
-type ReactTag = {
-  id: string;
-  text: string;
-};
-
-const presetSuggestions: ReactTag[] = MBTTAGS.map(mbttag => {
-  return {
-    id: mbttag.toLowerCase(), // MBT Tags are globally unique, so the tag name serves as the id
-    text: mbttag.toLowerCase(),
-  };
-});
+const presetSuggestions: ReactTag[] = MBTTAGS.map((mbttag) => ({
+  id: mbttag.toLowerCase(), // MBT Tags are globally unique, so the tag name serves as the id
+  text: mbttag.toLowerCase(),
+}));
 
 const KeyCodes = {
   comma: 188,
@@ -43,7 +36,7 @@ const Tags = ({
   updateSegmentAt: (index: number, data: Partial<Segment>) => void;
   refresh: [boolean];
 }): JSX.Element => {
-  const [reactTags, setReactTags] = React.useState([] as ReactTag[]);
+  const [reactTags, setReactTags] = React.useState<ReactTag[]>([]);
   const [suggestions, setSuggestions] = React.useState([] as ReactTag[]);
 
   const segmentTagToReactTag = (segTag: SegmentTag): ReactTag => ({
@@ -56,7 +49,7 @@ const Tags = ({
     rank,
   });
 
-  const tagToReactTag = (tag: Tag): ReactTag => ({
+  const tagToReactTag = (tag: AppTag): ReactTag => ({
     text: tag.name,
     id: tag.name,
   });
@@ -73,19 +66,18 @@ const Tags = ({
         'tag.name'
       );
       // Keep segments of other ranks
-      currentSegmentTags = currentSegmentTags.filter(t => t.rank !== rank);
+      currentSegmentTags = currentSegmentTags.filter((t) => t.rank !== rank);
       // Add new tags to old
       currentSegmentTags = [...currentSegmentTags, ...tags.map(reactTagToSegmentTag)];
-      setReactTags(
-        currentSegmentTags.filter(t => t.tag && t.rank === rank).map(segmentTagToReactTag)
-      );
+      // Only set ReactTag[] to state
+      setReactTags(tags);
       updateSegmentAt(segmentIndex, { tags: currentSegmentTags });
     }
   };
 
   const formatSuggestions = (suggestions: ReactTag[]): ReactTag[] => {
     return uniqBy(
-      suggestions.map(tag => ({
+      suggestions.map((tag) => ({
         id: tag.text.toLowerCase().trim(),
         text: tag.text.toLowerCase().trim(),
       })),
@@ -94,26 +86,29 @@ const Tags = ({
   };
 
   const handleDelete = (i: number): void => {
-    updateTags(reactTags.filter((tag, index) => index !== i));
+    const newTags = reactTags.filter((tag, index) => index !== i);
+    setReactTags(newTags);
+    updateTags(newTags);
   };
 
   const handleAddition = (tag: ReactTag): void => {
     //force lowercase
     tag.text = tag.text.toLowerCase();
-    updateTags([...reactTags, tag]);
-  };
-
-  const handleDrag = (tag: ReactTag, currPos: number, newPos: number) => {
-    const newTags = reactTags.slice();
-
-    tag && newTags.splice(currPos, 1);
-    tag && newTags.splice(newPos, 0, tag);
-
+    const newTags = [...reactTags, tag];
+    setReactTags(newTags);
     updateTags(newTags);
   };
 
-  const handleTagClick = (index: number) => {
-    console.log('The tag at index ' + index + ' was clicked');
+  const handleDrag = (tag: ReactTag, currPos: number, newPos: number) => {
+    const newTags = [...reactTags];
+    newTags.splice(currPos, 1);
+    newTags.splice(newPos, 0, tag);
+    setReactTags(newTags);
+    updateTags(newTags);
+  };
+
+  const handleTagClick = (i: number) => {
+    console.log('Tag clicked at index:', i);
   };
 
   const handleInputChange = async (text: string) => {
@@ -122,7 +117,7 @@ const Tags = ({
     } = await repository.tag.list({ $term: text, $limit: 50, $embed: 'segments' });
 
     // NOTE: Soon the tag filters and formatting will be accomplished on the backend
-    docs = docs.filter(tag => tag.segments && tag.segments.length > 0);
+    docs = docs.filter((tag) => tag.segments && tag.segments.length > 0);
 
     setSuggestions(formatSuggestions(docs.map(tagToReactTag).concat(presetSuggestions)));
   };
@@ -131,7 +126,9 @@ const Tags = ({
   React.useEffect(() => {
     const tagsInput = currentSegment.tags || [];
     if (assertModelArrayType<SegmentTag>(tagsInput, 'SegmentTag')) {
-      setReactTags(tagsInput.filter(tag => tag.tag && tag.rank === rank).map(segmentTagToReactTag));
+      setReactTags(
+        tagsInput.filter((tag) => tag.tag && tag.rank === rank).map(segmentTagToReactTag)
+      );
     }
   }, []);
 
@@ -139,7 +136,9 @@ const Tags = ({
   React.useEffect(() => {
     const tagsInput = currentSegment.tags || [];
     if (assertModelArrayType<SegmentTag>(tagsInput, 'SegmentTag')) {
-      const updatedTags = tagsInput.filter(t => t.tag && t.rank === rank).map(segmentTagToReactTag);
+      const updatedTags = tagsInput
+        .filter((t) => t.tag && t.rank === rank)
+        .map(segmentTagToReactTag);
       if (!isEqual(updatedTags, reactTags)) {
         setReactTags(updatedTags);
       }
